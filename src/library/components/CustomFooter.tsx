@@ -1,17 +1,16 @@
 import { Link } from 'react-router';
+import { CustomLogo } from '../../components/custom/CustomLogo';
 
 export const CustomFooter = () => {
     return (
         <footer className="bg-white dark:bg-[#101922] text-slate-800 dark:text-white border-t border-slate-200 dark:border-slate-800">
             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                 <div className="flex flex-col items-center justify-between space-y-6 md:flex-row md:space-y-0">
-                    <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-2xl text-blue-500">
-                            {'BV'}
-                            book{'MEZE'}
-                        </span>
-                        <span className="text-sm font-thin">BVMEZE © 2025</span>
+                    <div className="flex gap-1 items-end">
+                        <CustomLogo />
+                        <span className="text-sm font-thin">©2025</span>
                     </div>
+
                     <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
                         <Link
                             className="hover:text-primary"

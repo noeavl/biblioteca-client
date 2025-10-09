@@ -7,7 +7,7 @@ interface AuthorCardProps {
 }
 export const AuthorCard = ({ firstName, lastName, img }: AuthorCardProps) => {
     return (
-        <div className="group hidden text-center xl:block">
+        <div className="group text-center">
             <Link to={{ pathname: '/authores' }}>
                 <div className="mx-auto h-32 w-32 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
                     <img

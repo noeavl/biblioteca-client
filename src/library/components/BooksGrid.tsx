@@ -5,7 +5,7 @@ interface BooksGridProps {
 }
 export const BooksGrid = ({ books }: BooksGridProps) => {
     return (
-        <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-5 lg:gap-6">
             {books.map((book) => (
                 <BookCard
                     key={book.title}
