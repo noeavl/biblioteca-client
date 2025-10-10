@@ -9,6 +9,7 @@ export const BooksGrid = ({ books }: BooksGridProps) => {
             {books.map((book) => (
                 <BookCard
                     key={book.title}
+                    id={book.id}
                     img={book.img}
                     title={book.title}
                     category={book.author}

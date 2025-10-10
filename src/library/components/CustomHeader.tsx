@@ -51,17 +51,17 @@ export const CustomHeader = () => {
                             </Link>
                         </Button>
                         <Button variant={'link'}>
-                            <Link to={{ pathname: '/panel' }}>Panel</Link>
+                            <Link to={{ pathname: '/' }}>Panel</Link>
                         </Button>
                     </div>
                 </div>
             </div>
             <div className="pb-6">
                 <nav className="hidden lg:flex justify-start space-x-8">
-                    <Link to={{ pathname: '/libros' }}>Libros</Link>
-                    <Link to={{ pathname: '/categorias' }}>Categorías</Link>
-                    <Link to={{ pathname: '/autores' }}>Autores</Link>
-                    <Link to={{ pathname: '/mi-biblioteca' }}>
+                    <Link to={{ pathname: 'libros' }}>Libros</Link>
+                    <Link to={{ pathname: 'categorias' }}>Categorías</Link>
+                    <Link to={{ pathname: 'autores' }}>Autores</Link>
+                    <Link to={{ pathname: 'mi-biblioteca' }}>
                         Mi biblioteca
                     </Link>
                 </nav>

@@ -6,54 +6,74 @@ import mathilda from '@/assets/mathilda.png';
 import dracula from '@/assets/dracula.png';
 
 export interface Book {
+    id: string;
     title: string;
     publicationYear: number;
     img: string;
     category: string;
     author: string;
+    synopsis?: string;
 }
 
 export const books: Book[] = [
     {
+        id: '507f1f77bcf86cd799439011',
         title: 'Frankenstein',
         publicationYear: 1818,
         category: 'Literatura Gótica',
         author: 'Mary Wollstonecraft Shelley',
         img: frankenstein,
+        synopsis:
+            'La historia del joven científico Victor Frankenstein que crea una criatura en un experimento poco ortodoxo. Una reflexión profunda sobre la ambición científica, la responsabilidad y las consecuencias de jugar a ser Dios.',
     },
     {
+        id: '507f1f77bcf86cd799439012',
         title: 'El Principito',
         publicationYear: 1943,
         category: 'Ficción',
         author: 'Antoine de Saint-Exupéry',
         img: elPrincipito,
+        synopsis:
+            'Un pequeño príncipe viaja por diferentes planetas y conoce personajes peculiares, hasta llegar a la Tierra donde encuentra a un aviador en el desierto. Una hermosa fábula sobre la amistad, el amor y el sentido de la vida.',
     },
     {
+        id: '507f1f77bcf86cd799439013',
         title: 'El Hobbit',
         publicationYear: 1937,
         category: 'Fantasía',
         author: 'J.R.R. Tolkien',
         img: elHobbit,
+        synopsis:
+            'Bilbo Bolsón, un hobbit hogareño, se embarca en una aventura épica junto a un grupo de enanos para recuperar su tesoro custodiado por el dragón Smaug. Una historia de valor, amistad y descubrimiento personal.',
     },
     {
+        id: '507f1f77bcf86cd799439014',
         title: 'El Monje que Vendió su Ferrari',
         publicationYear: 1997,
         category: 'Autoayuda',
         author: 'Robin Sharma',
         img: elMonje,
+        synopsis:
+            'Un exitoso abogado abandona su lujosa vida tras un colapso, viaja al Himalaya y descubre secretos ancestrales para vivir con felicidad, propósito y paz interior. Una fábula inspiradora sobre el desarrollo personal.',
     },
     {
+        id: '507f1f77bcf86cd799439015',
         title: 'Matilda',
         publicationYear: 1988,
         category: 'Infantil',
         author: 'Roald Dahl',
         img: mathilda,
+        synopsis:
+            'Matilda es una niña extraordinariamente inteligente con poderes telequinéticos que enfrenta a su horrible familia y a la temible directora de su escuela. Una historia de valentía, justicia y el poder de la inteligencia.',
     },
     {
+        id: '507f1f77bcf86cd799439016',
         title: 'Drácula',
         publicationYear: 1897,
         category: 'Literatura Gótica',
         author: 'Bram Stoker',
         img: dracula,
+        synopsis:
+            'El conde Drácula viaja desde Transilvania a Inglaterra para propagar la maldición de los no-muertos. Un grupo de valientes debe enfrentarse al príncipe de las tinieblas en una batalla épica entre el bien y el mal.',
     },
 ];

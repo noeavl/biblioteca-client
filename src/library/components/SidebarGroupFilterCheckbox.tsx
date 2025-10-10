@@ -12,7 +12,7 @@ import { ChevronRight } from 'lucide-react';
 
 interface Filter {
     name: string;
-    quantityBooks: number;
+    quantityBooks?: number;
 }
 
 interface Props {
@@ -42,7 +42,10 @@ export const SidebarGroupFilterCheckbox = ({ label, items }: Props) => {
                     <SidebarGroupContent>
                         <SidebarMenu className="space-y-3 ms-2">
                             {items.map((item) => (
-                                <div className="flex items-center gap-3">
+                                <div
+                                    key={item.name}
+                                    className="flex items-center gap-3"
+                                >
                                     <Checkbox id={item.name} />
                                     <Label
                                         htmlFor={item.name}

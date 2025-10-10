@@ -1,56 +1,51 @@
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from '@/components/ui/pagination';
 import { BooksGrid } from '@/library/components/BooksGrid';
+import { CustomPagination } from '@/library/components/CustomPagination';
+import {
+    FilterSideBar,
+    type FilterConfig,
+} from '@/library/components/FilterSidebar';
 import { MainLayout } from '@/library/layouts/MainLayout';
+import { authors } from '@/mocks/authors.mock';
 import { books } from '@/mocks/books.mock';
+import { categories } from '@/mocks/categories.mock';
+
+const OrderByItems = [
+    {
+        name: 'Popularidad',
+    },
+    {
+        name: 'Recientes',
+    },
+    {
+        name: 'Alfabético (A-Z)',
+    },
+    {
+        name: 'Alfabético (Z-A)',
+    },
+];
+
+const bookFilters: FilterConfig[] = [
+    { type: 'radio', label: 'Ordenar Por', items: OrderByItems },
+    { type: 'checkbox', label: 'Categorías', items: categories },
+    {
+        type: 'checkbox',
+        label: 'Autores',
+        items: authors.map((author) => ({
+            name: author.firstName + ' ' + author.lastName,
+            quantityBooks: author.quantityBooks,
+        })),
+    },
+];
 
 export const BooksPage = () => {
     return (
-        <MainLayout>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">Catálogo de Libros</h2>
+        <MainLayout
+            title="Catálogo de Libros"
+            sidebar={<FilterSideBar filters={bookFilters} />}
+        >
             <div className="space-y-6 sm:space-y-8">
                 <BooksGrid books={books}></BooksGrid>
-                <Pagination>
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious
-                                className="text-blue-400"
-                                href="#"
-                            />
-                        </PaginationItem>
-                        <PaginationItem className="text-blue-400">
-                            <PaginationLink href="#">1</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationLink
-                                className="bg-blue-400 text-white rounded-full"
-                                href="#"
-                                isActive
-                            >
-                                2
-                            </PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem className="text-blue-400">
-                            <PaginationLink href="#">3</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationEllipsis className="text-blue-400" />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationNext
-                                className="text-blue-400"
-                                href="#"
-                            />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+                <CustomPagination />
             </div>
         </MainLayout>
     );

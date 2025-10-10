@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router';
 
 interface BookProps {
+    id: string;
     title: string;
     publicationYear: number;
     author: string;
@@ -9,6 +11,7 @@ interface BookProps {
 }
 
 export const BookCard = ({
+    id,
     title,
     publicationYear,
     author,
@@ -16,7 +19,10 @@ export const BookCard = ({
     img,
 }: BookProps) => {
     return (
-        <div className="group bg-white dark:bg-gray-800/50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col">
+        <Link
+            to={`/libros/detalle/${id}`}
+            className="group bg-white dark:bg-gray-800/50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col"
+        >
             <div className="relative h-48 sm:h-52 md:h-56 lg:h-60 xl:h-64">
                 <img
                     className="w-full h-full object-cover object-center"
@@ -45,6 +51,6 @@ export const BookCard = ({
                     {publicationYear}
                 </p>
             </div>
-        </div>
+        </Link>
     );
 };

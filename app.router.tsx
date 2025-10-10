@@ -5,6 +5,9 @@ import { MyLibraryPage } from '@/library/pages/my-library/MyLibraryPage';
 import { CategoriesPage } from '@/library/pages/categories/CategoriesPage';
 import { BooksPage } from '@/library/pages/books/BooksPage';
 import { AuthorsPage } from '@/library/pages/authors/AuthorsPage';
+import { BookDetailPage } from '@/library/pages/books/BookDetailPage';
+import { books } from '@/mocks/books.mock';
+import { LoginPage } from '@/library/pages/login/LoginPage';
 
 export const appRouter = createBrowserRouter([
     {
@@ -16,22 +19,44 @@ export const appRouter = createBrowserRouter([
                 Component: HomePage,
             },
             {
-                path: '/libros',
-                Component: BooksPage,
+                path: 'iniciar-sesion',
+                Component: LoginPage,
             },
             {
-                path: '/categorias',
+                path: 'libros',
+                children: [
+                    {
+                        path: '',
+                        Component: BooksPage,
+                    },
+                    {
+                        path: 'detalle/:book',
+                        Component: BookDetailPage,
+                        loader: async ({ params }) => {
+                            const bookFound = books.find(
+                                (book) => book.id === params.book
+                            );
+                            return bookFound;
+                        },
+                    },
+                ],
+            },
+            {
+                path: 'categorias',
                 Component: CategoriesPage,
             },
             {
-                path: '/autores',
+                path: 'autores',
                 Component: AuthorsPage,
             },
             {
-                path: '/mi-biblioteca',
+                path: 'mi-biblioteca',
                 Component: MyLibraryPage,
             },
         ],
+    },
+    {
+        path: 'panel',
     },
     {
         path: '*',

@@ -44,9 +44,10 @@ export const SideBarGroupFilterRadioGroup = ({ label, items }: Props) => {
                     <SidebarGroupContent>
                         <SidebarMenu className="space-y-3 ms-2">
                             {items.map((item, index) => (
-                                <RadioGroup defaultValue="1">
+                                <RadioGroup key={item.name} defaultValue="1">
                                     <div className="flex items-center gap-3">
                                         <RadioGroupItem
+                                            key={item.name}
                                             value={index.toString()}
                                             id={`${item.name}${index}`}
                                         />
