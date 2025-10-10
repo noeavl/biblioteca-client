@@ -13,42 +13,46 @@ export const BookDetailPage = () => {
 
     return (
         <MainContainer>
-            <section className="flex flex-row gap-8">
-                <div className="h-100 w-78 shadow-md rounded-2xl">
+            <section className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
+                <div className="h-64 w-full sm:h-80 sm:w-60 lg:h-100 lg:w-78 shadow-md rounded-2xl shrink-0 mx-auto lg:mx-0">
                     <img
                         src={book.img}
                         alt={book.title}
                         className="w-full h-full object-cover object-center rounded-2xl"
                     />
                 </div>
-                <article>
-                    <div className="space-y-8">
+                <article className="flex-1">
+                    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                         <div>
-                            <h2 className="text-8xl font-bold">{book.title}</h2>
-                            <h3 className="text-4xl text-gray-400">
+                            <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold">
+                                {book.title}
+                            </h2>
+                            <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-400">
                                 por{' '}
                                 <span className="text-blue-400">
                                     {book.author}
                                 </span>
                             </h3>
                         </div>
-                        <div className="flex justify-start items-center gap-3">
-                            <span className="text-blue-400 bg-blue-100 px-3 py-2 rounded-full">
+                        <div className="flex flex-wrap justify-start items-center gap-2 sm:gap-3">
+                            <span className="text-sm sm:text-base text-blue-400 bg-blue-100 px-3 py-2 rounded-full">
                                 {book.category}
                             </span>
-                            <span className="text-gray-400">
+                            <span className="text-sm sm:text-base text-gray-400">
                                 Publicado en {book.publicationYear}
                             </span>
                         </div>
-                        <p>{book.synopsis}</p>
-                        <div className="flex gap-3">
-                            <Button className="bg-blue-400 shadow-xl shadow-blue-200/50 hover:bg-blue-400 text-white font-bold">
+                        <p className="text-sm sm:text-base leading-relaxed">
+                            {book.synopsis}
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <Button className="bg-blue-400 shadow-xl shadow-blue-200/50 hover:bg-blue-400 text-white font-bold w-full sm:w-auto">
                                 <span className="material-symbols-outlined">
                                     book_5
                                 </span>
                                 Leer ahora
                             </Button>
-                            <Button className="bg-blue-50 text-blue-400  hover:bg-blue-50 font-bold">
+                            <Button className="bg-blue-50 text-blue-400 hover:bg-blue-50 font-bold w-full sm:w-auto">
                                 <span className="material-symbols-outlined">
                                     favorite
                                 </span>
@@ -58,9 +62,9 @@ export const BookDetailPage = () => {
                     </div>
                 </article>
             </section>
-            <section className="pt-30">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white">
+            <section className="pt-12 sm:pt-20 lg:pt-30">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
                         También te podría gustar
                     </h3>
                     <Link
