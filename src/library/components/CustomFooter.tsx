@@ -12,47 +12,35 @@ export const CustomFooter = () => {
                     </div>
 
                     <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
-                        <Link
-                            className="hover:text-primary"
-                            to={{ pathname: '/' }}
-                        >
+                        <Link className="hover:text-primary" to={'/'}>
                             Acerca de nosotros
                         </Link>
-                        <Link
-                            className="hover:text-primary"
-                            to={{ pathname: '/' }}
-                        >
+                        <Link className="hover:text-primary" to={'/'}>
                             Contacto
                         </Link>
-                        <Link
-                            className="hover:text-primary"
-                            to={{ pathname: '/' }}
-                        >
+                        <Link className="hover:text-primary" to={'/'}>
                             Política de privacidad
                         </Link>
-                        <Link
-                            className="hover:text-primary"
-                            to={{ pathname: '/' }}
-                        >
+                        <Link className="hover:text-primary" to={'/'}>
                             Términos de servicio
                         </Link>
                     </nav>
                     <div className="flex items-center space-x-4">
                         <Link
                             className="text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-white"
-                            to={{ pathname: '/' }}
+                            to={'/'}
                         >
                             <i className="fab fa-facebook-f"></i>
                         </Link>
                         <Link
                             className="text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-white"
-                            to={{ pathname: '/' }}
+                            to={'/'}
                         >
                             <i className="fab fa-twitter"></i>
                         </Link>
                         <Link
                             className="text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-white"
-                            to={{ pathname: '/' }}
+                            to={'/'}
                         >
                             <i className="fab fa-instagram"></i>
                         </Link>

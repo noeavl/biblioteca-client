@@ -15,7 +15,7 @@ export const AuthorCard = ({
     showQuantityBooks,
 }: AuthorCardProps) => {
     return (
-        <Link className="group text-center" to={{ pathname: '/autores' }}>
+        <Link className="group text-center" to={'autores'}>
             <div className="mx-auto h-32 w-32 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
                 <img
                     alt="Author avatar"

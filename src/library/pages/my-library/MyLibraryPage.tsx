@@ -13,7 +13,7 @@ export const MyLibraryPage = () => {
                 <BreadcrumbList>
                     <BreadcrumbItem>
                         <BreadcrumbLink>
-                            <Link to={{ pathname: '/' }}>Inicio</Link>
+                            <Link to={'/'}>Inicio</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                 </BreadcrumbList>

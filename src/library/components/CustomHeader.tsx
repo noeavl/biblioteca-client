@@ -46,24 +46,20 @@ export const CustomHeader = () => {
                     </div>
                     <div className="hidden sm:flex">
                         <Button variant={'link'}>
-                            <Link to={{ pathname: '/iniciar-sesion' }}>
-                                Iniciar Sesión
-                            </Link>
+                            <Link to={'iniciar-sesion'}>Iniciar Sesión</Link>
                         </Button>
                         <Button variant={'link'}>
-                            <Link to={{ pathname: '/' }}>Panel</Link>
+                            <Link to={'/'}>Panel</Link>
                         </Button>
                     </div>
                 </div>
             </div>
             <div className="pb-6">
                 <nav className="hidden lg:flex justify-start space-x-8">
-                    <Link to={{ pathname: 'libros' }}>Libros</Link>
-                    <Link to={{ pathname: 'categorias' }}>Categorías</Link>
-                    <Link to={{ pathname: 'autores' }}>Autores</Link>
-                    <Link to={{ pathname: 'mi-biblioteca' }}>
-                        Mi biblioteca
-                    </Link>
+                    <Link to={'libros'}>Libros</Link>
+                    <Link to={'categorias'}>Categorías</Link>
+                    <Link to={'autores'}>Autores</Link>
+                    <Link to={'mi-biblioteca'}>Mi biblioteca</Link>
                 </nav>
             </div>
         </header>

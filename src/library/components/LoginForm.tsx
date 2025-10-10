@@ -29,7 +29,7 @@ export const LoginForm = () => {
                                         Contraseña
                                     </FieldLabel>
                                     <Link
-                                        to={{ pathname: '/' }}
+                                        to={'/'}
                                         className="ml-auto text-sm font-thin text-blue-400 underline-offset-4 hover:underline"
                                     >
                                         ¿Olvidé mi contraseña?

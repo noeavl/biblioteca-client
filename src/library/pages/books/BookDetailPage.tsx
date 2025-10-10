@@ -69,7 +69,7 @@ export const BookDetailPage = () => {
                     </h3>
                     <Link
                         className="text-sm font-medium hover:underline text-blue-500"
-                        to={{ pathname: 'libros' }}
+                        to={'libros'}
                     >
                         Ver todo
                     </Link>

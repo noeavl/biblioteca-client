@@ -36,7 +36,7 @@ export const HomePage = () => {
                         </h3>
                         <Link
                             className="text-sm font-medium hover:underline text-blue-500"
-                            to={{ pathname: 'libros' }}
+                            to={'libros'}
                         >
                             Ver todo
                         </Link>
@@ -52,7 +52,7 @@ export const HomePage = () => {
                         </h3>
                         <Link
                             className="text-sm font-medium hover:underline text-blue-500"
-                            to={{ pathname: 'autores' }}
+                            to={'autores'}
                         >
                             Ver todo
                         </Link>
@@ -68,7 +68,7 @@ export const HomePage = () => {
                         </h3>
                         <Link
                             className="text-sm font-medium hover:underline text-blue-500"
-                            to={{ pathname: 'categorias' }}
+                            to={'categorias'}
                         >
                             Ver todo
                         </Link>
