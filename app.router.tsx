@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Navigate } from 'react-router';
 import { LibraryLayout } from './src/library/layouts/LibraryLayout';
 import { HomePage } from './src/library/pages/home/HomePage';
 import { MyLibraryPage } from '@/library/pages/my-library/MyLibraryPage';
@@ -8,6 +8,9 @@ import { AuthorsPage } from '@/library/pages/authors/AuthorsPage';
 import { BookDetailPage } from '@/library/pages/books/BookDetailPage';
 import { books } from '@/mocks/books.mock';
 import { LoginPage } from '@/library/pages/login/LoginPage';
+import { FavoritesPage } from '@/library/pages/my-library/favorites/FavoritesPage';
+import { ReadPage } from '@/library/pages/my-library/read/ReadPage';
+import { CollectionsPage } from '@/library/pages/my-library/collections/CollectionsPage';
 
 export const appRouter = createBrowserRouter([
     {
@@ -52,6 +55,15 @@ export const appRouter = createBrowserRouter([
             {
                 path: 'mi-biblioteca',
                 Component: MyLibraryPage,
+                children: [
+                    {
+                        index: true,
+                        element: <Navigate to="favoritos" replace />
+                    },
+                    { path: 'favoritos', Component: FavoritesPage },
+                    { path: 'leidos', Component: ReadPage },
+                    { path: 'colecciones', Component: CollectionsPage },
+                ],
             },
         ],
     },

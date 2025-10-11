@@ -13,6 +13,8 @@ export interface Book {
     category: string;
     author: string;
     synopsis?: string;
+    isFavorite?: boolean;
+    isRead?: boolean;
 }
 
 export const books: Book[] = [

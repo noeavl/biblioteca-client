@@ -6,10 +6,10 @@ import {
 } from '@/library/components/FilterSidebar';
 import { MainLayout } from '@/library/layouts/MainLayout';
 import { categories } from '@/mocks/categories.mock';
-import { OrderByItems } from '@/mocks/filters.mock';
+import { orderByItems } from '@/mocks/filters.mock';
 
 const categoriesFilters: FilterConfig[] = [
-    { type: 'radio', label: 'Ordernar Por', items: OrderByItems },
+    { type: 'radio', label: 'Ordernar Por', items: orderByItems },
 ];
 export const CategoriesPage = () => {
     return (

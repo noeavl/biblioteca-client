@@ -22,7 +22,7 @@ interface Props {
     items: Filter[];
 }
 
-export const SideBarGroupFilterRadioGroup = ({ label, items }: Props) => {
+export const SidebarGroupFilterRadioGroup = ({ label, items }: Props) => {
     return (
         <Collapsible
             key={label}

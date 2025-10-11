@@ -7,10 +7,10 @@ import {
 import { MainLayout } from '@/library/layouts/MainLayout';
 import { authors } from '@/mocks/authors.mock';
 import { categories } from '@/mocks/categories.mock';
-import { OrderByItems } from '@/mocks/filters.mock';
+import { orderByItems } from '@/mocks/filters.mock';
 
 const authorFilters: FilterConfig[] = [
-    { type: 'radio', label: 'Ordernar Por', items: OrderByItems },
+    { type: 'radio', label: 'Ordernar Por', items: orderByItems },
     { type: 'checkbox', label: 'Categorías', items: categories },
 ];
 
