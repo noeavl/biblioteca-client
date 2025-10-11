@@ -1,8 +1,8 @@
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
-import { SidebarGroupFilterCheckbox } from './SidebarGroupFilterCheckbox';
+import { SidebarGroupFilterCheckbox } from './SidebarGroupFilterCheckbox.tsx';
 import { Separator } from '@/components/ui/separator';
-import { SidebarGroupFilterRadioGroup } from './SidebarGroupFilterRadioGroup';
-import { SidebarGroupItems } from './SidebarGroupItems';
+import { SidebarGroupFilterRadioGroup } from './SidebarGroupFilterRadioGroup.tsx';
+import { SidebarGroupItems } from './SidebarGroupItems.tsx';
 
 type Type = 'radio' | 'checkbox' | 'menu-item' | 'group-items';
 
