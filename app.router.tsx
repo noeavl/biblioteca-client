@@ -11,6 +11,7 @@ import { LoginPage } from '@/library/pages/login/LoginPage';
 import { FavoritesPage } from '@/library/pages/my-library/favorites/FavoritesPage';
 import { ReadPage } from '@/library/pages/my-library/read/ReadPage';
 import { CollectionsPage } from '@/library/pages/my-library/collections/CollectionsPage';
+import { ReaderPage } from '@/library/pages/reader/ReaderPage';
 
 export const appRouter = createBrowserRouter([
     {
@@ -42,6 +43,16 @@ export const appRouter = createBrowserRouter([
                             return bookFound;
                         },
                     },
+                    {
+                        path: 'lector/:book',
+                        Component: ReaderPage,
+                        loader: async ({ params }) => {
+                            const bookFound = books.find(
+                                (book) => book.id === params.book
+                            );
+                            return bookFound;
+                        },
+                    },
                 ],
             },
             {
@@ -58,7 +69,7 @@ export const appRouter = createBrowserRouter([
                 children: [
                     {
                         index: true,
-                        element: <Navigate to="favoritos" replace />
+                        element: <Navigate to="favoritos" replace />,
                     },
                     { path: 'favoritos', Component: FavoritesPage },
                     { path: 'leidos', Component: ReadPage },

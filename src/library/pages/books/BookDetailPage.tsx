@@ -46,12 +46,15 @@ export const BookDetailPage = () => {
                             {book.synopsis}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3">
-                            <Button className="bg-blue-400 shadow-xl shadow-blue-200/50 hover:bg-blue-400 text-white font-bold w-full sm:w-auto">
-                                <span className="material-symbols-outlined">
-                                    book_5
-                                </span>
-                                Leer ahora
-                            </Button>
+                            <Link to={`/libros/lector/${book.id}`}>
+                                <Button className="bg-blue-400 shadow-xl shadow-blue-200/50 hover:bg-blue-400 text-white font-bold w-full sm:w-auto">
+                                    <span className="material-symbols-outlined">
+                                        book_5
+                                    </span>
+                                    Leer ahora
+                                </Button>
+                            </Link>
+
                             <Button className="bg-blue-50 text-blue-400 hover:bg-blue-50 font-bold w-full sm:w-auto">
                                 <span className="material-symbols-outlined">
                                     favorite
@@ -69,7 +72,7 @@ export const BookDetailPage = () => {
                     </h3>
                     <Link
                         className="text-sm font-medium hover:underline text-blue-500"
-                        to={'libros'}
+                        to={'/libros'}
                     >
                         Ver todo
                     </Link>
