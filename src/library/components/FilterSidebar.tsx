@@ -1,8 +1,8 @@
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
-import { SidebarGroupFilterCheckbox } from './SidebarGroupFilterCheckbox';
 import { Separator } from '@/components/ui/separator';
 import { SidebarGroupFilterRadioGroup } from './SidebarGroupFilterRadioGroup';
 import { SidebarGroupItems } from './SidebarGroupItems';
+import { SidebarGroupFilterCheckbox } from './SidebarGroupFilterCheckbox';
 
 type Type = 'radio' | 'checkbox' | 'menu-item' | 'group-items';
 
