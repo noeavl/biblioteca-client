@@ -4,22 +4,22 @@ import { books } from '@/mocks/books.mock';
 export const FavoritesPage = () => {
     const handleToggleFavorite = (id: string) => {
         console.log('Toggle favorite:', id);
-        // TODO: Implementar lógica para remover de favoritos
+        //  Implementar lógica para remover de favoritos
     };
 
     const handleToggleRead = (id: string) => {
         console.log('Toggle read:', id);
-        // TODO: Implementar lógica para marcar como leído
+        //  Implementar lógica para marcar como leído
     };
 
     const handleAddToCollection = (id: string) => {
         console.log('Add to collection:', id);
-        // TODO: Implementar lógica para añadir a colección
+        //  Implementar lógica para añadir a colección
     };
 
     const handleRemoveFromCollection = (id: string) => {
         console.log('Remove from collection:', id);
-        // TODO: Implementar lógica para remover de favoritos
+        //  Implementar lógica para remover de favoritos
     };
 
     return (

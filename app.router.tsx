@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import { LibraryLayout } from './src/library/layouts/LibraryLayout';
-import { HomePage } from './src/library/pages/home/HomePage';
+import { HomePage as LibraryHomePage } from './src/library/pages/home/HomePage';
+import { HomePage as PanelHomePage } from '@/panel/pages/home/HomePage';
 import { MyLibraryPage } from '@/library/pages/my-library/MyLibraryPage';
 import { CategoriesPage } from '@/library/pages/categories/CategoriesPage';
 import { BooksPage } from '@/library/pages/books/BooksPage';
@@ -12,6 +13,11 @@ import { FavoritesPage } from '@/library/pages/my-library/favorites/FavoritesPag
 import { ReadPage } from '@/library/pages/my-library/read/ReadPage';
 import { CollectionsPage } from '@/library/pages/my-library/collections/CollectionsPage';
 import { ReaderPage } from '@/library/pages/reader/ReaderPage';
+import { PanelLayout } from '@/panel/layouts/PanelLayout';
+import { UsersListPage } from '@/panel/pages/users/UsersListPage';
+import { UsersEditPage } from '@/panel/pages/users/UsersEditPage';
+import { BooksListPage } from '@/panel/pages/books/BooksListPage';
+import { CategoriesListPage } from '@/panel/pages/categories/CategoriesListPage';
 
 export const appRouter = createBrowserRouter([
     {
@@ -20,7 +26,7 @@ export const appRouter = createBrowserRouter([
         children: [
             {
                 index: true,
-                Component: HomePage,
+                Component: LibraryHomePage,
             },
             {
                 path: 'iniciar-sesion',
@@ -80,9 +86,50 @@ export const appRouter = createBrowserRouter([
     },
     {
         path: 'panel',
+        Component: PanelLayout,
+        children: [
+            {
+                Component: PanelHomePage,
+                index: true,
+            },
+            {
+                path: 'usuarios',
+                children: [
+                    {
+                        index: true,
+                        Component: UsersListPage,
+                    },
+                    {
+                        path: 'edit/:user',
+                        Component: UsersEditPage,
+                    },
+                ],
+            },
+            {
+                path: 'libros',
+                children: [
+                    {
+                        index: true,
+                        Component: BooksListPage,
+                    },
+                ],
+            },
+            {
+                path: 'categorias',
+                children: [
+                    {
+                        index: true,
+                        Component: CategoriesListPage,
+                    },
+                ],
+            },
+            {
+                path: 'autores',
+            },
+        ],
     },
     {
         path: '*',
-        Component: HomePage,
+        Component: LibraryHomePage,
     },
 ]);

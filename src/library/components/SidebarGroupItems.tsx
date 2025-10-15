@@ -5,7 +5,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { Icon } from './Icon';
+import { Icon } from '../../components/custom/Icon';
 import { Link } from 'react-router';
 
 export interface MenuItem {

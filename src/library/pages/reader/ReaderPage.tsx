@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+
 import {
     Popover,
     PopoverTrigger,
@@ -20,17 +21,30 @@ import { Switch } from '@/components/ui/switch';
 import type { Book } from '@/mocks/books.mock';
 import { useLoaderData } from 'react-router';
 import { useState } from 'react';
-import { Document, Page } from 'react-pdf';
+import { pdfjs, Document, Page } from 'react-pdf';
+import { Spinner } from '@/components/ui/spinner';
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url
+).toString();
 
 export const ReaderPage = () => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const book = useLoaderData<Book>();
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [numPages, setNumPages] = useState<number>(100);
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const book = useLoaderData<Book>();
 
     if (!book) {
         return <div>Libro no encontrado</div>;
     }
+
+    function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
+        setNumPages(numPages);
+    }
+
     const nextPage = () => {
+        if (currentPage + 2 > numPages) return;
         setCurrentPage(currentPage + 2);
     };
 
@@ -41,7 +55,28 @@ export const ReaderPage = () => {
     return (
         <div className="flex flex-col">
             <div className="flex flex-none justify-between items-center p-8 border-b-1">
-                <div></div>
+                <div className="flex gap-3">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button className="bg-blue-50 text-blue-400 hover:bg-blue-50">
+                                <span className="material-symbols-outlined">
+                                    notes
+                                </span>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30"></PopoverContent>
+                    </Popover>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button className="bg-blue-50 text-blue-400 hover:bg-blue-50">
+                                <span className="material-symbols-outlined">
+                                    bookmarks
+                                </span>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30"></PopoverContent>
+                    </Popover>
+                </div>
                 <div className="text-center space-y-2">
                     <h2 className="text-3xl font-bold">{book.title}</h2>
                     <span className="text-gray-500 font-thin text-lg">
@@ -142,13 +177,22 @@ export const ReaderPage = () => {
                     </Button>
                 </div>
             </div>
-            <div className="p-8">
-                <Document file={book.pdf}>
+            <div className="">
+                <Document
+                    className="bg-amber-200"
+                    file={book.pdf}
+                    loading={
+                        <div className="flex justify-center items">
+                            <Spinner />
+                        </div>
+                    }
+                    onLoadSuccess={onDocumentLoadSuccess}
+                >
                     <div className="flex justify-center items-center">
                         <Page
                             pageNumber={currentPage}
-                            renderTextLayer={false}
                             renderAnnotationLayer={false}
+                            renderTextLayer={false}
                         ></Page>
                         <Page
                             pageNumber={currentPage + 1}
@@ -187,7 +231,10 @@ export const ReaderPage = () => {
                         <span className="font-bold text-blue-400">
                             {currentPage}
                         </span>{' '}
-                        of <span className="font-bold text-blue-400">278</span>
+                        of{' '}
+                        <span className="font-bold text-blue-400">
+                            {numPages}
+                        </span>
                     </span>
                 </div>
             </div>

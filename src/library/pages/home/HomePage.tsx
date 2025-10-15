@@ -10,7 +10,6 @@ import homeSectionSearchImg from '@/assets/home-section-search.webp';
 export const HomePage = () => {
     return (
         <>
-            {/* Sección de bienvenida */}
             <section className="h-[calc(100vh-4rem)] relative overflow-hidden">
                 <img
                     src={homeSectionSearchImg}
