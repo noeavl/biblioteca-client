@@ -4,7 +4,7 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Link, useNavigate } from 'react-router';
-import { useState, FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { loginAction } from '../actions/login.action';
 import { useAuth } from '@/auth/hooks/useAuth';
 
