@@ -43,11 +43,10 @@ export const SidebarGroupFilterRadioGroup = ({ label, items }: Props) => {
                 <CollapsibleContent>
                     <SidebarGroupContent>
                         <SidebarMenu className="space-y-3 ms-2">
-                            {items.map((item, index) => (
-                                <RadioGroup key={item.name} defaultValue="1">
-                                    <div className="flex items-center gap-3">
+                            <RadioGroup defaultValue="0">
+                                {items.map((item, index) => (
+                                    <div key={item.name} className="flex items-center gap-3">
                                         <RadioGroupItem
-                                            key={item.name}
                                             value={index.toString()}
                                             id={`${item.name}${index}`}
                                         />
@@ -55,8 +54,8 @@ export const SidebarGroupFilterRadioGroup = ({ label, items }: Props) => {
                                             {item.name}
                                         </Label>
                                     </div>
-                                </RadioGroup>
-                            ))}
+                                ))}
+                            </RadioGroup>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </CollapsibleContent>

@@ -1,50 +1,38 @@
-import oscar from '@/assets/oscar.png';
-import edgar from '@/assets/edgar.png';
-import jane from '@/assets/jane.png';
-import gabriel from '@/assets/gabriel.png';
-import agatha from '@/assets/agata.png';
-import fyoodor from '@/assets/fyoodor.png';
+import type { AuthorCard } from '@/library/interfaces/author.interface';
 
-export interface Author {
-    img: string;
-    firstName: string;
-    lastName: string;
-    quantityBooks: number;
-}
-
-export const authors: Author[] = [
+export const authors: AuthorCard[] = [
     {
-        img: gabriel,
+        _id: '1',
         firstName: 'Gabriel',
         lastName: 'García Márquez',
         quantityBooks: 123,
     },
     {
-        img: edgar,
+        _id: '2',
         firstName: 'Edgar',
         lastName: 'Allan Poe',
         quantityBooks: 23,
     },
     {
-        img: jane,
+        _id: '3',
         firstName: 'Jane',
         lastName: 'Austen',
         quantityBooks: 43,
     },
     {
-        img: fyoodor,
+        _id: '4',
         firstName: 'Fyodor',
         lastName: 'Dostoevsky',
         quantityBooks: 76,
     },
     {
-        img: agatha,
+        _id: '5',
         firstName: 'Agatha',
         lastName: 'Christie',
         quantityBooks: 23,
     },
     {
-        img: oscar,
+        _id: '6',
         firstName: 'Oscar',
         lastName: 'Wilde',
         quantityBooks: 12,

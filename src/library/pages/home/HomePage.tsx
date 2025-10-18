@@ -5,7 +5,7 @@ import { CategoriesGrid } from '@/library/components/CategoriesGrid';
 import { categories } from '@/mocks/categories.mock';
 import { AuthorsGrid } from '@/library/components/AuthorsGrid';
 import { authors } from '@/mocks/authors.mock';
-import homeSectionSearchImg from '@/assets/home-section-search.webp';
+import homeSectionSearchImg from '@/assets/images/home-section-search.webp';
 
 export const HomePage = () => {
     return (

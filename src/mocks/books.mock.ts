@@ -1,9 +1,9 @@
-import elPrincipito from '@/assets/elprincipito.png';
-import elHobbit from '@/assets/elhobbit.png';
-import frankenstein from '@/assets/frankenstein.png';
-import elMonje from '@/assets/elmonje.png';
-import mathilda from '@/assets/mathilda.png';
-import dracula from '@/assets/dracula.png';
+import elPrincipito from '@/assets/images/elprincipito.png';
+import elHobbit from '@/assets/images/elhobbit.png';
+import frankenstein from '@/assets/images/frankenstein.png';
+import elMonje from '@/assets/images/elmonje.png';
+import mathilda from '@/assets/images/mathilda.png';
+import dracula from '@/assets/images/dracula.png';
 
 import frankensteinPDF from '@/assets/pdfs/Frankenstein-Mary_Shelley.pdf';
 import elPrincipitoPDF from '@/assets/pdfs/El_principito-Antoine_de_Saint-Exupery.pdf';

@@ -18,6 +18,7 @@ import { UsersListPage } from '@/panel/pages/users/UsersListPage';
 import { UsersEditPage } from '@/panel/pages/users/UsersEditPage';
 import { BooksListPage } from '@/panel/pages/books/BooksListPage';
 import { CategoriesListPage } from '@/panel/pages/categories/CategoriesListPage';
+import { AuthorsPage as PanelAuthorsPage } from '@/panel/pages/authors/AuthorsPage';
 
 export const appRouter = createBrowserRouter([
     {
@@ -125,6 +126,12 @@ export const appRouter = createBrowserRouter([
             },
             {
                 path: 'autores',
+                children: [
+                    {
+                        index: true,
+                        Component: PanelAuthorsPage,
+                    },
+                ],
             },
         ],
     },

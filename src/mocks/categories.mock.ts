@@ -1,9 +1,9 @@
-import misterio from '@/assets/misterio.png';
-import cienciaFiccion from '@/assets/ciencia-ficcion.png';
-import biografias from '@/assets/biografias.png';
-import romance from '@/assets/romance.png';
-import fantasia from '@/assets/fantasia.png';
-import historia from '@/assets/historia.png';
+import misterio from '@/assets/images/misterio.png';
+import cienciaFiccion from '@/assets/images/ciencia-ficcion.png';
+import biografias from '@/assets/images/biografias.png';
+import romance from '@/assets/images/romance.png';
+import fantasia from '@/assets/images/fantasia.png';
+import historia from '@/assets/images/historia.png';
 
 export interface Category {
     name: string;

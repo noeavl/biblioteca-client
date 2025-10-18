@@ -7,8 +7,11 @@ import {
     InputGroupInput,
 } from '@/components/ui/input-group';
 import { Search } from 'lucide-react';
+import { useAuth } from '@/auth/hooks/useAuth';
 
 export const CustomHeader = () => {
+    const { isAuthenticated, user } = useAuth();
+    const canAccessPanel = user?.role === 'admin' || user?.role === 'librarian';
     return (
         <header className="sticky z-50 top-0 w-full mx-auto px-4 sm:px-6 lg:px-8 border-b bg-white">
             <div className="flex my-10 items-center justify-between space-x-8">
@@ -45,12 +48,16 @@ export const CustomHeader = () => {
                         </button>
                     </div>
                     <div className="hidden sm:flex">
-                        <Button variant={'link'}>
-                            <Link to={'iniciar-sesion'}>Iniciar Sesión</Link>
-                        </Button>
-                        <Button variant={'link'}>
-                            <Link to={'/panel'}>Panel</Link>
-                        </Button>
+                        {!isAuthenticated && (
+                            <Button variant={'link'}>
+                                <Link to={'iniciar-sesion'}>Iniciar Sesión</Link>
+                            </Button>
+                        )}
+                        {isAuthenticated && canAccessPanel && (
+                            <Button variant={'link'}>
+                                <Link to={'/panel'}>Panel</Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>
