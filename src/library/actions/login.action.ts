@@ -6,12 +6,13 @@ export const loginAction = async (
     password: string
 ): Promise<AuthResponse> => {
     try {
+        const startTime = performance.now();
         const { data } = await libraryApi.post<AuthResponse>('/auth/login', {
             email,
             password,
         });
-
-        localStorage.setItem('token', data.access_token);
+        const endTime = performance.now();
+        console.log(`Login request took ${(endTime - startTime).toFixed(2)}ms`);
 
         return data;
     } catch (error: unknown) {

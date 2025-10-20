@@ -13,6 +13,7 @@ export const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showSlowWarning, setShowSlowWarning] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -20,6 +21,12 @@ export const LoginForm = () => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
+        setShowSlowWarning(false);
+
+        // Mostrar advertencia si tarda más de 2 segundos
+        const warningTimeout = setTimeout(() => {
+            setShowSlowWarning(true);
+        }, 2000);
 
         try {
             const response = await loginAction(email, password);
@@ -28,7 +35,9 @@ export const LoginForm = () => {
         } catch (err) {
             setError('Credenciales inválidas. Por favor, intenta de nuevo.');
         } finally {
+            clearTimeout(warningTimeout);
             setIsLoading(false);
+            setShowSlowWarning(false);
         }
     };
 
@@ -41,6 +50,11 @@ export const LoginForm = () => {
                             {error && (
                                 <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
                                     {error}
+                                </div>
+                            )}
+                            {showSlowWarning && (
+                                <div className="text-amber-600 text-sm text-center bg-amber-50 p-2 rounded">
+                                    El servidor está iniciando, esto puede tardar unos segundos...
                                 </div>
                             )}
                             <Field>
