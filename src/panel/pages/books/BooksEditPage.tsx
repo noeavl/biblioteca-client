@@ -231,6 +231,8 @@ export const BooksEditPage = () => {
                         toast.warning('Libro actualizado, pero hubo un error al subir la portada');
                     } else if (errorMessage === 'pdf') {
                         toast.warning('Libro actualizado, pero hubo un error al subir el PDF');
+                    } else {
+                        toast.warning('Libro actualizado, pero hubo errores al subir los archivos');
                     }
                 }
             } else {

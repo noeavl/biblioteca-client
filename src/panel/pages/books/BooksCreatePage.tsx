@@ -195,12 +195,12 @@ export const BooksCreatePage = () => {
                     }
                 } catch (uploadError) {
                     const errorMessage = (uploadError as Error).message;
-                    if (errorMessage === 'cover' && errorMessage === 'pdf') {
-                        toast.warning('Libro creado, pero hubo errores al subir la portada y el PDF');
-                    } else if (errorMessage === 'cover') {
+                    if (errorMessage === 'cover') {
                         toast.warning('Libro creado, pero hubo un error al subir la portada');
                     } else if (errorMessage === 'pdf') {
                         toast.warning('Libro creado, pero hubo un error al subir el PDF');
+                    } else {
+                        toast.warning('Libro creado, pero hubo errores al subir los archivos');
                     }
                 }
             } else {
