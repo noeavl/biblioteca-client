@@ -57,7 +57,7 @@ export const ReaderPage = () => {
 
     const nextPage = () => {
         if (currentPage + 2 > numPages) return;
-        const newPage = currentPage + 2;
+        const newPage = Math.min(currentPage + 2, numPages - 1);
         setCurrentPage(newPage);
         setSliderValue(newPage);
     };
