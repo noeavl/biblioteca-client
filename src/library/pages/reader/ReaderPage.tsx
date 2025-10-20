@@ -5,7 +5,7 @@ import {
     PopoverTrigger,
     PopoverContent,
 } from '@/components/ui/popover';
-import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
 import {
     Select,
     SelectContent,
@@ -32,6 +32,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 export const ReaderPage = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [sliderValue, setSliderValue] = useState<number>(1);
     const [numPages, setNumPages] = useState<number>(100);
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
@@ -56,12 +57,16 @@ export const ReaderPage = () => {
 
     const nextPage = () => {
         if (currentPage + 2 > numPages) return;
-        setCurrentPage(currentPage + 2);
+        const newPage = currentPage + 2;
+        setCurrentPage(newPage);
+        setSliderValue(newPage);
     };
 
     const prevPage = () => {
         if (currentPage === 1) return;
-        setCurrentPage(currentPage - 2);
+        const newPage = currentPage - 2;
+        setCurrentPage(newPage);
+        setSliderValue(newPage);
     };
     return (
         <div className="flex flex-col">
@@ -105,7 +110,9 @@ export const ReaderPage = () => {
                         </PopoverTrigger>
                         <PopoverContent className="p-4 m-3 z-10 rounded-2xl border-blue-400/30 w-80">
                             <div className="space-y-3">
-                                <h3 className="font-bold text-lg">Buscar en el libro</h3>
+                                <h3 className="font-bold text-lg">
+                                    Buscar en el libro
+                                </h3>
                                 <div className="relative">
                                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                                         search
@@ -115,7 +122,9 @@ export const ReaderPage = () => {
                                         type="text"
                                         placeholder="Escribe para buscar..."
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onChange={(e) =>
+                                            setSearchTerm(e.target.value)
+                                        }
                                         className="pl-10 border-blue-400/30 focus-visible:ring-blue-400"
                                     />
                                 </div>
@@ -210,9 +219,9 @@ export const ReaderPage = () => {
                     </Button>
                 </div>
             </div>
-            <div className="">
+            <div>
                 <Document
-                    className="bg-amber-200"
+                    className={'py-8'}
                     file={book.pdf}
                     loading={
                         <div className="flex justify-center items">
@@ -254,15 +263,20 @@ export const ReaderPage = () => {
                 </div>
             </div>
             <div className="flex-none p-8">
-                <Progress
-                    className="bg-blue-100 [&>div]:bg-blue-400"
-                    value={currentPage}
-                ></Progress>
-                <div className="mt-3">
+                <Slider
+                    className="[&>span]:bg-blue-100  [&>span>span]:bg-blue-400"
+                    value={[sliderValue]}
+                    min={1}
+                    max={numPages - 1}
+                    step={2}
+                    onValueChange={(value) => setSliderValue(value[0])}
+                    onValueCommit={(value) => setCurrentPage(value[0])}
+                />
+                <div className="mt-3 flex justify-center">
                     <span className="font-normal text-gray-400">
                         Page{' '}
                         <span className="font-bold text-blue-400">
-                            {currentPage}
+                            {sliderValue}
                         </span>{' '}
                         of{' '}
                         <span className="font-bold text-blue-400">
