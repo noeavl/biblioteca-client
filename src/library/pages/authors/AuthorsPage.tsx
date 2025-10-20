@@ -8,7 +8,7 @@ import {
 import { MainLayout } from '@/library/layouts/MainLayout';
 import { categories } from '@/mocks/categories.mock';
 import { orderByItems } from '@/mocks/filters.mock';
-import { getAuthors } from '@/library/api/authors.api';
+import { authors as mockAuthors } from '@/mocks/authors.mock';
 import type { AuthorCard } from '@/library/interfaces/author.interface';
 
 const authorFilters: FilterConfig[] = [
@@ -21,29 +21,33 @@ export const AuthorsPage = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchAuthors = async () => {
-            try {
-                const data = await getAuthors();
-                const authorsCards: AuthorCard[] = data
-                    .filter((author) => author.books.length > 0)
-                    .map((author) => ({
-                        _id: author._id,
-                        firstName: author.person.firstName,
-                        lastName: author.person.lastName,
-                        img: author.fileName
-                            ? `${import.meta.env.VITE_API_URL}/files/author/${author.fileName}`
-                            : undefined,
-                        quantityBooks: author.books.length,
-                    }));
-                setAuthors(authorsCards);
-            } catch (error) {
-                console.error('Error al cargar autores:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        // Usar autores del mock temporalmente
+        setAuthors(mockAuthors);
+        setLoading(false);
 
-        fetchAuthors();
+        // const fetchAuthors = async () => {
+        //     try {
+        //         const data = await getAuthors();
+        //         const authorsCards: AuthorCard[] = data
+        //             .filter((author) => author.books.length > 0)
+        //             .map((author) => ({
+        //                 _id: author._id,
+        //                 firstName: author.person.firstName,
+        //                 lastName: author.person.lastName,
+        //                 img: author.fileName
+        //                     ? `${import.meta.env.VITE_API_URL}/files/author/${author.fileName}`
+        //                     : undefined,
+        //                 quantityBooks: author.books.length,
+        //             }));
+        //         setAuthors(authorsCards);
+        //     } catch (error) {
+        //         console.error('Error al cargar autores:', error);
+        //     } finally {
+        //         setLoading(false);
+        //     }
+        // };
+
+        // fetchAuthors();
     }, []);
 
     return (

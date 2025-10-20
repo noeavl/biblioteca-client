@@ -53,7 +53,7 @@ export const PanelSidebar = () => {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
-                                <SidebarMenuItem>
+                                <SidebarMenuItem key={item.url}>
                                     <SidebarMenuButton asChild>
                                         <Link to={item.url}>
                                             <Icon icon={item.icon} />

@@ -17,6 +17,8 @@ import { PanelLayout } from '@/panel/layouts/PanelLayout';
 import { UsersListPage } from '@/panel/pages/users/UsersListPage';
 import { UsersEditPage } from '@/panel/pages/users/UsersEditPage';
 import { BooksListPage } from '@/panel/pages/books/BooksListPage';
+import { BooksCreatePage } from '@/panel/pages/books/BooksCreatePage';
+import { BooksEditPage } from '@/panel/pages/books/BooksEditPage';
 import { CategoriesListPage } from '@/panel/pages/categories/CategoriesListPage';
 import { AuthorsPage as PanelAuthorsPage } from '@/panel/pages/authors/AuthorsPage';
 
@@ -112,6 +114,14 @@ export const appRouter = createBrowserRouter([
                     {
                         index: true,
                         Component: BooksListPage,
+                    },
+                    {
+                        path: 'crear',
+                        Component: BooksCreatePage,
+                    },
+                    {
+                        path: 'editar/:bookId',
+                        Component: BooksEditPage,
                     },
                 ],
             },
