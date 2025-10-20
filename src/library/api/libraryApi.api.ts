@@ -2,6 +2,9 @@ import axios from 'axios';
 
 export const libraryApi = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
 libraryApi.interceptors.request.use((config) => {
