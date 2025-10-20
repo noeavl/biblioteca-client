@@ -219,12 +219,12 @@ export const ReaderPage = () => {
                     </Button>
                 </div>
             </div>
-            <div>
+            <div className="relative min-h-[800px]">
                 <Document
                     className={'py-8'}
                     file={book.pdf}
                     loading={
-                        <div className="flex justify-center items">
+                        <div className="flex justify-center items-center min-h-[800px]">
                             <Spinner />
                         </div>
                     }
@@ -235,11 +235,21 @@ export const ReaderPage = () => {
                             pageNumber={currentPage}
                             renderAnnotationLayer={false}
                             renderTextLayer={false}
+                            loading={
+                                <div className="flex justify-center items-center min-h-[800px]">
+                                    <Spinner />
+                                </div>
+                            }
                         ></Page>
                         <Page
                             pageNumber={currentPage + 1}
                             renderTextLayer={false}
                             renderAnnotationLayer={false}
+                            loading={
+                                <div className="flex justify-center items-center min-h-[800px]">
+                                    <Spinner />
+                                </div>
+                            }
                         />
                     </div>
                 </Document>
