@@ -18,9 +18,10 @@ import {
 
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import type { Book } from '@/mocks/books.mock';
 import { useLoaderData } from 'react-router';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { pdfjs, Document, Page } from 'react-pdf';
 import { Spinner } from '@/components/ui/spinner';
 
@@ -33,7 +34,17 @@ export const ReaderPage = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [numPages, setNumPages] = useState<number>(100);
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const book = useLoaderData<Book>();
+
+    // Auto-focus cuando se abre el popover de búsqueda
+    useEffect(() => {
+        if (searchOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [searchOpen]);
 
     if (!book) {
         return <div>Libro no encontrado</div>;
@@ -84,11 +95,33 @@ export const ReaderPage = () => {
                     </span>
                 </div>
                 <div className="space-x-3">
-                    <Button className="bg-blue-50 text-blue-400 hover:bg-blue-50">
-                        <span className="material-symbols-outlined">
-                            search
-                        </span>
-                    </Button>
+                    <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+                        <PopoverTrigger asChild>
+                            <Button className="bg-blue-50 text-blue-400 hover:bg-blue-50">
+                                <span className="material-symbols-outlined">
+                                    search
+                                </span>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="p-4 m-3 z-10 rounded-2xl border-blue-400/30 w-80">
+                            <div className="space-y-3">
+                                <h3 className="font-bold text-lg">Buscar en el libro</h3>
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                        search
+                                    </span>
+                                    <Input
+                                        ref={searchInputRef}
+                                        type="text"
+                                        placeholder="Escribe para buscar..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10 border-blue-400/30 focus-visible:ring-blue-400"
+                                    />
+                                </div>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button className="bg-blue-50 text-blue-400 hover:bg-blue-50">
