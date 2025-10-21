@@ -345,7 +345,7 @@ export const BooksEditPage = () => {
                                 Categoría <span className="text-destructive">*</span>
                             </Label>
                             <Select
-                                value={formData.categoryId}
+                                value={formData.categoryId || undefined}
                                 onValueChange={(value) =>
                                     setFormData({
                                         ...formData,

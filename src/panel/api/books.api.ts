@@ -21,7 +21,16 @@ export const getBookById = async (bookId: string): Promise<Book> => {
     }
 };
 
-export const createBook = async (bookData: CreateBookDto): Promise<Book> => {
+export interface CreateBookResponse {
+    message: string;
+    book: {
+        _id: string;
+        title: string;
+        publicationYear: number;
+    };
+}
+
+export const createBook = async (bookData: CreateBookDto): Promise<CreateBookResponse> => {
     try {
         const payload = {
             authorId: bookData.authorId,
@@ -30,7 +39,7 @@ export const createBook = async (bookData: CreateBookDto): Promise<Book> => {
             categoryId: bookData.categoryId,
         };
 
-        const { data } = await panelApi.post<Book>('/books', payload);
+        const { data } = await panelApi.post<CreateBookResponse>('/books', payload);
         return data;
     } catch (error) {
         console.error('Error al crear el libro:', error);

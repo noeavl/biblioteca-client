@@ -15,12 +15,17 @@ import { CollectionsPage } from '@/library/pages/my-library/collections/Collecti
 import { ReaderPage } from '@/library/pages/reader/ReaderPage';
 import { PanelLayout } from '@/panel/layouts/PanelLayout';
 import { UsersListPage } from '@/panel/pages/users/UsersListPage';
+import { UsersCreatePage } from '@/panel/pages/users/UsersCreatePage';
 import { UsersEditPage } from '@/panel/pages/users/UsersEditPage';
 import { BooksListPage } from '@/panel/pages/books/BooksListPage';
 import { BooksCreatePage } from '@/panel/pages/books/BooksCreatePage';
 import { BooksEditPage } from '@/panel/pages/books/BooksEditPage';
 import { CategoriesListPage } from '@/panel/pages/categories/CategoriesListPage';
+import { CategoriesCreatePage } from '@/panel/pages/categories/CategoriesCreatePage';
+import { CategoriesEditPage } from '@/panel/pages/categories/CategoriesEditPage';
 import { AuthorsPage as PanelAuthorsPage } from '@/panel/pages/authors/AuthorsPage';
+import { AuthorsCreatePage } from '@/panel/pages/authors/AuthorsCreatePage';
+import { AuthorsEditPage } from '@/panel/pages/authors/AuthorsEditPage';
 
 export const appRouter = createBrowserRouter([
     {
@@ -103,7 +108,11 @@ export const appRouter = createBrowserRouter([
                         Component: UsersListPage,
                     },
                     {
-                        path: 'edit/:user',
+                        path: 'crear',
+                        Component: UsersCreatePage,
+                    },
+                    {
+                        path: 'editar/:user',
                         Component: UsersEditPage,
                     },
                 ],
@@ -132,6 +141,14 @@ export const appRouter = createBrowserRouter([
                         index: true,
                         Component: CategoriesListPage,
                     },
+                    {
+                        path: 'crear',
+                        Component: CategoriesCreatePage,
+                    },
+                    {
+                        path: 'editar/:categoryId',
+                        Component: CategoriesEditPage,
+                    },
                 ],
             },
             {
@@ -140,6 +157,14 @@ export const appRouter = createBrowserRouter([
                     {
                         index: true,
                         Component: PanelAuthorsPage,
+                    },
+                    {
+                        path: 'crear',
+                        Component: AuthorsCreatePage,
+                    },
+                    {
+                        path: 'editar/:authorId',
+                        Component: AuthorsEditPage,
                     },
                 ],
             },

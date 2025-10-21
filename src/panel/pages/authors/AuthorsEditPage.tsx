@@ -1,0 +1,335 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, X } from 'lucide-react';
+import { getAuthorById, updateAuthor, uploadAuthorImage } from '@/panel/api/authors.api';
+import { toast } from 'sonner';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+export const AuthorsEditPage = () => {
+    const navigate = useNavigate();
+    const { authorId } = useParams<{ authorId: string }>();
+    const [loading, setLoading] = useState(false);
+    const [loadingData, setLoadingData] = useState(true);
+
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+    });
+
+    const [currentImageFileName, setCurrentImageFileName] = useState<string | null>(null);
+    const [authorImage, setAuthorImage] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    // Cargar datos del autor
+    useEffect(() => {
+        const fetchAuthor = async () => {
+            if (!authorId) {
+                toast.error('ID de autor no válido');
+                navigate('/panel/autores');
+                return;
+            }
+
+            try {
+                setLoadingData(true);
+                const author = await getAuthorById(authorId);
+                setFormData({
+                    firstName: author.person.firstName,
+                    lastName: author.person.lastName,
+                });
+                setCurrentImageFileName(author.fileName || null);
+            } catch (error) {
+                toast.error('Error al cargar los datos del autor');
+                console.error(error);
+                navigate('/panel/autores');
+            } finally {
+                setLoadingData(false);
+            }
+        };
+
+        fetchAuthor();
+    }, [authorId, navigate]);
+
+    // Manejar cambio de imagen
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            // Validar tipo de archivo
+            if (!file.type.startsWith('image/')) {
+                toast.error('Por favor selecciona una imagen válida');
+                return;
+            }
+
+            // Validar tamaño (máximo 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('La imagen no debe superar los 5MB');
+                return;
+            }
+
+            setAuthorImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // Remover imagen nueva (volver a la actual o sin imagen)
+    const handleRemoveImage = () => {
+        setAuthorImage(null);
+        setPreviewUrl(null);
+    };
+
+    // Manejar submit
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!authorId) {
+            toast.error('ID de autor no válido');
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // Preparar datos de actualización (solo enviar si hay cambios)
+            const updateData: { firstName?: string; lastName?: string } = {};
+
+            if (formData.firstName.trim()) {
+                updateData.firstName = formData.firstName.trim();
+            }
+
+            if (formData.lastName.trim()) {
+                updateData.lastName = formData.lastName.trim();
+            }
+
+            // Actualizar datos básicos del autor
+            await updateAuthor(authorId, updateData);
+
+            // Subir nueva imagen si existe
+            if (authorImage) {
+                try {
+                    await uploadAuthorImage(authorId, authorImage);
+                    toast.success('Autor e imagen actualizados exitosamente');
+                } catch (uploadError) {
+                    console.error('Error al subir imagen:', uploadError);
+                    toast.warning(
+                        'Autor actualizado, pero hubo un error al subir la imagen'
+                    );
+                }
+            } else {
+                toast.success('Autor actualizado exitosamente');
+            }
+
+            navigate('/panel/autores');
+        } catch (error: any) {
+            // Manejar errores de validación del backend
+            if (error?.response?.data?.message) {
+                const messages = error.response.data.message;
+                if (Array.isArray(messages)) {
+                    messages.forEach((msg: string) => toast.error(msg));
+                } else {
+                    toast.error(messages);
+                }
+            } else {
+                toast.error('Error al actualizar el autor');
+            }
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Generar iniciales para el avatar
+    const getInitials = () => {
+        const first = formData.firstName.trim()[0] || '';
+        const last = formData.lastName.trim()[0] || '';
+        return (first + last).toUpperCase();
+    };
+
+    // Obtener URL de la imagen actual
+    const getCurrentImageUrl = () => {
+        if (currentImageFileName) {
+            return `${import.meta.env.VITE_API_URL}/files/author/${currentImageFileName}`;
+        }
+        return null;
+    };
+
+    if (loadingData) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col gap-6 p-6 w-full max-w-2xl mx-auto">
+            <div className="flex items-center gap-4">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate('/panel/autores')}
+                >
+                    <ArrowLeft />
+                </Button>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        Editar Autor
+                    </h1>
+                    <p className="text-muted-foreground mt-1">
+                        Modifica la información del autor
+                    </p>
+                </div>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Información del Autor</CardTitle>
+                        <CardDescription>
+                            Todos los campos son opcionales
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        {/* Nombre */}
+                        <div className="space-y-2">
+                            <Label htmlFor="firstName">Nombre</Label>
+                            <Input
+                                id="firstName"
+                                placeholder="Ej: Gabriel"
+                                value={formData.firstName}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        firstName: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+
+                        {/* Apellido */}
+                        <div className="space-y-2">
+                            <Label htmlFor="lastName">Apellido</Label>
+                            <Input
+                                id="lastName"
+                                placeholder="Ej: García Márquez"
+                                value={formData.lastName}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        lastName: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+
+                        {/* Foto del autor */}
+                        <div className="space-y-2">
+                            <Label htmlFor="authorImage">
+                                Fotografía del Autor (opcional)
+                            </Label>
+                            {!previewUrl ? (
+                                <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+                                    <input
+                                        id="authorImage"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        className="hidden"
+                                    />
+                                    <label
+                                        htmlFor="authorImage"
+                                        className="cursor-pointer flex flex-col items-center gap-2"
+                                    >
+                                        <Avatar className="h-24 w-24">
+                                            {getCurrentImageUrl() ? (
+                                                <AvatarImage
+                                                    src={getCurrentImageUrl()!}
+                                                    alt="Imagen actual"
+                                                />
+                                            ) : null}
+                                            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-primary/10">
+                                                {getInitials() || '?'}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="text-sm">
+                                            <span className="font-semibold text-primary">
+                                                Haz clic para cambiar la imagen
+                                            </span>{' '}
+                                            <span className="text-muted-foreground">
+                                                o arrastra y suelta
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            PNG, JPG o WEBP (máx. 5MB)
+                                        </p>
+                                    </label>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center gap-4 p-6 border-2 rounded-lg">
+                                    <div className="relative">
+                                        <Avatar className="h-32 w-32">
+                                            <AvatarImage
+                                                src={previewUrl}
+                                                alt="Vista previa"
+                                            />
+                                            <AvatarFallback>
+                                                {getInitials()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon-sm"
+                                            className="absolute -top-2 -right-2"
+                                            onClick={handleRemoveImage}
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                        {authorImage?.name}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Esta imagen reemplazará la actual
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Botones */}
+                        <div className="flex gap-4 pt-4">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => navigate('/panel/autores')}
+                                disabled={loading}
+                                className="flex-1"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="flex-1"
+                            >
+                                {loading ? 'Guardando...' : 'Guardar Cambios'}
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </form>
+        </div>
+    );
+};

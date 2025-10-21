@@ -16,6 +16,8 @@ export interface BookCategory {
     _id: string;
     name: string;
     __v: number;
+    books?: string[];
+    featuredBookCover?: string | null;
 }
 
 export interface Book {

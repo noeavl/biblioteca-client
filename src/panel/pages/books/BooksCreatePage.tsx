@@ -155,27 +155,28 @@ export const BooksCreatePage = () => {
             setLoading(true);
 
             // Crear el libro primero (solo con datos básicos)
-            const newBook = await createBook(formData);
+            const response = await createBook(formData);
+            const bookId = response.book._id;
 
             // Subir archivos si existen
             const uploadPromises = [];
             let hasCover = false;
             let hasPDF = false;
 
-            if (coverImage && newBook._id) {
+            if (coverImage && bookId) {
                 hasCover = true;
                 uploadPromises.push(
-                    uploadBookCover(newBook._id, coverImage).catch((error) => {
+                    uploadBookCover(bookId, coverImage).catch((error) => {
                         console.error('Error al subir portada:', error);
                         throw new Error('cover');
                     })
                 );
             }
 
-            if (pdfFile && newBook._id) {
+            if (pdfFile && bookId) {
                 hasPDF = true;
                 uploadPromises.push(
-                    uploadBookPDF(newBook._id, pdfFile).catch((error) => {
+                    uploadBookPDF(bookId, pdfFile).catch((error) => {
                         console.error('Error al subir PDF:', error);
                         throw new Error('pdf');
                     })

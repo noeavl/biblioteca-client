@@ -32,8 +32,15 @@ export const LoginForm = () => {
             const response = await loginAction(email, password);
             login(response.access_token, response.user);
             navigate('/');
-        } catch (err) {
-            setError('Credenciales inválidas. Por favor, intenta de nuevo.');
+        } catch (err: any) {
+            // Mostrar el mensaje específico del backend si existe
+            if (err?.response?.data?.message) {
+                setError(err.response.data.message);
+            } else if (err?.message) {
+                setError(err.message);
+            } else {
+                setError('Credenciales inválidas. Por favor, intenta de nuevo.');
+            }
         } finally {
             clearTimeout(warningTimeout);
             setIsLoading(false);
