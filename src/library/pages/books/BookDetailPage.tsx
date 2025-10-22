@@ -3,9 +3,15 @@ import { BooksGrid } from '@/library/components/BooksGrid';
 import { MainContainer } from '@/library/components/MainContainer';
 import { books, type Book } from '@/mocks/books.mock';
 import { Link, useLoaderData } from 'react-router';
+import { useEffect } from 'react';
 
 export const BookDetailPage = () => {
     const book = useLoaderData<Book>();
+
+    // Scroll hacia arriba cuando se carga la página
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [book?.id]);
 
     if (!book) {
         return <div>Libro no encontrado</div>;
