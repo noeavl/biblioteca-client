@@ -7,7 +7,6 @@ import { CategoriesPage } from '@/library/pages/categories/CategoriesPage';
 import { BooksPage } from '@/library/pages/books/BooksPage';
 import { AuthorsPage } from '@/library/pages/authors/AuthorsPage';
 import { BookDetailPage } from '@/library/pages/books/BookDetailPage';
-import { books } from '@/mocks/books.mock';
 import { LoginPage } from '@/library/pages/login/LoginPage';
 import { FavoritesPage } from '@/library/pages/my-library/favorites/FavoritesPage';
 import { ReadPage } from '@/library/pages/my-library/read/ReadPage';
@@ -48,24 +47,12 @@ export const appRouter = createBrowserRouter([
                         Component: BooksPage,
                     },
                     {
-                        path: 'detalle/:book',
+                        path: 'detalle/:bookId',
                         Component: BookDetailPage,
-                        loader: async ({ params }) => {
-                            const bookFound = books.find(
-                                (book) => book.id === params.book
-                            );
-                            return bookFound;
-                        },
                     },
                     {
-                        path: 'lector/:book',
+                        path: 'lector/:bookId',
                         Component: ReaderPage,
-                        loader: async ({ params }) => {
-                            const bookFound = books.find(
-                                (book) => book.id === params.book
-                            );
-                            return bookFound;
-                        },
                     },
                 ],
             },

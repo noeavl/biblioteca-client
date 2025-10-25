@@ -53,8 +53,8 @@ export const BooksCreatePage = () => {
                     getAuthors(),
                     getCategories(),
                 ]);
-                setAuthors(authorsData);
-                setCategories(categoriesData);
+                setAuthors(authorsData.authors);
+                setCategories(categoriesData.categories);
             } catch (error) {
                 toast.error('Error al cargar los datos necesarios');
                 console.error(error);

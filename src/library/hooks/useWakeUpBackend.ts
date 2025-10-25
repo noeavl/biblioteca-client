@@ -11,10 +11,8 @@ export const useWakeUpBackend = () => {
             try {
                 // Intentar un endpoint simple de health check o cualquier GET
                 await libraryApi.get('/health', { timeout: 15000 });
-                console.log('Backend está listo');
             } catch (error) {
                 // Ignorar errores, es solo para despertar el servidor
-                console.log('Ping al backend completado');
             }
         };
 

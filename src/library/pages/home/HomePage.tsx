@@ -1,49 +1,351 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { BooksGrid } from '@/library/components/BooksGrid';
-import { books } from '@/mocks/books.mock';
 import { CategoriesGrid } from '@/library/components/CategoriesGrid';
-import { categories } from '@/mocks/categories.mock';
 import { AuthorsGrid } from '@/library/components/AuthorsGrid';
-import { authors } from '@/mocks/authors.mock';
-import homeSectionSearchImg from '@/assets/images/home-section-search.webp';
+import { InteractiveBook } from '@/library/components/InteractiveBook';
+import { getBooks } from '@/panel/api/books.api';
+import { getAuthors } from '@/panel/api/authors.api';
+import { getCategories } from '@/panel/api/categories.api';
+import type { Book, BookCategory } from '@/library/interfaces/book.interface';
+import type { Author, AuthorCard } from '@/library/interfaces/author.interface';
+import type { Category } from '@/mocks/categories.mock';
+import { useAuth } from '@/auth/hooks/useAuth';
 
 export const HomePage = () => {
+    const { user } = useAuth();
+    const [books, setBooks] = useState<Book[]>([]);
+    const [authors, setAuthors] = useState<AuthorCard[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [booksLoading, setBooksLoading] = useState(true);
+    const [authorsLoading, setAuthorsLoading] = useState(true);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
+    const [preloadedColors, setPreloadedColors] = useState<Record<string, string>>({});
+    const [colorsLoading, setColorsLoading] = useState(true);
+
+    const isLoading = booksLoading || authorsLoading || categoriesLoading || colorsLoading;
+
+    useEffect(() => {
+        const fetchBooks = async () => {
+            try {
+                const data = await getBooks({ limit: 24 });
+                setBooks(data.books);
+            } catch (error) {
+                console.error('Error al cargar los libros:', error);
+            } finally {
+                setBooksLoading(false);
+            }
+        };
+
+        fetchBooks();
+    }, []);
+
+    useEffect(() => {
+        const fetchAuthors = async () => {
+            try {
+                const response = await getAuthors();
+                // Transformar Author[] a AuthorCard[]
+                const authorsCards: AuthorCard[] = response.authors.map(
+                    (author: Author) => ({
+                        _id: author._id,
+                        firstName: author.person.firstName,
+                        lastName: author.person.lastName,
+                        img: author.fileName,
+                        quantityBooks: author.books?.length || 0,
+                    })
+                );
+                setAuthors(authorsCards);
+            } catch (error) {
+                console.error('Error al cargar los autores:', error);
+            } finally {
+                setAuthorsLoading(false);
+            }
+        };
+
+        fetchAuthors();
+    }, []);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await getCategories();
+                const categoriesCards: Category[] = response.categories.map(
+                    (category: BookCategory) => ({
+                        name: category.name,
+                        img: category.featuredBookCover
+                            ? `${import.meta.env.VITE_API_URL}/files/cover/${
+                                  category.featuredBookCover
+                              }`
+                            : '',
+                        quantityBooks: category.books?.length || 0,
+                    })
+                );
+                setCategories(categoriesCards);
+            } catch (error) {
+                console.error('Error al cargar las categorías:', error);
+            } finally {
+                setCategoriesLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+    // Pre-cargar imágenes y extraer colores
+    useEffect(() => {
+        if (books.length === 0) return;
+
+        const extractColorFromImage = (img: HTMLImageElement): string => {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return '#3b82f6';
+
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                // Obtener color dominante del centro de la imagen
+                const imageData = ctx.getImageData(
+                    img.width / 4,
+                    img.height / 4,
+                    img.width / 2,
+                    img.height / 2
+                );
+                const data = imageData.data;
+
+                let r = 0, g = 0, b = 0;
+                const pixelCount = data.length / 4;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    r += data[i];
+                    g += data[i + 1];
+                    b += data[i + 2];
+                }
+
+                r = Math.floor(r / pixelCount);
+                g = Math.floor(g / pixelCount);
+                b = Math.floor(b / pixelCount);
+
+                // Oscurecer un poco el color para el lomo
+                const darkenFactor = 0.7;
+                r = Math.floor(r * darkenFactor);
+                g = Math.floor(g * darkenFactor);
+                b = Math.floor(b * darkenFactor);
+
+                return `rgb(${r}, ${g}, ${b})`;
+            } catch (error) {
+                console.error('Error extracting color:', error);
+                return '#3b82f6';
+            }
+        };
+
+        const preloadImages = async () => {
+            const colors: Record<string, string> = {};
+            const imagePromises = books.map((book) => {
+                return new Promise<void>((resolve) => {
+                    if (!book.coverImage) {
+                        colors[book._id] = '#3b82f6';
+                        resolve();
+                        return;
+                    }
+
+                    const img = new Image();
+                    img.crossOrigin = 'Anonymous';
+                    img.src = `${import.meta.env.VITE_API_URL}/files/cover/${book.coverImage}`;
+
+                    img.onload = () => {
+                        colors[book._id] = extractColorFromImage(img);
+                        resolve();
+                    };
+
+                    img.onerror = () => {
+                        colors[book._id] = '#3b82f6';
+                        resolve();
+                    };
+                });
+            });
+
+            await Promise.all(imagePromises);
+            setPreloadedColors(colors);
+            setColorsLoading(false);
+        };
+
+        preloadImages();
+    }, [books]);
+
+    // Crear tres filas de 8 libros cada una (24 total)
+    const row1Books = books.slice(0, 8);
+    const row2Books = books.slice(8, 16);
+    const row3Books = books.slice(16, 24);
+
+    // Estado para controlar qué libro está abierto (formato: "fila-indice")
+    const [openBookId, setOpenBookId] = useState<string | null>(null);
+
+    // Mostrar splash screen mientras carga
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+                <div className="text-center">
+                    {/* Logo o animación */}
+                    <div className="mb-8">
+                        <svg
+                            className="animate-bounce w-20 h-20 mx-auto text-blue-500 dark:text-blue-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                            />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <>
-            <section className="h-[calc(100vh-4rem)] relative overflow-hidden">
-                <img
-                    src={homeSectionSearchImg}
-                    className="absolute inset-0 scale-110 backdrop-blur-md object-cover object-center w-full h-full"
-                    alt="Descubre un mundo de historias"
-                />
-                <div className="absolute inset-0 w-full h-full bg-black/30 backdrop-blur-sm"></div>
-                <div className="absolute inset-0 w-full h-full flex flex-col justify-center items-center text-white space-y-6 px-4">
-                    <h1 className="font-bold text-4xl sm:text-6xl text-center leading-tight">
-                        Descubre un mundo de historias
-                    </h1>
-                    <p className="text-lg sm:text-2xl font-thin text-center max-w-2xl">
-                        Explora nuestra colección de libros y sumergete en
-                        nuevas aventuras
-                    </p>
-                </div>
-            </section>
-            <section className="py-16 sm:py-24">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-3xl font-bold text-slate-900 dark:text-white">
-                            Destacados
-                        </h3>
-                        <Link
-                            className="text-sm font-medium hover:underline text-blue-500"
-                            to={'libros'}
-                        >
-                            Ver todo
-                        </Link>
+            {/* Nueva sección interactiva de estante con tres filas */}
+            <section className="relative bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 h-screen flex items-center overflow-hidden">
+                {books.length === 0 ? (
+                    <div className="flex items-center justify-center w-full py-12">
+                        <p className="text-slate-500 dark:text-slate-400">
+                            No hay libros disponibles
+                        </p>
                     </div>
-                    <BooksGrid books={books}></BooksGrid>
-                </div>
+                ) : (
+                    <div className="relative px-4 w-full h-full py-6">
+                        <div className="max-w-7xl mx-auto flex flex-col justify-center h-full gap-8">
+                            {/* Mensaje de Bienvenida */}
+                            <div className="text-center mb-4">
+                                <h2 className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-white mb-2">
+                                    ¡Bienvenido, <span className="text-blue-500">{user?.name || 'Usuario'}</span>!
+                                </h2>
+                                <p className="text-lg text-slate-600 dark:text-slate-300">
+                                    Descubre tu próxima gran lectura
+                                </p>
+                            </div>
+
+                            {/* Fila 1 - Diseño Classic */}
+                            {row1Books.length > 0 && (
+                                <div className="overflow-visible flex flex-col justify-end relative">
+                                    <div className="flex gap-3 justify-center items-end">
+                                        {row1Books.map((book, index) => (
+                                            <InteractiveBook
+                                                key={book._id}
+                                                book={book}
+                                                index={index + 0}
+                                                isOpen={
+                                                    openBookId ===
+                                                    `row1-${index}`
+                                                }
+                                                designType="classic"
+                                                onToggle={() => {
+                                                    setOpenBookId(
+                                                        openBookId ===
+                                                            `row1-${index}`
+                                                            ? null
+                                                            : `row1-${index}`
+                                                    );
+                                                }}
+                                                preloadedColor={preloadedColors[book._id]}
+                                            />
+                                        ))}
+                                    </div>
+                                    {/* Repisa */}
+                                    <div className="h-3 bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-800 rounded-sm shadow-md w-[85%] mx-auto"></div>
+                                    {/* Postit - Call to Action 1 */}
+                                    <div className="absolute bottom-0 left-[8%] bg-yellow-200 dark:bg-yellow-300 shadow-lg px-4 py-2 rounded-sm transform -rotate-2 z-10">
+                                        <span className="text-sm text-gray-800 font-medium">
+                                            ¡Léeme!
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Fila 2 - Diseño Elegant */}
+                            {row2Books.length > 0 && (
+                                <div className="overflow-visible flex flex-col justify-end relative">
+                                    <div className="flex gap-3 justify-center items-end">
+                                        {row2Books.map((book, index) => (
+                                            <InteractiveBook
+                                                key={book._id}
+                                                book={book}
+                                                index={index + 3}
+                                                isOpen={
+                                                    openBookId ===
+                                                    `row2-${index}`
+                                                }
+                                                designType="elegant"
+                                                onToggle={() => {
+                                                    setOpenBookId(
+                                                        openBookId ===
+                                                            `row2-${index}`
+                                                            ? null
+                                                            : `row2-${index}`
+                                                    );
+                                                }}
+                                                preloadedColor={preloadedColors[book._id]}
+                                            />
+                                        ))}
+                                    </div>
+                                    {/* Repisa */}
+                                    <div className="h-3 bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-800 rounded-sm shadow-md w-[85%] mx-auto"></div>
+                                    {/* Postit - Call to Action 2 */}
+                                    <div className="absolute bottom-0 right-[8%] bg-pink-200 dark:bg-pink-300 shadow-lg px-4 py-2 rounded-sm transform -rotate-1 z-10">
+                                        <span className="text-sm text-gray-800 font-medium">
+                                            Descúbrelo
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Fila 3 - Diseño Minimalist */}
+                            {row3Books.length > 0 && (
+                                <div className="overflow-visible flex flex-col justify-end relative">
+                                    <div className="flex gap-3 justify-center items-end">
+                                        {row3Books.map((book, index) => (
+                                            <InteractiveBook
+                                                key={book._id}
+                                                book={book}
+                                                index={index + 5}
+                                                isOpen={
+                                                    openBookId ===
+                                                    `row3-${index}`
+                                                }
+                                                designType="minimalist"
+                                                onToggle={() => {
+                                                    setOpenBookId(
+                                                        openBookId ===
+                                                            `row3-${index}`
+                                                            ? null
+                                                            : `row3-${index}`
+                                                    );
+                                                }}
+                                                preloadedColor={preloadedColors[book._id]}
+                                            />
+                                        ))}
+                                    </div>
+                                    {/* Repisa */}
+                                    <div className="h-3 bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-800 rounded-sm shadow-md w-[85%] mx-auto"></div>
+                                    {/* Postit - Call to Action 3 */}
+                                    <div className="absolute bottom-0 left-[8%] bg-green-200 dark:bg-green-300 shadow-lg px-4 py-2 rounded-sm transform -rotate-1 z-10">
+                                        <span className="text-sm text-gray-800 font-medium">
+                                            ¡Empieza ya!
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </section>
-            <section className="bg-background-light pb-16 sm:pb-24 dark:bg-background-dark/50">
+            <section className="bg-background-light p-16 sm:pb-24 dark:bg-background-dark/50">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
                         <h3 className="text-3xl font-bold text-slate-900 dark:text-white">
@@ -56,7 +358,15 @@ export const HomePage = () => {
                             Ver todo
                         </Link>
                     </div>
-                    <AuthorsGrid authors={authors} />
+                    {authors.length === 0 ? (
+                        <div className="mt-8 text-center">
+                            <p className="text-slate-500 dark:text-slate-400">
+                                No hay autores disponibles
+                            </p>
+                        </div>
+                    ) : (
+                        <AuthorsGrid authors={authors} />
+                    )}
                 </div>
             </section>
             <section className="bg-background-light pb-16 sm:pb-24 dark:bg-background-dark/50">
@@ -72,7 +382,15 @@ export const HomePage = () => {
                             Ver todo
                         </Link>
                     </div>
-                    <CategoriesGrid categories={categories}></CategoriesGrid>
+                    {categories.length === 0 ? (
+                        <div className="mt-8 text-center">
+                            <p className="text-slate-500 dark:text-slate-400">
+                                No hay categorías disponibles
+                            </p>
+                        </div>
+                    ) : (
+                        <CategoriesGrid categories={categories} />
+                    )}
                 </div>
             </section>
         </>

@@ -14,7 +14,7 @@ interface BookCardWithMenuProps {
     publicationYear: number;
     author: string;
     category: string;
-    img: string;
+    img: string | null;
     isFavorite?: boolean;
     isRead?: boolean;
     collectionName?: string;
@@ -42,11 +42,19 @@ export const BookCardWithMenu = ({
     return (
         <div className="group bg-white dark:bg-gray-800/50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col">
             <Link to={`/libros/detalle/${id}`} className="relative h-48 sm:h-52 md:h-56 lg:h-60 xl:h-64">
-                <img
-                    className="w-full h-full object-cover object-center"
-                    src={img}
-                    alt={title}
-                />
+                {img ? (
+                    <img
+                        className="w-full h-full object-cover object-center"
+                        src={img}
+                        alt={title}
+                    />
+                ) : (
+                    <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-blue-400 dark:text-blue-300 text-6xl">
+                            book
+                        </span>
+                    </div>
+                )}
             </Link>
             <div className="p-3 sm:p-4 flex-1 flex flex-col">
                 <div className="flex items-start justify-between gap-2 mb-1">

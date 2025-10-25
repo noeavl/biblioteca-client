@@ -257,6 +257,7 @@ export const AuthorsEditPage = () => {
                                                 <AvatarImage
                                                     src={getCurrentImageUrl()!}
                                                     alt="Imagen actual"
+                                                    className="object-cover"
                                                 />
                                             ) : null}
                                             <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-primary/10">
@@ -283,6 +284,7 @@ export const AuthorsEditPage = () => {
                                             <AvatarImage
                                                 src={previewUrl}
                                                 alt="Vista previa"
+                                                className="object-cover"
                                             />
                                             <AvatarFallback>
                                                 {getInitials()}

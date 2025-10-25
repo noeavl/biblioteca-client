@@ -19,9 +19,11 @@ export const AuthorCard = ({
             <div className="mx-auto h-32 w-32 overflow-hidden rounded-full bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-600 dark:to-purple-700 flex items-center justify-center">
                 {img ? (
                     <img
-                        alt="Author avatar"
+                        alt={`${firstName} ${lastName}`}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        src={img}
+                        src={`${
+                            import.meta.env.VITE_API_URL
+                        }/files/author/${img}`}
                     />
                 ) : (
                     <span className="text-4xl font-bold text-white">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -54,22 +54,33 @@ const ITEMS_PER_PAGE = 8;
 
 export const CategoriesListPage = () => {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [searchTerm, setSearchTerm] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
     const [categories, setCategories] = useState<BookCategory[]>([]);
+    const [totalCategories, setTotalCategories] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [categoryToDelete, setCategoryToDelete] = useState<BookCategory | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Cargar categorías desde la API
+    // Obtener página actual de los query params
+    const currentPage = parseInt(searchParams.get('page') || '1', 10);
+
+    // Cargar categorías desde la API con paginación
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getCategories();
-                setCategories(data);
+                const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+                const response = await getCategories({
+                    limit: ITEMS_PER_PAGE,
+                    skip
+                });
+                setCategories(response.categories);
+                setTotalCategories(response.total);
+                setTotalPages(response.totalPages);
             } catch (err) {
                 setError("Error al cargar las categorías");
                 console.error(err);
@@ -79,23 +90,30 @@ export const CategoriesListPage = () => {
         };
 
         fetchCategories();
-    }, []);
+    }, [currentPage]);
 
-    // Filtrar categorías por término de búsqueda
+    // Filtrar categorías por término de búsqueda (localmente sobre la página actual)
     const filteredCategories = categories.filter((category) => {
+        if (!searchTerm) return true;
         return category.name.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
-    // Calcular paginación
-    const totalPages = Math.ceil(filteredCategories.length / ITEMS_PER_PAGE);
+    // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const currentCategories = filteredCategories.slice(startIndex, endIndex);
+    const endIndex = startIndex + categories.length;
+    const currentCategories = filteredCategories;
+
+    // Función para cambiar de página
+    const handlePageChange = (page: number) => {
+        setSearchParams({ page: page.toString() });
+    };
 
     // Resetear a página 1 cuando cambia la búsqueda
     const handleSearchChange = (value: string) => {
         setSearchTerm(value);
-        setCurrentPage(1);
+        if (currentPage !== 1) {
+            setSearchParams({ page: '1' });
+        }
     };
 
     // Manejar eliminación de categoría
@@ -307,8 +325,8 @@ export const CategoriesListPage = () => {
                     <div className="mt-4 flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
                             Mostrando {startIndex + 1} a{" "}
-                            {Math.min(endIndex, filteredCategories.length)} de{" "}
-                            {filteredCategories.length} categorías
+                            {Math.min(endIndex, totalCategories)} de{" "}
+                            {totalCategories} categorías
                         </p>
 
                         {totalPages > 1 && (
@@ -320,9 +338,7 @@ export const CategoriesListPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 if (currentPage > 1) {
-                                                    setCurrentPage(
-                                                        currentPage - 1
-                                                    );
+                                                    handlePageChange(currentPage - 1);
                                                 }
                                             }}
                                             className={
@@ -354,9 +370,7 @@ export const CategoriesListPage = () => {
                                                         }
                                                         onClick={(e) => {
                                                             e.preventDefault();
-                                                            setCurrentPage(
-                                                                pageNumber
-                                                            );
+                                                            handlePageChange(pageNumber);
                                                         }}
                                                     >
                                                         {pageNumber}
@@ -382,9 +396,7 @@ export const CategoriesListPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 if (currentPage < totalPages) {
-                                                    setCurrentPage(
-                                                        currentPage + 1
-                                                    );
+                                                    handlePageChange(currentPage + 1);
                                                 }
                                             }}
                                             className={

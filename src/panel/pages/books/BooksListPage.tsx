@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -43,20 +43,31 @@ const ITEMS_PER_PAGE = 8;
 
 export const BooksListPage = () => {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [searchTerm, setSearchTerm] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
     const [books, setBooks] = useState<Book[]>([]);
+    const [totalBooks, setTotalBooks] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Cargar libros desde la API
+    // Obtener página actual de los query params
+    const currentPage = parseInt(searchParams.get('page') || '1', 10);
+
+    // Cargar libros desde la API con paginación
     useEffect(() => {
         const fetchBooks = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getBooks();
-                setBooks(data);
+                const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+                const response = await getBooks({
+                    limit: ITEMS_PER_PAGE,
+                    skip
+                });
+                setBooks(response.books);
+                setTotalBooks(response.total);
+                setTotalPages(response.totalPages);
             } catch (err) {
                 setError('Error al cargar los libros');
                 console.error(err);
@@ -66,24 +77,31 @@ export const BooksListPage = () => {
         };
 
         fetchBooks();
-    }, []);
+    }, [currentPage]);
 
-    // Filtrar libros por término de búsqueda
+    // Filtrar libros por término de búsqueda (localmente sobre la página actual)
     const filteredBooks = books.filter((book) => {
+        if (!searchTerm) return true;
         const searchText = `${book.title} ${book.author.person.firstName} ${book.author.person.lastName}`.toLowerCase();
         return searchText.includes(searchTerm.toLowerCase());
     });
 
-    // Calcular paginación
-    const totalPages = Math.ceil(filteredBooks.length / ITEMS_PER_PAGE);
+    // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const currentBooks = filteredBooks.slice(startIndex, endIndex);
+    const endIndex = startIndex + books.length;
+    const currentBooks = filteredBooks;
+
+    // Función para cambiar de página
+    const handlePageChange = (page: number) => {
+        setSearchParams({ page: page.toString() });
+    };
 
     // Resetear a página 1 cuando cambia la búsqueda
     const handleSearchChange = (value: string) => {
         setSearchTerm(value);
-        setCurrentPage(1);
+        if (currentPage !== 1) {
+            setSearchParams({ page: '1' });
+        }
     };
 
     return (
@@ -268,8 +286,8 @@ export const BooksListPage = () => {
                     <div className="mt-4 flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
                             Mostrando {startIndex + 1} a{' '}
-                            {Math.min(endIndex, filteredBooks.length)} de{' '}
-                            {filteredBooks.length} libros
+                            {Math.min(endIndex, totalBooks)} de{' '}
+                            {totalBooks} libros
                         </p>
 
                         {totalPages > 1 && (
@@ -281,9 +299,7 @@ export const BooksListPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 if (currentPage > 1) {
-                                                    setCurrentPage(
-                                                        currentPage - 1
-                                                    );
+                                                    handlePageChange(currentPage - 1);
                                                 }
                                             }}
                                             className={
@@ -315,9 +331,7 @@ export const BooksListPage = () => {
                                                         }
                                                         onClick={(e) => {
                                                             e.preventDefault();
-                                                            setCurrentPage(
-                                                                pageNumber
-                                                            );
+                                                            handlePageChange(pageNumber);
                                                         }}
                                                     >
                                                         {pageNumber}
@@ -343,9 +357,7 @@ export const BooksListPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 if (currentPage < totalPages) {
-                                                    setCurrentPage(
-                                                        currentPage + 1
-                                                    );
+                                                    handlePageChange(currentPage + 1);
                                                 }
                                             }}
                                             className={

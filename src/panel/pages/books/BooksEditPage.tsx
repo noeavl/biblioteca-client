@@ -66,8 +66,8 @@ export const BooksEditPage = () => {
                 ]);
 
                 setBook(bookData);
-                setAuthors(authorsData);
-                setCategories(categoriesData);
+                setAuthors(authorsData.authors);
+                setCategories(categoriesData.categories);
 
                 // Establecer valores del formulario
                 setFormData({

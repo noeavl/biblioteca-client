@@ -8,33 +8,82 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 
-export const CustomPagination = () => {
+interface CustomPaginationProps {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+}
+
+export const CustomPagination = ({ currentPage, totalPages, onPageChange }: CustomPaginationProps) => {
     return (
         <Pagination>
             <PaginationContent>
                 <PaginationItem>
-                    <PaginationPrevious className="text-blue-400" href="#" />
-                </PaginationItem>
-                <PaginationItem className="text-blue-400">
-                    <PaginationLink href="#">1</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                    <PaginationLink
-                        className="bg-blue-400 text-white rounded-full"
+                    <PaginationPrevious
+                        className="text-blue-400 cursor-pointer"
                         href="#"
-                        isActive
-                    >
-                        2
-                    </PaginationLink>
+                        onClick={(e) => {
+                            e.preventDefault();
+                            if (currentPage > 1) {
+                                onPageChange(currentPage - 1);
+                            }
+                        }}
+                        aria-disabled={currentPage === 1}
+                    />
                 </PaginationItem>
-                <PaginationItem className="text-blue-400">
-                    <PaginationLink href="#">3</PaginationLink>
-                </PaginationItem>
+
+                {[...Array(totalPages)].map((_, index) => {
+                    const pageNumber = index + 1;
+                    // Mostrar solo algunas páginas alrededor de la actual
+                    if (
+                        pageNumber === 1 ||
+                        pageNumber === totalPages ||
+                        (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                    ) {
+                        return (
+                            <PaginationItem key={pageNumber}>
+                                <PaginationLink
+                                    className={
+                                        currentPage === pageNumber
+                                            ? 'bg-blue-400 text-white rounded-full cursor-pointer'
+                                            : 'text-blue-400 cursor-pointer'
+                                    }
+                                    href="#"
+                                    isActive={currentPage === pageNumber}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onPageChange(pageNumber);
+                                    }}
+                                >
+                                    {pageNumber}
+                                </PaginationLink>
+                            </PaginationItem>
+                        );
+                    } else if (
+                        pageNumber === currentPage - 2 ||
+                        pageNumber === currentPage + 2
+                    ) {
+                        return (
+                            <PaginationItem key={pageNumber}>
+                                <PaginationEllipsis className="text-blue-400" />
+                            </PaginationItem>
+                        );
+                    }
+                    return null;
+                })}
+
                 <PaginationItem>
-                    <PaginationEllipsis className="text-blue-400" />
-                </PaginationItem>
-                <PaginationItem>
-                    <PaginationNext className="text-blue-400" href="#" />
+                    <PaginationNext
+                        className="text-blue-400 cursor-pointer"
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            if (currentPage < totalPages) {
+                                onPageChange(currentPage + 1);
+                            }
+                        }}
+                        aria-disabled={currentPage === totalPages}
+                    />
                 </PaginationItem>
             </PaginationContent>
         </Pagination>

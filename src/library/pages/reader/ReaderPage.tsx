@@ -19,14 +19,18 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
-import type { Book } from '@/mocks/books.mock';
-import { useLoaderData } from 'react-router';
+import { getBookById } from '@/library/api/books.api';
+import type { Book } from '@/library/interfaces/book.interface';
+import { useParams } from 'react-router';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { pdfjs, Document, Page } from 'react-pdf';
+import type { RenderMode } from 'react-pdf';
 import { Spinner } from '@/components/ui/spinner';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
+import HTMLFlipBook from 'react-pageflip';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -40,11 +44,14 @@ interface SearchResult {
     matchIndex: number;
 }
 
-// Tipos para configuración de lectura
 type FontSize = 'small' | 'medium' | 'large';
 type FontFamily = 'serif' | 'sans-serif' | 'monospace' | 'georgia' | 'palatino';
 
 export const ReaderPage = () => {
+    const { bookId } = useParams<{ bookId: string }>();
+    const [book, setBook] = useState<Book | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [sliderValue, setSliderValue] = useState<number>(1);
     const [numPages, setNumPages] = useState<number>(100);
@@ -56,6 +63,9 @@ export const ReaderPage = () => {
     const [isSearching, setIsSearching] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const pdfDocumentRef = useRef<PDFDocumentProxy | null>(null);
+    const flipBookRef = useRef<typeof HTMLFlipBook.prototype | null>(null);
+    const isMobile = useIsMobile();
+    const [bookSize, setBookSize] = useState({ width: 550, height: 733 });
 
     // Estados para configuración de lectura
     const [fontSize, setFontSize] = useState<FontSize>('medium');
@@ -65,7 +75,36 @@ export const ReaderPage = () => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const readerContainerRef = useRef<HTMLDivElement>(null);
 
-    const book = useLoaderData<Book>();
+    // Keep a fixed base book size; remove dynamic sizing/scroll logic for simplicity
+    useEffect(() => {
+        if (isMobile) setBookSize({ width: 300, height: 450 });
+        else setBookSize({ width: 550, height: 733 });
+    }, [isMobile]);
+
+    useEffect(() => {
+        const fetchBook = async () => {
+            if (!bookId) {
+                setError('ID del libro no válido');
+                setLoading(false);
+                return;
+            }
+
+            try {
+                setLoading(true);
+                setError(null);
+                const bookData = await getBookById(bookId);
+                setBook(bookData);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                setError('Error al cargar el libro');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBook();
+    }, [bookId]);
 
     // Función para cuando el documento PDF se carga exitosamente
     const onDocumentLoadSuccess = useCallback(
@@ -75,20 +114,18 @@ export const ReaderPage = () => {
         []
     );
 
-    // Funciones de navegación
+    // Funciones de navegación con flipbook
     const nextPage = useCallback(() => {
-        if (currentPage + 2 > numPages) return;
-        const newPage = Math.min(currentPage + 2, numPages - 1);
-        setCurrentPage(newPage);
-        setSliderValue(newPage);
-    }, [currentPage, numPages]);
+        if (flipBookRef.current) {
+            flipBookRef.current.pageFlip().flipNext();
+        }
+    }, []);
 
     const prevPage = useCallback(() => {
-        if (currentPage === 1) return;
-        const newPage = currentPage - 2;
-        setCurrentPage(newPage);
-        setSliderValue(newPage);
-    }, [currentPage]);
+        if (flipBookRef.current) {
+            flipBookRef.current.pageFlip().flipPrev();
+        }
+    }, []);
 
     // Auto-focus cuando se abre el popover de búsqueda
     useEffect(() => {
@@ -225,15 +262,12 @@ export const ReaderPage = () => {
                 }
             }
 
-            console.log('Resultados encontrados:', results.length);
-
             setSearchResults(results);
             setCurrentSearchIndex(results.length > 0 ? 0 : -1);
 
             // Navegar al primer resultado
             if (results.length > 0) {
-                setCurrentPage(results[0].pageNumber);
-                setSliderValue(results[0].pageNumber);
+                handlePageChange(results[0].pageNumber);
             }
         } catch (error) {
             console.error('Error al buscar en el PDF:', error);
@@ -248,8 +282,7 @@ export const ReaderPage = () => {
         const nextIndex = (currentSearchIndex + 1) % searchResults.length;
         setCurrentSearchIndex(nextIndex);
         const result = searchResults[nextIndex];
-        setCurrentPage(result.pageNumber);
-        setSliderValue(result.pageNumber);
+        handlePageChange(result.pageNumber);
     };
 
     // Navegar al resultado anterior de búsqueda
@@ -261,8 +294,7 @@ export const ReaderPage = () => {
                 : currentSearchIndex - 1;
         setCurrentSearchIndex(prevIndex);
         const result = searchResults[prevIndex];
-        setCurrentPage(result.pageNumber);
-        setSliderValue(result.pageNumber);
+        handlePageChange(result.pageNumber);
     };
 
     // Manejar el submit de búsqueda
@@ -298,19 +330,39 @@ export const ReaderPage = () => {
         }
     };
 
+    // No scroll/transition helpers — keep behavior simple
+
+    // Cambios de página simples
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        setSliderValue(page);
+    };
+
     // Validación del libro después de todos los hooks
-    if (!book) {
-        return <div>Libro no encontrado</div>;
+    if (loading) {
+        return <div>Cargando libro...</div>;
+    }
+
+    if (error || !book) {
+        return <div>{error || 'Libro no encontrado'}</div>;
+    }
+
+    const pdfUrl = book.fileName
+        ? `${import.meta.env.VITE_API_URL}/files/book/${book.fileName}`
+        : null;
+
+    if (!pdfUrl) {
+        return <div>PDF no encontrado para este libro</div>;
     }
 
     return (
-        <div ref={readerContainerRef} className="flex flex-col h-screen">
+        <div ref={readerContainerRef} className="flex flex-col min-h-screen">
             <div
-                className={`flex flex-none justify-between items-center p-8 border-b-1 ${
+                className={`flex flex-none justify-between items-center p-4 sm:p-8 border-b-1 ${
                     isDarkMode ? 'bg-gray-900 border-gray-800' : ''
                 }`}
             >
-                <div className="flex gap-3">
+                <div className="hidden sm:flex gap-3">
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button
@@ -325,7 +377,7 @@ export const ReaderPage = () => {
                                 </span>
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30"></PopoverContent>
+                        <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30 w-full sm:w-auto"></PopoverContent>
                     </Popover>
                     <Popover>
                         <PopoverTrigger asChild>
@@ -341,23 +393,24 @@ export const ReaderPage = () => {
                                 </span>
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30"></PopoverContent>
+                        <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30 w-full sm:w-auto"></PopoverContent>
                     </Popover>
                 </div>
                 <div className="text-center space-y-2">
                     <h2
-                        className={`text-3xl font-bold ${
+                        className={`text-2xl sm:text-3xl font-bold ${
                             isDarkMode ? 'text-gray-100' : ''
                         }`}
                     >
                         {book.title}
                     </h2>
                     <span
-                        className={`font-thin text-lg ${
+                        className={`hidden sm:block font-thin text-lg ${
                             isDarkMode ? 'text-gray-400' : 'text-gray-500'
                         }`}
                     >
-                        {book.author} - {book.publicationYear}
+                        {book.author.person.firstName}
+                        {book.author.person.lastName} - {book.publicationYear}
                     </span>
                 </div>
                 <div className="space-x-3">
@@ -375,7 +428,7 @@ export const ReaderPage = () => {
                                 </span>
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="p-4 m-3 z-10 rounded-2xl border-blue-400/30 w-96">
+                        <PopoverContent className="p-4 m-3 z-10 rounded-2xl border-blue-400/30 w-full sm:w-96">
                             <div className="space-y-3">
                                 <h3 className="font-bold text-lg">
                                     Buscar en el libro
@@ -474,7 +527,7 @@ export const ReaderPage = () => {
                                 </span>
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30 w-80">
+                        <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30 w-full sm:w-80">
                             <div className="space-y-6">
                                 {/* Tamaño de letra */}
                                 <div>
@@ -649,96 +702,89 @@ export const ReaderPage = () => {
                 </div>
             </div>
             <div
-                className={`relative flex-1 overflow-y-auto ${getFontFamilyClass()} ${
+                className={`relative flex-1 overflow-hidden ${getFontFamilyClass()} ${
                     isDarkMode ? 'pdf-dark-mode bg-black' : 'pdf-light-mode'
                 }`}
             >
-                <style>{`
-                    .react-pdf__Page__canvas {
-                        display: none !important;
-                    }
-                    .react-pdf__Page__textContent {
-                        position: relative !important;
-                    }
-                    .react-pdf__Page__textContent span {
-                        text-shadow: none !important;
-                        font-family: ${
-                            fontFamily === 'serif'
-                                ? 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif'
-                                : fontFamily === 'sans-serif'
-                                ? 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-                                : fontFamily === 'monospace'
-                                ? 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
-                                : fontFamily === 'georgia'
-                                ? 'Georgia, serif'
-                                : fontFamily === 'palatino'
-                                ? 'Palatino, "Palatino Linotype", "Book Antiqua", serif'
-                                : 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif'
-                        } !important;
-                    }
-                    .pdf-dark-mode .react-pdf__Page {
-                        background-color: #1a1a1a !important;
-                    }
-                    .pdf-dark-mode .react-pdf__Page__textContent {
-                        background-color: #1a1a1a !important;
-                    }
-                    .pdf-dark-mode .react-pdf__Page__textContent span {
-                        color: #ffffff !important;
-                    }
-                    .pdf-light-mode .react-pdf__Page {
-                        background-color: #ffffff !important;
-                    }
-                    .pdf-light-mode .react-pdf__Page__textContent {
-                        background-color: #ffffff !important;
-                    }
-                    .pdf-light-mode .react-pdf__Page__textContent span {
-                        color: #000000 !important;
-                    }
-                `}</style>
-                <Document
-                    className="py-8"
-                    file={book.pdf}
-                    loading={
-                        <div className="flex justify-center items-center min-h-[800px]">
-                            <Spinner />
-                        </div>
-                    }
-                    onLoadSuccess={(pdf) => {
-                        onDocumentLoadSuccess(pdf);
-                        pdfDocumentRef.current = pdf;
-                    }}
-                >
-                    <div className="flex justify-center items-center gap-4">
-                        <Page
-                            pageNumber={currentPage}
-                            renderAnnotationLayer={false}
-                            renderTextLayer={true}
-                            scale={scale}
-                            loading={
-                                <div className="flex justify-center items-center min-h-[800px]">
-                                    <Spinner />
-                                </div>
-                            }
-                        />
-                        {currentPage + 1 <= numPages && (
-                            <Page
-                                pageNumber={currentPage + 1}
-                                renderTextLayer={true}
-                                renderAnnotationLayer={false}
-                                scale={scale}
-                                loading={
-                                    <div className="flex justify-center items-center min-h-[800px]">
-                                        <Spinner />
+                <>
+                    <style>{`.react-pdf__Page__canvas{width:100% !important;height:100% !important;display:block}.react-pdf__Page__svg{width:100% !important;height:100% !important;display:block}`}</style>
+                    <Document
+                        file={pdfUrl}
+                        loading={
+                            <div className="flex justify-center items-center">
+                                <Spinner />
+                            </div>
+                        }
+                        onLoadSuccess={(pdf) => {
+                            onDocumentLoadSuccess(pdf);
+                            pdfDocumentRef.current = pdf;
+                        }}
+                    >
+                        <div className="flex justify-center items-center  max-w-screen-lg mx-auto py-8 bg-amber-200">
+                            <HTMLFlipBook
+                                key={`flipbook-${scale}`}
+                                ref={flipBookRef}
+                                width={bookSize.width * scale}
+                                height={bookSize.height * scale}
+                                size="stretch"
+                                minWidth={315}
+                                minHeight={0}
+                                maxWidth={1000}
+                                maxHeight={1000}
+                                maxShadowOpacity={0.5}
+                                showCover={true}
+                                mobileScrollSupport={false}
+                                onFlip={(e: { data: number }) => {
+                                    handlePageChange(e.data);
+                                }}
+                                className=""
+                                style={{}}
+                                startPage={0}
+                                drawShadow={true}
+                                flippingTime={1000}
+                                usePortrait={true}
+                                startZIndex={0}
+                                autoSize={true}
+                                clickEventForward={true}
+                                useMouseEvents={true}
+                                swipeDistance={0}
+                                showPageCorners={true}
+                                disableFlipByClick={false}
+                            >
+                                {Array.from(
+                                    { length: numPages },
+                                    (_, i) => i + 1
+                                ).map((pageNum) => (
+                                    <div
+                                        key={pageNum}
+                                        className="bg-blue-400"
+                                        style={{
+                                            backgroundColor: isDarkMode
+                                                ? '#1a1a1a'
+                                                : '#ffffff',
+                                        }}
+                                    >
+                                        <Page
+                                            pageNumber={pageNum}
+                                            renderAnnotationLayer={false}
+                                            renderTextLayer={true}
+                                            className={'w-full h-full'}
+                                            loading={
+                                                <div className="flex justify-center items-center w-full h-full">
+                                                    <Spinner />
+                                                </div>
+                                            }
+                                        />
                                     </div>
-                                }
-                            />
-                        )}
-                    </div>
-                </Document>
+                                ))}
+                            </HTMLFlipBook>
+                        </div>
+                    </Document>
+                </>
 
                 {/* Botón Anterior - Costado Izquierdo */}
                 <Button
-                    className={`fixed left-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-14 h-14 z-50 disabled:opacity-50 ${
+                    className={`fixed left-2 sm:left-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-10 h-10 sm:w-14 sm:h-14 z-50 disabled:opacity-50 ${
                         isDarkMode
                             ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
                             : 'bg-blue-400 text-white hover:bg-blue-500'
@@ -747,14 +793,14 @@ export const ReaderPage = () => {
                     disabled={currentPage === 1}
                     title="Página anterior (Flecha izquierda)"
                 >
-                    <span className="material-symbols-outlined text-3xl">
+                    <span className="material-symbols-outlined text-2xl sm:text-3xl">
                         chevron_left
                     </span>
                 </Button>
 
                 {/* Botón Siguiente - Costado Derecho */}
                 <Button
-                    className={`fixed right-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-14 h-14 z-50 disabled:opacity-50 ${
+                    className={`fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-10 h-10 sm:w-14 sm:h-14 z-50 disabled:opacity-50 ${
                         isDarkMode
                             ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
                             : 'bg-blue-400 text-white hover:bg-blue-500'
@@ -763,12 +809,16 @@ export const ReaderPage = () => {
                     disabled={currentPage + 2 > numPages}
                     title="Página siguiente (Flecha derecha)"
                 >
-                    <span className="material-symbols-outlined text-3xl">
+                    <span className="material-symbols-outlined text-2xl sm:text-3xl">
                         chevron_right
                     </span>
                 </Button>
             </div>
-            <div className={`flex-none p-8 ${isDarkMode ? 'bg-gray-900' : ''}`}>
+            <div
+                className={`flex-none p-4 sm:p-8 ${
+                    isDarkMode ? 'bg-gray-900' : ''
+                }`}
+            >
                 <div className="mb-3 flex justify-center">
                     <span
                         className={`font-normal ${
@@ -796,7 +846,7 @@ export const ReaderPage = () => {
                     max={numPages - 1}
                     step={2}
                     onValueChange={(value) => setSliderValue(value[0])}
-                    onValueCommit={(value) => setCurrentPage(value[0])}
+                    onValueCommit={(value) => handlePageChange(value[0])}
                 />
             </div>
         </div>

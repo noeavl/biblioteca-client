@@ -7,7 +7,7 @@ interface BookProps {
     publicationYear: number;
     author: string;
     category: string;
-    img: string;
+    img: string | null;
 }
 
 export const BookCard = ({
@@ -24,11 +24,19 @@ export const BookCard = ({
             className="group bg-white dark:bg-gray-800/50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col"
         >
             <div className="relative h-48 sm:h-52 md:h-56 lg:h-60 xl:h-64">
-                <img
-                    className="w-full h-full object-cover object-center"
-                    src={img}
-                    alt={title}
-                />
+                {img ? (
+                    <img
+                        className="w-full h-full object-cover object-center"
+                        src={img}
+                        alt={title}
+                    />
+                ) : (
+                    <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-blue-400 dark:text-blue-300 text-6xl">
+                            book
+                        </span>
+                    </div>
+                )}
                 <div className="absolute top-2 right-2">
                     <Button className="size-7 sm:size-8 bg-white/80 dark:bg-gray-900/80 text-primary rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-900 transition-colors">
                         <span className="material-symbols-outlined text-blue-400 text-lg sm:text-xl">

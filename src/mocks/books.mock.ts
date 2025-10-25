@@ -16,7 +16,7 @@ export interface Book {
     id: string;
     title: string;
     publicationYear: number;
-    img: string;
+    img: string | null;
     pdf?: string;
     category: string;
     author: string;

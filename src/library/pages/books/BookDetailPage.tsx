@@ -1,31 +1,84 @@
 import { Button } from '@/components/ui/button';
-import { BooksGrid } from '@/library/components/BooksGrid';
 import { MainContainer } from '@/library/components/MainContainer';
-import { books, type Book } from '@/mocks/books.mock';
-import { Link, useLoaderData } from 'react-router';
-import { useEffect } from 'react';
+import { Link, useParams } from 'react-router';
+import { useEffect, useState } from 'react';
+import { getBookById } from '@/library/api/books.api';
+import type { Book } from '@/library/interfaces/book.interface';
 
 export const BookDetailPage = () => {
-    const book = useLoaderData<Book>();
+    const { bookId } = useParams<{ bookId: string }>();
+    const [book, setBook] = useState<Book | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Scroll hacia arriba cuando se carga la página
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [book?.id]);
+        const fetchBook = async () => {
+            if (!bookId) {
+                setError('ID del libro no válido');
+                setLoading(false);
+                return;
+            }
 
-    if (!book) {
-        return <div>Libro no encontrado</div>;
+            try {
+                setLoading(true);
+                setError(null);
+                const bookData = await getBookById(bookId);
+                setBook(bookData);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                setError('Error al cargar el libro');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBook();
+    }, [bookId]);
+
+    if (loading) {
+        return (
+            <MainContainer>
+                <div className="flex items-center justify-center py-12">
+                    <p className="text-muted-foreground">Cargando libro...</p>
+                </div>
+            </MainContainer>
+        );
     }
+
+    if (error || !book) {
+        return (
+            <MainContainer>
+                <div className="flex items-center justify-center py-12">
+                    <p className="text-destructive">{error || 'Libro no encontrado'}</p>
+                </div>
+            </MainContainer>
+        );
+    }
+
+    const coverImageUrl = book.coverImage
+        ? `${import.meta.env.VITE_API_URL}/files/cover/${book.coverImage}`
+        : null;
+
+    const authorName = `${book.author.person.firstName} ${book.author.person.lastName}`;
 
     return (
         <MainContainer>
             <section className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
-                <div className="h-64 w-full sm:h-80 sm:w-60 lg:h-100 lg:w-78 shadow-md rounded-2xl shrink-0 mx-auto lg:mx-0">
-                    <img
-                        src={book.img}
-                        alt={book.title}
-                        className="w-full h-full object-cover object-center rounded-2xl"
-                    />
+                <div className="h-64 w-full sm:h-80 sm:w-60 lg:h-100 lg:w-78 shadow-md rounded-2xl shrink-0 mx-auto lg:mx-0 overflow-hidden">
+                    {coverImageUrl ? (
+                        <img
+                            src={coverImageUrl}
+                            alt={book.title}
+                            className="w-full h-full object-cover object-center"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-blue-400 dark:text-blue-300 text-9xl">
+                                book
+                            </span>
+                        </div>
+                    )}
                 </div>
                 <article className="flex-1">
                     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
@@ -36,23 +89,23 @@ export const BookDetailPage = () => {
                             <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-400">
                                 por{' '}
                                 <span className="text-blue-400">
-                                    {book.author}
+                                    {authorName}
                                 </span>
                             </h3>
                         </div>
                         <div className="flex flex-wrap justify-start items-center gap-2 sm:gap-3">
-                            <span className="text-sm sm:text-base text-blue-400 bg-blue-100 px-3 py-2 rounded-full">
-                                {book.category}
+                            <span className="text-sm sm:text-base text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-3 py-2 rounded-full">
+                                {book.category.name}
                             </span>
                             <span className="text-sm sm:text-base text-gray-400">
                                 Publicado en {book.publicationYear}
                             </span>
                         </div>
                         <p className="text-sm sm:text-base leading-relaxed">
-                            {book.synopsis}
+                            Sin sinopsis disponible
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3">
-                            <Link to={`/libros/lector/${book.id}`}>
+                            <Link to={`/libros/lector/${book._id}`}>
                                 <Button className="bg-blue-400 shadow-xl shadow-blue-200/50 hover:bg-blue-400 text-white font-bold w-full sm:w-auto">
                                     <span className="material-symbols-outlined">
                                         book_5
@@ -83,9 +136,7 @@ export const BookDetailPage = () => {
                         Ver todo
                     </Link>
                 </div>
-                <BooksGrid
-                    books={books.filter((b) => b.id !== book.id)}
-                ></BooksGrid>
+                {/* TODO: Implementar recomendaciones basadas en categoría o autor */}
             </section>
         </MainContainer>
     );

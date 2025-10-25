@@ -11,10 +11,12 @@ export interface FilterConfig {
     label: string;
     items: Array<{
         name: string;
+        id?: string;
         quantityBooks?: number;
         url?: string;
         icon?: string;
     }>;
+    onChange?: (name: string, checked: boolean) => void;
 }
 
 export const FilterSideBar = ({ filters }: { filters: FilterConfig[] }) => {
@@ -38,6 +40,7 @@ export const FilterSideBar = ({ filters }: { filters: FilterConfig[] }) => {
                                 <SidebarGroupFilterCheckbox
                                     label={filter.label}
                                     items={filter.items}
+                                    onChange={filter.onChange}
                                 />
                             );
                             break;

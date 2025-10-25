@@ -1,9 +1,26 @@
 import { panelApi } from './panelApi.api';
 import type { Book, CreateBookDto, UpdateBookDto } from '@/library/interfaces/book.interface';
 
-export const getBooks = async (): Promise<Book[]> => {
+export interface GetBooksParams {
+    limit?: number;
+    skip?: number;
+}
+
+export interface GetBooksResponse {
+    books: Book[];
+    total: number;
+    page: number;
+    totalPages: number;
+}
+
+export const getBooks = async (params?: GetBooksParams): Promise<GetBooksResponse> => {
     try {
-        const { data } = await panelApi.get<Book[]>('/books');
+        const queryParams = new URLSearchParams();
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
+        if (params?.skip) queryParams.append('skip', params.skip.toString());
+
+        const url = `/books${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        const { data } = await panelApi.get<GetBooksResponse>(url);
         return data;
     } catch (error) {
         console.error('Error al obtener los libros:', error);

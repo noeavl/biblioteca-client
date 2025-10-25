@@ -69,7 +69,7 @@ export const AuthorsPage = () => {
                 setLoading(true);
                 setError(null);
                 const data = await getAuthors();
-                setAuthors(data);
+                setAuthors(data.authors);
             } catch (err) {
                 setError("Error al cargar los autores");
                 console.error(err);

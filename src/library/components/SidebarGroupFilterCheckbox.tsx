@@ -18,9 +18,10 @@ interface Filter {
 interface Props {
     label: string;
     items: Filter[];
+    onChange?: (name: string, checked: boolean) => void;
 }
 
-export const SidebarGroupFilterCheckbox = ({ label, items }: Props) => {
+export const SidebarGroupFilterCheckbox = ({ label, items, onChange }: Props) => {
     return (
         <Collapsible
             key={label}
@@ -46,10 +47,17 @@ export const SidebarGroupFilterCheckbox = ({ label, items }: Props) => {
                                     key={item.name}
                                     className="flex items-center gap-3"
                                 >
-                                    <Checkbox id={item.name} />
+                                    <Checkbox
+                                        id={item.name}
+                                        onCheckedChange={(checked) => {
+                                            if (onChange) {
+                                                onChange(item.name, checked === true);
+                                            }
+                                        }}
+                                    />
                                     <Label
                                         htmlFor={item.name}
-                                        className="font-normal"
+                                        className="font-normal cursor-pointer"
                                     >
                                         <span className="text-wrap leading-relaxed">
                                             {item.name}{' '}
