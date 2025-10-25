@@ -24,7 +24,6 @@ import type { Book } from '@/library/interfaces/book.interface';
 import { useParams } from 'react-router';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { pdfjs, Document, Page } from 'react-pdf';
-import type { RenderMode } from 'react-pdf';
 import { Spinner } from '@/components/ui/spinner';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import HTMLFlipBook from 'react-pageflip';
