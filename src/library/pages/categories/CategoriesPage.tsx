@@ -9,13 +9,9 @@ import {
 import { MainLayout } from '@/library/layouts/MainLayout';
 import { getCategories } from '@/library/api/categories.api';
 import type { BookCategory } from '@/library/interfaces/book.interface';
-import { orderByItems } from '@/mocks/filters.mock';
+import { orderByItems, type SortType } from '@/mocks/filters.mock';
 
-const categoriesFilters: FilterConfig[] = [
-    { type: 'radio', label: 'Ordernar Por', items: orderByItems },
-];
-
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 18;
 
 export const CategoriesPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -23,6 +19,7 @@ export const CategoriesPage = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedSort, setSelectedSort] = useState<SortType>('recent');
 
     // Obtener página actual de los query params
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
@@ -36,7 +33,8 @@ export const CategoriesPage = () => {
                 const skip = (currentPage - 1) * ITEMS_PER_PAGE;
                 const response = await getCategories({
                     limit: ITEMS_PER_PAGE,
-                    skip
+                    skip,
+                    sort: selectedSort,
                 });
                 setCategories(response.categories);
                 setTotalPages(response.totalPages);
@@ -49,12 +47,26 @@ export const CategoriesPage = () => {
         };
 
         fetchCategories();
-    }, [currentPage]);
+    }, [currentPage, selectedSort]);
 
     // Función para cambiar de página
     const handlePageChange = (page: number) => {
         setSearchParams({ page: page.toString() });
     };
+
+    const handleSortChange = (sortValue: string) => {
+        setSelectedSort(sortValue as SortType);
+        setSearchParams({ page: '1' });
+    };
+
+    const categoriesFilters: FilterConfig[] = [
+        {
+            type: 'radio',
+            label: 'Ordenar Por',
+            items: orderByItems,
+            onChange: handleSortChange,
+        },
+    ];
 
     // Transformar categorías al formato esperado por CategoriesGrid
     const categoriesCards = categories.map(category => ({

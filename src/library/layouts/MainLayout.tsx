@@ -14,7 +14,7 @@ export const MainLayout = ({
         <div className="p-4 sm:p-6 md:p-8">
             <SidebarProvider className="relative" defaultOpen={true}>
                 {sidebar}
-                <main className="w-full md:w-auto md:ps-6 lg:ps-8">
+                <main className="w-full md:ps-6 lg:ps-8">
                     <SidebarTrigger className="md:hidden mb-4" />
                     <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">
                         {title}

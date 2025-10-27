@@ -12,11 +12,12 @@ export interface FilterConfig {
     items: Array<{
         name: string;
         id?: string;
+        value?: string;
         quantityBooks?: number;
         url?: string;
         icon?: string;
     }>;
-    onChange?: (name: string, checked: boolean) => void;
+    onChange?: (value: string, checked?: boolean) => void;
 }
 
 export const FilterSideBar = ({ filters }: { filters: FilterConfig[] }) => {
@@ -32,6 +33,7 @@ export const FilterSideBar = ({ filters }: { filters: FilterConfig[] }) => {
                                 <SidebarGroupFilterRadioGroup
                                     label={filter.label}
                                     items={filter.items}
+                                    onChange={(value) => filter.onChange?.(value)}
                                 />
                             );
                             break;

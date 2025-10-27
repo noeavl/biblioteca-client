@@ -64,21 +64,40 @@ const roleConfig: Record<string, { label: string; color: string }> = {
 export const UsersListPage = () => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [users, setUsers] = useState<User[]>([]);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalUsers, setTotalUsers] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Cargar usuarios desde la API
+    // Debounce del término de búsqueda
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500); // Esperar 500ms después de que el usuario deje de escribir
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // Cargar usuarios desde la API con paginación y búsqueda del lado del servidor
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getUsers();
-                setUsers(data);
+                const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+                const data = await getUsers({
+                    limit: ITEMS_PER_PAGE,
+                    skip,
+                    search: debouncedSearchTerm || undefined,
+                });
+                setUsers(data.users);
+                setTotalPages(data.totalPages);
+                setTotalUsers(data.total);
             } catch (err) {
                 setError("Error al cargar los usuarios");
                 console.error(err);
@@ -88,23 +107,14 @@ export const UsersListPage = () => {
         };
 
         fetchUsers();
-    }, []);
+    }, [currentPage, debouncedSearchTerm]);
 
-    // Filtrar usuarios por término de búsqueda
-    const filteredUsers = users.filter((user) => {
-        const searchLower = searchTerm.toLowerCase();
-        return (
-            user.name.toLowerCase().includes(searchLower) ||
-            user.email.toLowerCase().includes(searchLower) ||
-            user.role.name.toLowerCase().includes(searchLower)
-        );
-    });
+    // Los usuarios ya vienen filtrados y paginados del servidor
+    const currentUsers = users;
 
-    // Calcular paginación
-    const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+    // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const currentUsers = filteredUsers.slice(startIndex, endIndex);
+    const endIndex = startIndex + users.length;
 
     // Resetear a página 1 cuando cambia la búsqueda
     const handleSearchChange = (value: string) => {
@@ -120,11 +130,24 @@ export const UsersListPage = () => {
             setIsDeleting(true);
             await deleteUser(userToDelete._id);
 
-            // Actualizar la lista de usuarios
-            setUsers(users.filter(user => user._id !== userToDelete._id));
-
             toast.success(`Usuario ${userToDelete.name} eliminado exitosamente`);
             setUserToDelete(null);
+
+            // Recargar los usuarios después de eliminar
+            const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+            const data = await getUsers({
+                limit: ITEMS_PER_PAGE,
+                skip,
+                search: debouncedSearchTerm || undefined,
+            });
+            setUsers(data.users);
+            setTotalPages(data.totalPages);
+            setTotalUsers(data.total);
+
+            // Si la página actual quedó vacía y no es la primera, volver a la anterior
+            if (data.users.length === 0 && currentPage > 1) {
+                setCurrentPage(currentPage - 1);
+            }
         } catch (error: any) {
             console.error('Error al eliminar usuario:', error);
             if (error?.response?.data?.message) {
@@ -341,8 +364,8 @@ export const UsersListPage = () => {
                     <div className="mt-4 flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
                             Mostrando {startIndex + 1} a{" "}
-                            {Math.min(endIndex, filteredUsers.length)} de{" "}
-                            {filteredUsers.length} usuarios
+                            {Math.min(endIndex, totalUsers)} de{" "}
+                            {totalUsers} usuarios
                         </p>
 
                         {totalPages > 1 && (

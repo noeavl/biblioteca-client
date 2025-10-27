@@ -10,7 +10,7 @@ export const CategoriesGrid = ({
     showQuantityBooks,
 }: CategoriesGridProps) => {
     return (
-        <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6">
             {categories.map((category) => (
                 <CategoryCard
                     key={category.name}

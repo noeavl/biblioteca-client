@@ -61,6 +61,7 @@ export const ReaderPage = () => {
     const [currentSearchIndex, setCurrentSearchIndex] = useState<number>(-1);
     const [isSearching, setIsSearching] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const searchAbortControllerRef = useRef<AbortController | null>(null);
     const pdfDocumentRef = useRef<PDFDocumentProxy | null>(null);
     const flipBookRef = useRef<typeof HTMLFlipBook.prototype | null>(null);
     const isMobile = useIsMobile();
@@ -113,18 +114,22 @@ export const ReaderPage = () => {
         []
     );
 
-    // Funciones de navegación con flipbook
+    // Funciones de navegación con flipbook (optimizadas)
     const nextPage = useCallback(() => {
-        if (flipBookRef.current) {
-            flipBookRef.current.pageFlip().flipNext();
+        if (flipBookRef.current && currentPage < numPages - 1) {
+            requestAnimationFrame(() => {
+                flipBookRef.current?.pageFlip().flipNext();
+            });
         }
-    }, []);
+    }, [currentPage, numPages]);
 
     const prevPage = useCallback(() => {
-        if (flipBookRef.current) {
-            flipBookRef.current.pageFlip().flipPrev();
+        if (flipBookRef.current && currentPage > 1) {
+            requestAnimationFrame(() => {
+                flipBookRef.current?.pageFlip().flipPrev();
+            });
         }
-    }, []);
+    }, [currentPage]);
 
     // Auto-focus cuando se abre el popover de búsqueda
     useEffect(() => {
@@ -133,20 +138,32 @@ export const ReaderPage = () => {
         }
     }, [searchOpen]);
 
-    // Actualizar escala según tamaño de letra
+    // Actualizar escala según tamaño de letra y mantener la página
     useEffect(() => {
-        switch (fontSize) {
-            case 'small':
-                setScale(0.8);
-                break;
-            case 'medium':
-                setScale(1.0);
-                break;
-            case 'large':
-                setScale(1.3);
-                break;
+        const newScale = fontSize === 'small' ? 0.8 : fontSize === 'large' ? 1.3 : 1.0;
+
+        // Si la escala es diferente, actualizar
+        if (newScale !== scale) {
+            setScale(newScale);
+
+            // Actualizar el flipbook después del cambio
+            if (flipBookRef.current && currentPage > 0) {
+                // Usar un pequeño delay para asegurar que React termine de renderizar
+                setTimeout(() => {
+                    if (flipBookRef.current) {
+                        try {
+                            // Actualizar tamaño del flipbook
+                            flipBookRef.current.pageFlip().updateState();
+                        } catch (error) {
+                            console.warn('No se pudo actualizar el estado del flipbook:', error);
+                        }
+                    }
+                }, 50);
+            }
         }
-    }, [fontSize]);
+    }, [fontSize, scale, currentPage]);
+
+
 
     // Manejar cambios de pantalla completa
     useEffect(() => {
@@ -193,99 +210,144 @@ export const ReaderPage = () => {
         };
     }, [nextPage, prevPage]);
 
-    // Función para buscar en el PDF
+    // Función para buscar en el PDF (optimizada con procesamiento asíncrono no bloqueante)
     const searchInPDF = async (query: string) => {
+        // Cancelar búsqueda anterior si existe
+        if (searchAbortControllerRef.current) {
+            searchAbortControllerRef.current.abort();
+        }
+
         if (!pdfDocumentRef.current || !query.trim()) {
             setSearchResults([]);
             setCurrentSearchIndex(-1);
             return;
         }
 
+        // Crear nuevo controlador de cancelación
+        const abortController = new AbortController();
+        searchAbortControllerRef.current = abortController;
+
         setIsSearching(true);
         const results: SearchResult[] = [];
         const normalizedQuery = query.toLowerCase().trim();
-
-        console.log('Iniciando búsqueda de:', normalizedQuery);
-        console.log('Número de páginas:', numPages);
+        const MAX_RESULTS = 30; // Reducir aún más para mejor rendimiento
+        const CHUNK_SIZE = 3; // Procesar 3 páginas a la vez
 
         try {
-            for (let i = 1; i <= numPages; i++) {
-                const page = await pdfDocumentRef.current.getPage(i);
-                const textContent = await page.getTextContent();
+            const startPage = currentPage;
+            const endPage = Math.min(startPage + 30, numPages); // Buscar solo en las próximas 30 páginas
 
-                // Obtener el texto de la página
-                const pageText = textContent.items
-                    .map((item) => {
-                        if ('str' in item) {
-                            return item.str;
+            // Función auxiliar para procesar una página sin bloquear el UI
+            const processPage = async (pageNum: number): Promise<SearchResult | null> => {
+                return new Promise((resolve) => {
+                    // Usar setTimeout para permitir que el navegador respire entre páginas
+                    setTimeout(async () => {
+                        try {
+                            if (abortController.signal.aborted) {
+                                resolve(null);
+                                return;
+                            }
+
+                            const page = await pdfDocumentRef.current!.getPage(pageNum);
+                            const textContent = await page.getTextContent();
+
+                            // Optimización: Buscar directamente en los items sin crear string largo
+                            let fullText = '';
+                            for (const item of textContent.items) {
+                                if ('str' in item) {
+                                    fullText += item.str + ' ';
+                                }
+                            }
+
+                            const lowerText = fullText.toLowerCase();
+                            const matchIndex = lowerText.indexOf(normalizedQuery);
+
+                            if (matchIndex !== -1) {
+                                resolve({
+                                    pageNumber: pageNum,
+                                    textContent: '',
+                                    matchIndex: matchIndex,
+                                });
+                            } else {
+                                resolve(null);
+                            }
+                        } catch (error) {
+                            console.error(`Error procesando página ${pageNum}:`, error);
+                            resolve(null);
                         }
-                        return '';
-                    })
-                    .join(' ')
-                    .toLowerCase();
+                    }, 0);
+                });
+            };
 
-                // Debug: mostrar las primeras páginas
-                if (i <= 3) {
-                    console.log(
-                        `Página ${i} - Primeros 100 caracteres:`,
-                        pageText.substring(0, 100)
-                    );
+            // Procesar páginas en chunks para no bloquear el UI
+            for (let i = startPage; i <= endPage && results.length < MAX_RESULTS; i += CHUNK_SIZE) {
+                if (abortController.signal.aborted) {
+                    return;
                 }
 
-                // Buscar todas las ocurrencias en la página
-                let startIndex = 0;
-                let matchIndex = 0;
-                while (
-                    (matchIndex = pageText.indexOf(
-                        normalizedQuery,
-                        startIndex
-                    )) !== -1
-                ) {
-                    // Extraer contexto alrededor de la coincidencia
-                    const contextStart = Math.max(0, matchIndex - 50);
-                    const contextEnd = Math.min(
-                        pageText.length,
-                        matchIndex + normalizedQuery.length + 50
-                    );
-                    const context = pageText.substring(
-                        contextStart,
-                        contextEnd
-                    );
-
-                    results.push({
-                        pageNumber: i,
-                        textContent: context,
-                        matchIndex: matchIndex,
-                    });
-                    startIndex = matchIndex + normalizedQuery.length;
+                // Procesar chunk de páginas en paralelo
+                const chunkPromises = [];
+                for (let j = 0; j < CHUNK_SIZE && i + j <= endPage; j++) {
+                    chunkPromises.push(processPage(i + j));
                 }
+
+                const chunkResults = await Promise.all(chunkPromises);
+
+                // Agregar resultados válidos
+                for (const result of chunkResults) {
+                    if (result !== null) {
+                        results.push(result);
+
+                        // Navegar al primer resultado inmediatamente
+                        if (results.length === 1) {
+                            setSearchResults([result]);
+                            setCurrentSearchIndex(0);
+                            goToPage(result.pageNumber);
+                        }
+
+                        if (results.length >= MAX_RESULTS) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Verificar si la búsqueda fue cancelada
+            if (abortController.signal.aborted) {
+                return;
             }
 
             setSearchResults(results);
             setCurrentSearchIndex(results.length > 0 ? 0 : -1);
 
-            // Navegar al primer resultado
-            if (results.length > 0) {
-                handlePageChange(results[0].pageNumber);
+        } catch (error: unknown) {
+            // Ignorar errores de cancelación
+            if (error instanceof Error && error.name === 'AbortError') {
+                return;
             }
-        } catch (error) {
             console.error('Error al buscar en el PDF:', error);
         } finally {
-            setIsSearching(false);
+            if (!abortController.signal.aborted) {
+                setIsSearching(false);
+            }
         }
     };
 
     // Navegar al siguiente resultado de búsqueda
-    const nextSearchResult = () => {
+    const nextSearchResult = useCallback(() => {
         if (searchResults.length === 0) return;
         const nextIndex = (currentSearchIndex + 1) % searchResults.length;
         setCurrentSearchIndex(nextIndex);
         const result = searchResults[nextIndex];
-        handlePageChange(result.pageNumber);
-    };
+        if (result && flipBookRef.current) {
+            setCurrentPage(result.pageNumber);
+            setSliderValue(result.pageNumber);
+            flipBookRef.current.pageFlip().turnToPage(result.pageNumber - 1);
+        }
+    }, [searchResults, currentSearchIndex]);
 
     // Navegar al resultado anterior de búsqueda
-    const prevSearchResult = () => {
+    const prevSearchResult = useCallback(() => {
         if (searchResults.length === 0) return;
         const prevIndex =
             currentSearchIndex - 1 < 0
@@ -293,8 +355,12 @@ export const ReaderPage = () => {
                 : currentSearchIndex - 1;
         setCurrentSearchIndex(prevIndex);
         const result = searchResults[prevIndex];
-        handlePageChange(result.pageNumber);
-    };
+        if (result && flipBookRef.current) {
+            setCurrentPage(result.pageNumber);
+            setSliderValue(result.pageNumber);
+            flipBookRef.current.pageFlip().turnToPage(result.pageNumber - 1);
+        }
+    }, [searchResults, currentSearchIndex]);
 
     // Manejar el submit de búsqueda
     const handleSearch = (e: React.FormEvent) => {
@@ -331,11 +397,21 @@ export const ReaderPage = () => {
 
     // No scroll/transition helpers — keep behavior simple
 
-    // Cambios de página simples
-    const handlePageChange = (page: number) => {
+    // Función para cuando el flipbook cambia de página (onFlip event)
+    const handleFlipPageChange = useCallback((page: number) => {
         setCurrentPage(page);
         setSliderValue(page);
-    };
+    }, []);
+
+    // Función para cambiar de página programáticamente (búsqueda, clics) - optimizada
+    const goToPage = useCallback((page: number) => {
+        if (flipBookRef.current && page >= 1 && page <= numPages) {
+            // Usar requestAnimationFrame para evitar bloqueos
+            requestAnimationFrame(() => {
+                flipBookRef.current?.pageFlip().turnToPage(page - 1);
+            });
+        }
+    }, [numPages]);
 
     // Validación del libro después de todos los hooks
     if (loading) {
@@ -355,7 +431,12 @@ export const ReaderPage = () => {
     }
 
     return (
-        <div ref={readerContainerRef} className="flex flex-col min-h-screen">
+        <div
+            ref={readerContainerRef}
+            className={`flex flex-col min-h-screen ${
+                isDarkMode ? 'bg-gray-900' : 'bg-white'
+            }`}
+        >
             <div
                 className={`flex flex-none justify-between items-center p-4 sm:p-8 border-b-1 ${
                     isDarkMode ? 'bg-gray-900 border-gray-800' : ''
@@ -491,14 +572,17 @@ export const ReaderPage = () => {
                                                 </Button>
                                             </div>
                                         </div>
-                                        <div className="text-xs text-gray-500 p-2 bg-gray-50 rounded">
-                                            Página{' '}
-                                            {
-                                                searchResults[
-                                                    currentSearchIndex
-                                                ]?.pageNumber
-                                            }
-                                        </div>
+                                        <button
+                                            className="text-xs text-gray-500 p-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors cursor-pointer w-full text-left"
+                                            onClick={() => {
+                                                const result = searchResults[currentSearchIndex];
+                                                if (result) {
+                                                    goToPage(result.pageNumber);
+                                                }
+                                            }}
+                                        >
+                                            Página {searchResults[currentSearchIndex]?.pageNumber}
+                                        </button>
                                     </div>
                                 )}
 
@@ -719,9 +803,12 @@ export const ReaderPage = () => {
                             pdfDocumentRef.current = pdf;
                         }}
                     >
-                        <div className="flex justify-center items-center  max-w-screen-lg mx-auto py-8 bg-amber-200">
+                        <div
+                            className={`flex justify-center items-center max-w-screen-lg mx-auto py-8 ${
+                                isDarkMode ? 'bg-gray-800' : 'bg-white'
+                            }`}
+                        >
                             <HTMLFlipBook
-                                key={`flipbook-${scale}`}
                                 ref={flipBookRef}
                                 width={bookSize.width * scale}
                                 height={bookSize.height * scale}
@@ -730,17 +817,17 @@ export const ReaderPage = () => {
                                 minHeight={0}
                                 maxWidth={1000}
                                 maxHeight={1000}
-                                maxShadowOpacity={0.5}
+                                maxShadowOpacity={0.3}
                                 showCover={true}
                                 mobileScrollSupport={false}
                                 onFlip={(e: { data: number }) => {
-                                    handlePageChange(e.data);
+                                    handleFlipPageChange(e.data);
                                 }}
                                 className=""
                                 style={{}}
                                 startPage={0}
-                                drawShadow={true}
-                                flippingTime={1000}
+                                drawShadow={false}
+                                flippingTime={600}
                                 usePortrait={true}
                                 startZIndex={0}
                                 autoSize={true}
@@ -767,6 +854,7 @@ export const ReaderPage = () => {
                                             pageNumber={pageNum}
                                             renderAnnotationLayer={false}
                                             renderTextLayer={true}
+                                            renderMode="canvas"
                                             className={'w-full h-full'}
                                             loading={
                                                 <div className="flex justify-center items-center w-full h-full">
@@ -844,8 +932,15 @@ export const ReaderPage = () => {
                     min={1}
                     max={numPages - 1}
                     step={2}
-                    onValueChange={(value) => setSliderValue(value[0])}
-                    onValueCommit={(value) => handlePageChange(value[0])}
+                    onValueChange={(value) => {
+                        const page = value[0];
+                        setSliderValue(page);
+                        setCurrentPage(page);
+                        // Navegar el flipbook a la página correspondiente
+                        if (flipBookRef.current) {
+                            flipBookRef.current.pageFlip().turnToPage(page - 1);
+                        }
+                    }}
                 />
             </div>
         </div>

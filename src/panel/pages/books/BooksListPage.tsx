@@ -45,6 +45,7 @@ export const BooksListPage = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [books, setBooks] = useState<Book[]>([]);
     const [totalBooks, setTotalBooks] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -54,7 +55,16 @@ export const BooksListPage = () => {
     // Obtener página actual de los query params
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
-    // Cargar libros desde la API con paginación
+    // Debounce del término de búsqueda
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500); // Esperar 500ms después de que el usuario deje de escribir
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // Cargar libros desde la API con paginación y búsqueda del lado del servidor
     useEffect(() => {
         const fetchBooks = async () => {
             try {
@@ -63,7 +73,8 @@ export const BooksListPage = () => {
                 const skip = (currentPage - 1) * ITEMS_PER_PAGE;
                 const response = await getBooks({
                     limit: ITEMS_PER_PAGE,
-                    skip
+                    skip,
+                    search: debouncedSearchTerm || undefined, // Usar el término con debounce
                 });
                 setBooks(response.books);
                 setTotalBooks(response.total);
@@ -77,19 +88,14 @@ export const BooksListPage = () => {
         };
 
         fetchBooks();
-    }, [currentPage]);
+    }, [currentPage, debouncedSearchTerm]);
 
-    // Filtrar libros por término de búsqueda (localmente sobre la página actual)
-    const filteredBooks = books.filter((book) => {
-        if (!searchTerm) return true;
-        const searchText = `${book.title} ${book.author.person.firstName} ${book.author.person.lastName}`.toLowerCase();
-        return searchText.includes(searchTerm.toLowerCase());
-    });
+    // Los libros ya vienen filtrados del servidor
+    const currentBooks = books;
 
     // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + books.length;
-    const currentBooks = filteredBooks;
 
     // Función para cambiar de página
     const handlePageChange = (page: number) => {

@@ -12,21 +12,7 @@ import { getCategories } from '@/library/api/categories.api';
 import { getAuthors } from '@/library/api/authors.api';
 import type { Book, BookCategory } from '@/library/interfaces/book.interface';
 import type { Author } from '@/library/interfaces/author.interface';
-
-const orderByItems = [
-    {
-        name: 'Popularidad',
-    },
-    {
-        name: 'Recientes',
-    },
-    {
-        name: 'Alfabético (A-Z)',
-    },
-    {
-        name: 'Alfabético (Z-A)',
-    },
-];
+import { orderByItems, type SortType } from '@/mocks/filters.mock';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -39,23 +25,33 @@ export const BooksPage = () => {
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
-    const [allBooks, setAllBooks] = useState<Book[]>([]);
+    const [selectedSort, setSelectedSort] = useState<SortType>('recent');
+    const [books, setBooks] = useState<Book[]>([]);
+    const [totalPages, setTotalPages] = useState(1);
 
     // Obtener página actual de los query params
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
-    // Cargar todos los libros desde la API
+    // Cargar libros desde la API con filtros del lado del servidor
     useEffect(() => {
         const fetchBooks = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                // Cargar todos los libros sin paginación para filtrar en el cliente
+
+                // Calcular skip basado en la página actual
+                const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+
                 const response = await getBooks({
-                    limit: 1000, // Límite alto para obtener todos
-                    skip: 0
+                    limit: ITEMS_PER_PAGE,
+                    skip,
+                    authors: selectedAuthors.length > 0 ? selectedAuthors : undefined,
+                    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+                    sort: selectedSort,
                 });
-                setAllBooks(response.books);
+
+                setBooks(response.books);
+                setTotalPages(response.totalPages);
             } catch (err) {
                 setError('Error al cargar los libros');
                 console.error(err);
@@ -65,7 +61,7 @@ export const BooksPage = () => {
         };
 
         fetchBooks();
-    }, []);
+    }, [currentPage, selectedAuthors, selectedCategories, selectedSort]);
 
     // Cargar categorías para filtros
     useEffect(() => {
@@ -115,39 +111,34 @@ export const BooksPage = () => {
         // TODO: Implementar lógica para añadir a colección
     };
 
-    // Filtrar libros según categorías y autores seleccionados
-    const filteredBooks = allBooks.filter((book) => {
-        const categoryMatch = selectedCategories.length === 0 ||
-            selectedCategories.includes(book.category.name);
-        const authorMatch = selectedAuthors.length === 0 ||
-            selectedAuthors.includes(`${book.author.person.firstName} ${book.author.person.lastName}`);
-        return categoryMatch && authorMatch;
-    });
-
-    // Calcular paginación del lado del cliente
-    const totalFilteredPages = Math.ceil(filteredBooks.length / ITEMS_PER_PAGE);
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const paginatedBooks = filteredBooks.slice(startIndex, endIndex);
-
-    // Handlers para los filtros
-    const handleCategoryChange = (categoryName: string, checked: boolean) => {
+    // Handlers para los filtros - ahora usan IDs
+    const handleCategoryChange = (categoryId: string, checked: boolean) => {
         setSelectedCategories(prev =>
-            checked ? [...prev, categoryName] : prev.filter(c => c !== categoryName)
+            checked ? [...prev, categoryId] : prev.filter(c => c !== categoryId)
         );
         setSearchParams({ page: '1' }); // Reset a página 1 al filtrar
     };
 
-    const handleAuthorChange = (authorName: string, checked: boolean) => {
+    const handleAuthorChange = (authorId: string, checked: boolean) => {
         setSelectedAuthors(prev =>
-            checked ? [...prev, authorName] : prev.filter(a => a !== authorName)
+            checked ? [...prev, authorId] : prev.filter(a => a !== authorId)
         );
         setSearchParams({ page: '1' }); // Reset a página 1 al filtrar
+    };
+
+    const handleSortChange = (sortValue: string) => {
+        setSelectedSort(sortValue as SortType);
+        setSearchParams({ page: '1' }); // Reset a página 1 al cambiar ordenamiento
     };
 
     // Preparar filtros
     const bookFilters: FilterConfig[] = [
-        { type: 'radio', label: 'Ordenar Por', items: orderByItems },
+        {
+            type: 'radio',
+            label: 'Ordenar Por',
+            items: orderByItems,
+            onChange: handleSortChange,
+        },
         {
             type: 'checkbox',
             label: 'Categorías',
@@ -156,21 +147,26 @@ export const BooksPage = () => {
                 id: category._id,
                 quantityBooks: category.books?.length || 0,
             })),
-            onChange: handleCategoryChange,
+            onChange: (categoryId: string, checked: boolean) => {
+                handleCategoryChange(categoryId, checked);
+            },
         },
         {
             type: 'checkbox',
             label: 'Autores',
             items: authors.map((author) => ({
                 name: `${author.person.firstName} ${author.person.lastName}`,
+                id: author._id,
                 quantityBooks: author.books?.length || 0,
             })),
-            onChange: handleAuthorChange,
+            onChange: (authorId: string, checked: boolean) => {
+                handleAuthorChange(authorId, checked);
+            },
         },
     ];
 
     // Transformar libros al formato esperado por BooksGrid
-    const transformedBooks = paginatedBooks.map((book) => ({
+    const transformedBooks = books.map((book) => ({
         id: book._id,
         title: book.title,
         publicationYear: book.publicationYear,
@@ -210,10 +206,10 @@ export const BooksPage = () => {
                             onToggleRead={handleToggleRead}
                             onAddToCollection={handleAddToCollection}
                         />
-                        {totalFilteredPages > 1 && (
+                        {totalPages > 1 && (
                             <CustomPagination
                                 currentPage={currentPage}
-                                totalPages={totalFilteredPages}
+                                totalPages={totalPages}
                                 onPageChange={handlePageChange}
                             />
                         )}

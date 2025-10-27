@@ -92,7 +92,10 @@ export const HomePage = () => {
 
     // Pre-cargar imágenes y extraer colores
     useEffect(() => {
-        if (books.length === 0) return;
+        if (books.length === 0) {
+            setColorsLoading(false);
+            return;
+        }
 
         const extractColorFromImage = (img: HTMLImageElement): string => {
             try {
@@ -213,10 +216,51 @@ export const HomePage = () => {
             {/* Nueva sección interactiva de estante con tres filas */}
             <section className="relative bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 h-screen flex items-center overflow-hidden">
                 {books.length === 0 ? (
-                    <div className="flex items-center justify-center w-full py-12">
-                        <p className="text-slate-500 dark:text-slate-400">
-                            No hay libros disponibles
-                        </p>
+                    <div className="relative px-4 w-full h-full py-6">
+                        <div className="max-w-7xl mx-auto flex flex-col justify-center h-full gap-16">
+                            {/* Mensaje de Bienvenida */}
+                            <div className="text-center mb-8">
+                                <h2 className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-white mb-2">
+                                    ¡Bienvenido, <span className="text-blue-500">{user?.name || 'Usuario'}</span>!
+                                </h2>
+                                <p className="text-lg text-slate-600 dark:text-slate-300">
+                                    Nuestra biblioteca está creciendo
+                                </p>
+                            </div>
+
+                            {/* Estante 1 */}
+                            <div className="overflow-visible flex flex-col justify-end">
+                                <div className="text-center py-12">
+                                    <p className="text-2xl md:text-3xl font-semibold text-slate-600 dark:text-slate-400">
+                                        Próximamente nuevos títulos
+                                    </p>
+                                </div>
+                                {/* Repisa */}
+                                <div className="h-3 bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-800 rounded-sm shadow-md w-[85%] mx-auto"></div>
+                            </div>
+
+                            {/* Estante 2 */}
+                            <div className="overflow-visible flex flex-col justify-end">
+                                <div className="text-center py-12">
+                                    <p className="text-2xl md:text-3xl font-semibold text-slate-600 dark:text-slate-400">
+                                        Grandes obras en camino
+                                    </p>
+                                </div>
+                                {/* Repisa */}
+                                <div className="h-3 bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-800 rounded-sm shadow-md w-[85%] mx-auto"></div>
+                            </div>
+
+                            {/* Estante 3 */}
+                            <div className="overflow-visible flex flex-col justify-end">
+                                <div className="text-center py-12">
+                                    <p className="text-2xl md:text-3xl font-semibold text-slate-600 dark:text-slate-400">
+                                        ¡Espera lo mejor!
+                                    </p>
+                                </div>
+                                {/* Repisa */}
+                                <div className="h-3 bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-800 rounded-sm shadow-md w-[85%] mx-auto"></div>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <div className="relative px-4 w-full h-full py-6">
@@ -359,10 +403,47 @@ export const HomePage = () => {
                         </Link>
                     </div>
                     {authors.length === 0 ? (
-                        <div className="mt-8 text-center">
-                            <p className="text-slate-500 dark:text-slate-400">
-                                No hay autores disponibles
-                            </p>
+                        <div className="mt-8">
+                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                                {[
+                                    "Grandes autores",
+                                    "Próximamente",
+                                    "Escritores famosos",
+                                    "Nuevos talentos",
+                                    "Pronto aquí",
+                                    "Esperando..."
+                                ].map((text, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex flex-col items-center gap-3 p-4 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-300 dark:border-slate-700 hover:shadow-lg transition-shadow"
+                                    >
+                                        <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-600 dark:to-purple-700 flex items-center justify-center shadow-md">
+                                            <svg
+                                                className="w-12 h-12 text-white"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                {text}
+                                            </p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                Muy pronto
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     ) : (
                         <AuthorsGrid authors={authors} />
@@ -383,10 +464,52 @@ export const HomePage = () => {
                         </Link>
                     </div>
                     {categories.length === 0 ? (
-                        <div className="mt-8 text-center">
-                            <p className="text-slate-500 dark:text-slate-400">
-                                No hay categorías disponibles
-                            </p>
+                        <div className="mt-8">
+                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                                {[
+                                    { name: "Ficción", icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" },
+                                    { name: "No Ficción", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
+                                    { name: "Ciencia", icon: "M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" },
+                                    { name: "Historia", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+                                    { name: "Infantil", icon: "M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+                                    { name: "Poesía", icon: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" },
+                                    { name: "Próximamente", icon: "M12 4v16m8-8H4" },
+                                    { name: "Más...", icon: "M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" }
+                                ].map((category, index) => (
+                                    <div
+                                        key={index}
+                                        className="relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow group"
+                                    >
+                                        <div className="aspect-[4/3] bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900 relative">
+                                            <div className="absolute inset-0 bg-black/20 dark:bg-black/40"></div>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <svg
+                                                    className="w-16 h-16 text-white opacity-70"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                        d={category.icon}
+                                                    />
+                                                </svg>
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                                                <h4 className="text-lg font-bold text-white">
+                                                    {category.name}
+                                                </h4>
+                                                <p className="text-sm text-white/80">
+                                                    Próximamente
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     ) : (
                         <CategoriesGrid categories={categories} />

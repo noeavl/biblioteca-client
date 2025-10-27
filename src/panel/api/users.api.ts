@@ -1,9 +1,32 @@
 import { panelApi } from './panelApi.api';
 import type { User, UserRole } from '@/library/interfaces/user.interface';
 
-export const getUsers = async (): Promise<User[]> => {
+export interface GetUsersParams {
+    limit?: number;
+    skip?: number;
+    search?: string; // Término de búsqueda
+}
+
+export interface GetUsersResponse {
+    users: User[];
+    total: number;
+    page: number;
+    totalPages: number;
+}
+
+export const getUsers = async (params?: GetUsersParams): Promise<GetUsersResponse> => {
     try {
-        const { data } = await panelApi.get<User[]>('/users');
+        const queryParams = new URLSearchParams();
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
+        if (params?.skip) queryParams.append('skip', params.skip.toString());
+
+        // Agregar término de búsqueda
+        if (params?.search && params.search.trim()) {
+            queryParams.append('search', params.search.trim());
+        }
+
+        const url = `/users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        const { data } = await panelApi.get<GetUsersResponse>(url);
         return data;
     } catch (error) {
         console.error('Error al obtener los usuarios:', error);

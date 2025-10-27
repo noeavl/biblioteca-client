@@ -1,9 +1,12 @@
 import { libraryApi } from './libraryApi.api';
 import type { Author } from '../interfaces/author.interface';
+import type { SortType } from '@/mocks/filters.mock';
 
 export interface GetAuthorsParams {
     limit?: number;
     skip?: number;
+    categories?: string[]; // Array de IDs de categorías
+    sort?: SortType; // Tipo de ordenamiento
 }
 
 export interface GetAuthorsResponse {
@@ -18,6 +21,12 @@ export const getAuthors = async (params?: GetAuthorsParams): Promise<GetAuthorsR
         const queryParams = new URLSearchParams();
         if (params?.limit) queryParams.append('limit', params.limit.toString());
         if (params?.skip) queryParams.append('skip', params.skip.toString());
+        if (params?.categories && params.categories.length > 0) {
+            queryParams.append('categories', params.categories.join(','));
+        }
+        if (params?.sort) {
+            queryParams.append('sort', params.sort);
+        }
 
         const url = `/authors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
         const { data } = await libraryApi.get<GetAuthorsResponse>(url);

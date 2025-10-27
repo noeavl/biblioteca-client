@@ -12,6 +12,7 @@ import { ChevronRight } from 'lucide-react';
 
 interface Filter {
     name: string;
+    id?: string;
     quantityBooks?: number;
 }
 
@@ -44,19 +45,20 @@ export const SidebarGroupFilterCheckbox = ({ label, items, onChange }: Props) =>
                         <SidebarMenu className="space-y-3 ms-2">
                             {items.map((item) => (
                                 <div
-                                    key={item.name}
+                                    key={item.id || item.name}
                                     className="flex items-center gap-3"
                                 >
                                     <Checkbox
-                                        id={item.name}
+                                        id={item.id || item.name}
                                         onCheckedChange={(checked) => {
                                             if (onChange) {
-                                                onChange(item.name, checked === true);
+                                                // Pasar el ID si existe, sino el nombre
+                                                onChange(item.id || item.name, checked === true);
                                             }
                                         }}
                                     />
                                     <Label
-                                        htmlFor={item.name}
+                                        htmlFor={item.id || item.name}
                                         className="font-normal cursor-pointer"
                                     >
                                         <span className="text-wrap leading-relaxed">

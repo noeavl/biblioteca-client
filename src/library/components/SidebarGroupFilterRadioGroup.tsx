@@ -15,14 +15,16 @@ import { ChevronRight } from 'lucide-react';
 
 interface Filter {
     name: string;
+    value?: string;
 }
 
 interface Props {
     label: string;
     items: Filter[];
+    onChange?: (value: string) => void;
 }
 
-export const SidebarGroupFilterRadioGroup = ({ label, items }: Props) => {
+export const SidebarGroupFilterRadioGroup = ({ label, items, onChange }: Props) => {
     return (
         <Collapsible
             key={label}
@@ -43,18 +45,24 @@ export const SidebarGroupFilterRadioGroup = ({ label, items }: Props) => {
                 <CollapsibleContent>
                     <SidebarGroupContent>
                         <SidebarMenu className="space-y-3 ms-2">
-                            <RadioGroup defaultValue="0">
-                                {items.map((item, index) => (
-                                    <div key={item.name} className="flex items-center gap-3">
-                                        <RadioGroupItem
-                                            value={index.toString()}
-                                            id={`${item.name}${index}`}
-                                        />
-                                        <Label htmlFor={`${item.name}${index}`}>
-                                            {item.name}
-                                        </Label>
-                                    </div>
-                                ))}
+                            <RadioGroup
+                                defaultValue={items[0]?.value || items[0]?.name}
+                                onValueChange={onChange}
+                            >
+                                {items.map((item, index) => {
+                                    const value = item.value || item.name;
+                                    return (
+                                        <div key={value} className="flex items-center gap-3">
+                                            <RadioGroupItem
+                                                value={value}
+                                                id={`${item.name}${index}`}
+                                            />
+                                            <Label htmlFor={`${item.name}${index}`}>
+                                                {item.name}
+                                            </Label>
+                                        </div>
+                                    );
+                                })}
                             </RadioGroup>
                         </SidebarMenu>
                     </SidebarGroupContent>

@@ -55,21 +55,40 @@ const ITEMS_PER_PAGE = 8;
 export const AuthorsPage = () => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [authors, setAuthors] = useState<Author[]>([]);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalAuthors, setTotalAuthors] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [authorToDelete, setAuthorToDelete] = useState<Author | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Cargar autores desde la API
+    // Debounce del término de búsqueda
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500); // Esperar 500ms después de que el usuario deje de escribir
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // Cargar autores desde la API con paginación y búsqueda del lado del servidor
     useEffect(() => {
         const fetchAuthors = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getAuthors();
+                const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+                const data = await getAuthors({
+                    limit: ITEMS_PER_PAGE,
+                    skip,
+                    search: debouncedSearchTerm || undefined,
+                });
                 setAuthors(data.authors);
+                setTotalPages(data.totalPages);
+                setTotalAuthors(data.total);
             } catch (err) {
                 setError("Error al cargar los autores");
                 console.error(err);
@@ -79,25 +98,19 @@ export const AuthorsPage = () => {
         };
 
         fetchAuthors();
-    }, []);
+    }, [currentPage, debouncedSearchTerm]);
 
     // Función para generar iniciales
     const getInitials = (firstName: string, lastName: string) => {
         return `${firstName.charAt(0)}${lastName.charAt(0)}`;
     };
 
-    // Filtrar autores por término de búsqueda
-    const filteredAuthors = authors.filter((author) => {
-        const fullName =
-            `${author.person.firstName} ${author.person.lastName}`.toLowerCase();
-        return fullName.includes(searchTerm.toLowerCase());
-    });
+    // Los autores ya vienen filtrados y paginados del servidor
+    const currentAuthors = authors;
 
-    // Calcular paginación
-    const totalPages = Math.ceil(filteredAuthors.length / ITEMS_PER_PAGE);
+    // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const currentAuthors = filteredAuthors.slice(startIndex, endIndex);
+    const endIndex = startIndex + authors.length;
 
     // Resetear a página 1 cuando cambia la búsqueda
     const handleSearchChange = (value: string) => {
@@ -113,11 +126,24 @@ export const AuthorsPage = () => {
             setIsDeleting(true);
             await deleteAuthor(authorToDelete._id);
 
-            // Actualizar la lista de autores
-            setAuthors(authors.filter(author => author._id !== authorToDelete._id));
-
             toast.success(`Autor ${authorToDelete.person.firstName} ${authorToDelete.person.lastName} eliminado exitosamente`);
             setAuthorToDelete(null);
+
+            // Recargar los autores después de eliminar
+            const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+            const data = await getAuthors({
+                limit: ITEMS_PER_PAGE,
+                skip,
+                search: debouncedSearchTerm || undefined,
+            });
+            setAuthors(data.authors);
+            setTotalPages(data.totalPages);
+            setTotalAuthors(data.total);
+
+            // Si la página actual quedó vacía y no es la primera, volver a la anterior
+            if (data.authors.length === 0 && currentPage > 1) {
+                setCurrentPage(currentPage - 1);
+            }
         } catch (error: any) {
             console.error('Error al eliminar autor:', error);
             if (error?.response?.data?.message) {
@@ -309,8 +335,8 @@ export const AuthorsPage = () => {
                     <div className="mt-4 flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
                             Mostrando {startIndex + 1} a{" "}
-                            {Math.min(endIndex, filteredAuthors.length)} de{" "}
-                            {filteredAuthors.length} autores
+                            {Math.min(endIndex, totalAuthors)} de{" "}
+                            {totalAuthors} autores
                         </p>
 
                         {totalPages > 1 && (

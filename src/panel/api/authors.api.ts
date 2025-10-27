@@ -1,6 +1,12 @@
 import { panelApi } from './panelApi.api';
 import type { Author } from '@/library/interfaces/author.interface';
 
+export interface GetAuthorsParams {
+    limit?: number;
+    skip?: number;
+    search?: string; // Término de búsqueda
+}
+
 export interface GetAuthorsResponse {
     authors: Author[];
     total: number;
@@ -8,9 +14,19 @@ export interface GetAuthorsResponse {
     totalPages: number;
 }
 
-export const getAuthors = async (): Promise<GetAuthorsResponse> => {
+export const getAuthors = async (params?: GetAuthorsParams): Promise<GetAuthorsResponse> => {
     try {
-        const { data } = await panelApi.get<GetAuthorsResponse>('/authors');
+        const queryParams = new URLSearchParams();
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
+        if (params?.skip) queryParams.append('skip', params.skip.toString());
+
+        // Agregar término de búsqueda
+        if (params?.search && params.search.trim()) {
+            queryParams.append('search', params.search.trim());
+        }
+
+        const url = `/authors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        const { data } = await panelApi.get<GetAuthorsResponse>(url);
         return data;
     } catch (error) {
         console.error('Error al obtener los autores:', error);

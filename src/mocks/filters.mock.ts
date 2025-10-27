@@ -1,17 +1,19 @@
 import type { MenuItem } from '@/library/components/SidebarGroupItems';
 
+export type SortType = 'recent' | 'alphabetical_asc' | 'alphabetical_desc';
+
 export const orderByItems = [
     {
-        name: 'Popularidad',
-    },
-    {
         name: 'Recientes',
+        value: 'recent' as SortType,
     },
     {
         name: 'Alfabético (A-Z)',
+        value: 'alphabetical_asc' as SortType,
     },
     {
         name: 'Alfabético (Z-A)',
+        value: 'alphabetical_desc' as SortType,
     },
 ];
 

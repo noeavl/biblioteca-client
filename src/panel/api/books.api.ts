@@ -4,6 +4,9 @@ import type { Book, CreateBookDto, UpdateBookDto } from '@/library/interfaces/bo
 export interface GetBooksParams {
     limit?: number;
     skip?: number;
+    authors?: string[]; // Array de IDs de autores
+    categories?: string[]; // Array de IDs de categorías
+    search?: string; // Término de búsqueda
 }
 
 export interface GetBooksResponse {
@@ -18,6 +21,21 @@ export const getBooks = async (params?: GetBooksParams): Promise<GetBooksRespons
         const queryParams = new URLSearchParams();
         if (params?.limit) queryParams.append('limit', params.limit.toString());
         if (params?.skip) queryParams.append('skip', params.skip.toString());
+
+        // Agregar filtros de autores (comma-separated IDs)
+        if (params?.authors && params.authors.length > 0) {
+            queryParams.append('authors', params.authors.join(','));
+        }
+
+        // Agregar filtros de categorías (comma-separated IDs)
+        if (params?.categories && params.categories.length > 0) {
+            queryParams.append('categories', params.categories.join(','));
+        }
+
+        // Agregar término de búsqueda
+        if (params?.search && params.search.trim()) {
+            queryParams.append('search', params.search.trim());
+        }
 
         const url = `/books${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
         const { data } = await panelApi.get<GetBooksResponse>(url);
