@@ -13,8 +13,28 @@ import { getAuthors } from '@/library/api/authors.api';
 import type { Book, BookCategory } from '@/library/interfaces/book.interface';
 import type { Author } from '@/library/interfaces/author.interface';
 import { orderByItems, type SortType } from '@/mocks/filters.mock';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ITEMS_PER_PAGE = 10;
+
+const BookCardSkeleton = () => (
+    <div className="flex flex-col space-y-3">
+        <Skeleton className="h-[300px] w-full rounded-lg" />
+        <div className="space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="h-3 w-2/3" />
+        </div>
+    </div>
+);
+
+const BooksGridSkeleton = () => (
+    <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-5 lg:gap-6">
+        {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+            <BookCardSkeleton key={index} />
+        ))}
+    </div>
+);
 
 export const BooksPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -22,6 +42,7 @@ export const BooksPage = () => {
     const [authors, setAuthors] = useState<Author[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [filtersLoading, setFiltersLoading] = useState(true);
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
@@ -63,32 +84,27 @@ export const BooksPage = () => {
         fetchBooks();
     }, [currentPage, selectedAuthors, selectedCategories, selectedSort]);
 
-    // Cargar categorías para filtros
+    // Cargar categorías y autores para filtros en paralelo
     useEffect(() => {
-        const fetchCategories = async () => {
+        const fetchFilters = async () => {
             try {
-                const response = await getCategories();
-                setCategories(response.categories);
+                setFiltersLoading(true);
+                // Ejecutar ambas peticiones en paralelo para mejor rendimiento
+                const [categoriesResponse, authorsResponse] = await Promise.all([
+                    getCategories({ hasBooks: true }),
+                    getAuthors({ hasBooks: true })
+                ]);
+
+                setCategories(categoriesResponse.categories);
+                setAuthors(authorsResponse.authors);
             } catch (error) {
-                console.error('Error al cargar las categorías:', error);
+                console.error('Error al cargar los filtros:', error);
+            } finally {
+                setFiltersLoading(false);
             }
         };
 
-        fetchCategories();
-    }, []);
-
-    // Cargar autores para filtros
-    useEffect(() => {
-        const fetchAuthors = async () => {
-            try {
-                const response = await getAuthors();
-                setAuthors(response.authors);
-            } catch (error) {
-                console.error('Error al cargar los autores:', error);
-            }
-        };
-
-        fetchAuthors();
+        fetchFilters();
     }, []);
 
     // Función para cambiar de página
@@ -139,30 +155,35 @@ export const BooksPage = () => {
             items: orderByItems,
             onChange: handleSortChange,
         },
-        {
-            type: 'checkbox',
-            label: 'Categorías',
-            items: categories.map((category) => ({
-                name: category.name,
-                id: category._id,
-                quantityBooks: category.books?.length || 0,
-            })),
-            onChange: (categoryId: string, checked: boolean) => {
-                handleCategoryChange(categoryId, checked);
-            },
-        },
-        {
-            type: 'checkbox',
-            label: 'Autores',
-            items: authors.map((author) => ({
-                name: `${author.person.firstName} ${author.person.lastName}`,
-                id: author._id,
-                quantityBooks: author.books?.length || 0,
-            })),
-            onChange: (authorId: string, checked: boolean) => {
-                handleAuthorChange(authorId, checked);
-            },
-        },
+        ...(filtersLoading
+            ? []
+            : [
+                {
+                    type: 'checkbox' as const,
+                    label: 'Categorías',
+                    items: categories.map((category) => ({
+                        name: category.name,
+                        id: category._id,
+                        quantityBooks: category.books?.length || 0,
+                    })),
+                    onChange: (categoryId: string, checked?: boolean) => {
+                        handleCategoryChange(categoryId, checked ?? false);
+                    },
+                },
+                {
+                    type: 'checkbox' as const,
+                    label: 'Autores',
+                    items: authors.map((author) => ({
+                        name: `${author.person.firstName} ${author.person.lastName}`,
+                        id: author._id,
+                        quantityBooks: author.books?.length || 0,
+                    })),
+                    onChange: (authorId: string, checked?: boolean) => {
+                        handleAuthorChange(authorId, checked ?? false);
+                    },
+                },
+            ]
+        ),
     ];
 
     // Transformar libros al formato esperado por BooksGrid
@@ -182,13 +203,11 @@ export const BooksPage = () => {
     return (
         <MainLayout
             title="Catálogo de Libros"
-            sidebar={<FilterSideBar filters={bookFilters} />}
+            sidebar={<FilterSideBar filters={bookFilters} isLoading={filtersLoading} />}
         >
             <div className="space-y-6 sm:space-y-8">
                 {loading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <p className="text-muted-foreground">Cargando libros...</p>
-                    </div>
+                    <BooksGridSkeleton />
                 ) : error ? (
                     <div className="flex items-center justify-center py-12">
                         <p className="text-destructive">{error}</p>

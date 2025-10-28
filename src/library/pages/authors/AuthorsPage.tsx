@@ -12,8 +12,27 @@ import { getCategories } from '@/library/api/categories.api';
 import { orderByItems, type SortType } from '@/mocks/filters.mock';
 import type { AuthorCard } from '@/library/interfaces/author.interface';
 import type { BookCategory } from '@/library/interfaces/book.interface';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ITEMS_PER_PAGE = 12;
+
+const AuthorCardSkeleton = () => (
+    <div className="flex flex-col items-center space-y-3">
+        <Skeleton className="h-40 w-40 rounded-full" />
+        <div className="space-y-2 w-full">
+            <Skeleton className="h-5 w-3/4 mx-auto" />
+            <Skeleton className="h-4 w-1/2 mx-auto" />
+        </div>
+    </div>
+);
+
+const AuthorsGridSkeleton = () => (
+    <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6">
+        {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+            <AuthorCardSkeleton key={index} />
+        ))}
+    </div>
+);
 
 export const AuthorsPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -21,6 +40,7 @@ export const AuthorsPage = () => {
     const [categories, setCategories] = useState<BookCategory[]>([]);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [filtersLoading, setFiltersLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedSort, setSelectedSort] = useState<SortType>('recent');
@@ -63,14 +83,17 @@ export const AuthorsPage = () => {
         fetchAuthors();
     }, [currentPage, selectedCategories, selectedSort]);
 
-    // Cargar categorías para filtros
+    // Cargar categorías para filtros (solo las que tienen libros)
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await getCategories();
+                setFiltersLoading(true);
+                const response = await getCategories({ hasBooks: true });
                 setCategories(response.categories);
             } catch (error) {
                 console.error('Error al cargar las categorías:', error);
+            } finally {
+                setFiltersLoading(false);
             }
         };
 
@@ -116,20 +139,20 @@ export const AuthorsPage = () => {
                 id: category._id,
                 quantityBooks: category.books?.length || 0,
             })),
-            onChange: handleCategoryChange,
+            onChange: (categoryId: string, checked?: boolean) => {
+                handleCategoryChange(categoryId, checked ?? false);
+            },
         },
     ];
 
     return (
         <MainLayout
             title="Catálogo de Autores"
-            sidebar={<FilterSideBar filters={authorFilters} />}
+            sidebar={<FilterSideBar filters={authorFilters} isLoading={filtersLoading} />}
         >
             <div className="space-y-6 sm:space-y-8">
                 {loading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <p className="text-muted-foreground">Cargando autores...</p>
-                    </div>
+                    <AuthorsGridSkeleton />
                 ) : error ? (
                     <div className="flex items-center justify-center py-12">
                         <p className="text-destructive">{error}</p>

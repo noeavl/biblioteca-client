@@ -6,6 +6,7 @@ export interface GetCategoriesParams {
     limit?: number;
     skip?: number;
     sort?: SortType; // Tipo de ordenamiento
+    hasBooks?: boolean; // Filtrar solo categorías con libros
 }
 
 export interface GetCategoriesResponse {
@@ -22,6 +23,9 @@ export const getCategories = async (params?: GetCategoriesParams): Promise<GetCa
         if (params?.skip) queryParams.append('skip', params.skip.toString());
         if (params?.sort) {
             queryParams.append('sort', params.sort);
+        }
+        if (params?.hasBooks !== undefined) {
+            queryParams.append('hasBooks', params.hasBooks.toString());
         }
 
         const url = `/categories${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;

@@ -10,8 +10,27 @@ import { MainLayout } from '@/library/layouts/MainLayout';
 import { getCategories } from '@/library/api/categories.api';
 import type { BookCategory } from '@/library/interfaces/book.interface';
 import { orderByItems, type SortType } from '@/mocks/filters.mock';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ITEMS_PER_PAGE = 18;
+
+const CategoryCardSkeleton = () => (
+    <div className="flex flex-col space-y-3">
+        <Skeleton className="h-48 w-full rounded-lg" />
+        <div className="space-y-2">
+            <Skeleton className="h-5 w-3/4 mx-auto" />
+            <Skeleton className="h-4 w-1/2 mx-auto" />
+        </div>
+    </div>
+);
+
+const CategoriesGridSkeleton = () => (
+    <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+            <CategoryCardSkeleton key={index} />
+        ))}
+    </div>
+);
 
 export const CategoriesPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -84,9 +103,7 @@ export const CategoriesPage = () => {
         >
             <div className="space-y-6 sm:space-y-8">
                 {loading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <p className="text-muted-foreground">Cargando categorías...</p>
-                    </div>
+                    <CategoriesGridSkeleton />
                 ) : error ? (
                     <div className="flex items-center justify-center py-12">
                         <p className="text-destructive">{error}</p>
