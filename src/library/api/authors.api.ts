@@ -7,6 +7,7 @@ export interface GetAuthorsParams {
     skip?: number;
     categories?: string[]; // Array de IDs de categorías
     sort?: SortType; // Tipo de ordenamiento
+    hasBooks?: boolean; // Filtrar solo autores con libros
 }
 
 export interface GetAuthorsResponse {
@@ -26,6 +27,9 @@ export const getAuthors = async (params?: GetAuthorsParams): Promise<GetAuthorsR
         }
         if (params?.sort) {
             queryParams.append('sort', params.sort);
+        }
+        if (params?.hasBooks !== undefined) {
+            queryParams.append('hasBooks', params.hasBooks.toString());
         }
 
         const url = `/authors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
