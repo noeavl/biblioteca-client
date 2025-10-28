@@ -14,7 +14,9 @@ export interface GetUsersResponse {
     totalPages: number;
 }
 
-export const getUsers = async (params?: GetUsersParams): Promise<GetUsersResponse> => {
+export const getUsers = async (
+    params?: GetUsersParams
+): Promise<GetUsersResponse> => {
     try {
         const queryParams = new URLSearchParams();
         if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -25,7 +27,9 @@ export const getUsers = async (params?: GetUsersParams): Promise<GetUsersRespons
             queryParams.append('search', params.search.trim());
         }
 
-        const url = `/users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        const url = `/users${
+            queryParams.toString() ? `?${queryParams.toString()}` : ''
+        }`;
         const { data } = await panelApi.get<GetUsersResponse>(url);
         return data;
     } catch (error) {
@@ -38,9 +42,13 @@ export interface DeleteUserResponse {
     message: string;
 }
 
-export const deleteUser = async (userId: string): Promise<DeleteUserResponse> => {
+export const deleteUser = async (
+    userId: string
+): Promise<DeleteUserResponse> => {
     try {
-        const { data } = await panelApi.delete<DeleteUserResponse>(`/users/${userId}`);
+        const { data } = await panelApi.delete<DeleteUserResponse>(
+            `/users/${userId}`
+        );
         return data;
     } catch (error) {
         console.error('Error al eliminar el usuario:', error);
@@ -62,10 +70,15 @@ export interface CreateUserResponse {
     user: User;
 }
 
-export const createUser = async (userData: CreateUserDto): Promise<CreateUserResponse> => {
+export const createUser = async (
+    userData: CreateUserDto
+): Promise<CreateUserResponse> => {
     try {
-        const { confirmPassword, ...payload } = userData;
-        const { data } = await panelApi.post<CreateUserResponse>('/users', payload);
+        const { data } = await panelApi.post<CreateUserResponse>(
+            '/users',
+            userData
+        );
+        console.log('data', data);
         return data;
     } catch (error) {
         console.error('Error al crear el usuario:', error);
@@ -106,14 +119,22 @@ export const getUserById = async (userId: string): Promise<User> => {
     }
 };
 
-export const updateUser = async (userId: string, userData: UpdateUserDto): Promise<UpdateUserResponse> => {
+export const updateUser = async (
+    userId: string,
+    userData: UpdateUserDto
+): Promise<UpdateUserResponse> => {
     try {
         const { confirmPassword, ...payload } = userData;
         // Solo enviar campos que no estén vacíos
         const filteredPayload = Object.fromEntries(
-            Object.entries(payload).filter(([_, value]) => value !== '' && value !== undefined)
+            Object.entries(payload).filter(
+                ([_, value]) => value !== '' && value !== undefined
+            )
         );
-        const { data } = await panelApi.patch<UpdateUserResponse>(`/users/${userId}`, filteredPayload);
+        const { data } = await panelApi.patch<UpdateUserResponse>(
+            `/users/${userId}`,
+            filteredPayload
+        );
         return data;
     } catch (error) {
         console.error('Error al actualizar el usuario:', error);

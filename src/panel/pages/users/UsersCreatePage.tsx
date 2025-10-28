@@ -114,7 +114,9 @@ export const UsersCreatePage = () => {
         }
 
         if (!validatePasswordStrength(formData.password)) {
-            toast.error('La contraseña debe contener al menos una mayúscula, una minúscula y un número');
+            toast.error(
+                'La contraseña debe contener al menos una mayúscula, una minúscula y un número'
+            );
             return;
         }
 
@@ -185,7 +187,8 @@ export const UsersCreatePage = () => {
                         {/* Nombre */}
                         <div className="space-y-2">
                             <Label htmlFor="name">
-                                Nombre de Usuario <span className="text-destructive">*</span>
+                                Nombre de Usuario{' '}
+                                <span className="text-destructive">*</span>
                             </Label>
                             <Input
                                 id="name"
@@ -201,14 +204,16 @@ export const UsersCreatePage = () => {
                                 maxLength={20}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Debe estar en minúsculas. Máximo 20 caracteres ({formData.name.length}/20)
+                                Debe estar en minúsculas. Máximo 20 caracteres (
+                                {formData.name.length}/20)
                             </p>
                         </div>
 
                         {/* Email */}
                         <div className="space-y-2">
                             <Label htmlFor="email">
-                                Email <span className="text-destructive">*</span>
+                                Email{' '}
+                                <span className="text-destructive">*</span>
                             </Label>
                             <Input
                                 id="email"
@@ -247,11 +252,21 @@ export const UsersCreatePage = () => {
                                             value={role._id}
                                         >
                                             <span className="capitalize">
-                                                {role.name === 'admin' && 'Administrador'}
-                                                {role.name === 'librarian' && 'Bibliotecario'}
-                                                {role.name === 'executive' && 'Ejecutivo'}
-                                                {role.name === 'reader' && 'Lector'}
-                                                {!['admin', 'librarian', 'executive', 'reader'].includes(role.name) && role.name}
+                                                {role.name === 'admin' &&
+                                                    'Administrador'}
+                                                {role.name === 'librarian' &&
+                                                    'Bibliotecario'}
+                                                {role.name === 'executive' &&
+                                                    'Ejecutivo'}
+                                                {role.name === 'reader' &&
+                                                    'Lector'}
+                                                {![
+                                                    'admin',
+                                                    'librarian',
+                                                    'executive',
+                                                    'reader',
+                                                ].includes(role.name) &&
+                                                    role.name}
                                             </span>
                                         </SelectItem>
                                     ))}
@@ -262,7 +277,8 @@ export const UsersCreatePage = () => {
                         {/* Contraseña */}
                         <div className="space-y-2">
                             <Label htmlFor="password">
-                                Contraseña <span className="text-destructive">*</span>
+                                Contraseña{' '}
+                                <span className="text-destructive">*</span>
                             </Label>
                             <div className="relative">
                                 <Input
@@ -286,7 +302,9 @@ export const UsersCreatePage = () => {
                                     variant="ghost"
                                     size="icon-sm"
                                     className="absolute right-2 top-1/2 -translate-y-1/2"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    onClick={() =>
+                                        setShowPassword(!showPassword)
+                                    }
                                 >
                                     {showPassword ? (
                                         <EyeOff className="h-4 w-4" />
@@ -296,19 +314,25 @@ export const UsersCreatePage = () => {
                                 </Button>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Debe tener entre 6 y 30 caracteres, incluir al menos una mayúscula, una minúscula y un número
+                                Debe tener entre 6 y 30 caracteres, incluir al
+                                menos una mayúscula, una minúscula y un número
                             </p>
                         </div>
 
                         {/* Confirmar Contraseña */}
                         <div className="space-y-2">
                             <Label htmlFor="confirmPassword">
-                                Confirmar Contraseña <span className="text-destructive">*</span>
+                                Confirmar Contraseña{' '}
+                                <span className="text-destructive">*</span>
                             </Label>
                             <div className="relative">
                                 <Input
                                     id="confirmPassword"
-                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    type={
+                                        showConfirmPassword
+                                            ? 'text'
+                                            : 'password'
+                                    }
                                     placeholder="Confirme la contraseña"
                                     value={formData.confirmPassword}
                                     onChange={(e) =>
@@ -325,7 +349,11 @@ export const UsersCreatePage = () => {
                                     variant="ghost"
                                     size="icon-sm"
                                     className="absolute right-2 top-1/2 -translate-y-1/2"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    onClick={() =>
+                                        setShowConfirmPassword(
+                                            !showConfirmPassword
+                                        )
+                                    }
                                 >
                                     {showConfirmPassword ? (
                                         <EyeOff className="h-4 w-4" />
