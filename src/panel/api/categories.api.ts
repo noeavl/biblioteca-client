@@ -13,13 +13,17 @@ export interface GetCategoriesResponse {
     totalPages: number;
 }
 
-export const getCategories = async (params?: GetCategoriesParams): Promise<GetCategoriesResponse> => {
+export const getCategories = async (
+    params?: GetCategoriesParams
+): Promise<GetCategoriesResponse> => {
     try {
         const queryParams = new URLSearchParams();
         if (params?.limit) queryParams.append('limit', params.limit.toString());
         if (params?.skip) queryParams.append('skip', params.skip.toString());
 
-        const url = `/categories${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        const url = `/categories${
+            queryParams.toString() ? `?${queryParams.toString()}` : ''
+        }`;
         const { data } = await panelApi.get<GetCategoriesResponse>(url);
         return data;
     } catch (error) {
@@ -32,9 +36,13 @@ export interface DeleteCategoryResponse {
     message: string;
 }
 
-export const deleteCategory = async (categoryId: string): Promise<DeleteCategoryResponse> => {
+export const deleteCategory = async (
+    categoryId: string
+): Promise<DeleteCategoryResponse> => {
     try {
-        const { data } = await panelApi.delete<DeleteCategoryResponse>(`/categories/${categoryId}`);
+        const { data } = await panelApi.delete<DeleteCategoryResponse>(
+            `/categories/${categoryId}`
+        );
         return data;
     } catch (error) {
         console.error('Error al eliminar la categoría:', error);
@@ -51,9 +59,14 @@ export interface CreateCategoryResponse {
     category: BookCategory;
 }
 
-export const createCategory = async (categoryData: CreateCategoryDto): Promise<CreateCategoryResponse> => {
+export const createCategory = async (
+    categoryData: CreateCategoryDto
+): Promise<CreateCategoryResponse> => {
     try {
-        const { data } = await panelApi.post<CreateCategoryResponse>('/categories', categoryData);
+        const { data } = await panelApi.post<CreateCategoryResponse>(
+            '/categories',
+            categoryData
+        );
         return data;
     } catch (error) {
         console.error('Error al crear la categoría:', error);
@@ -61,9 +74,13 @@ export const createCategory = async (categoryData: CreateCategoryDto): Promise<C
     }
 };
 
-export const getCategoryById = async (categoryId: string): Promise<BookCategory> => {
+export const getCategoryById = async (
+    categoryId: string
+): Promise<BookCategory> => {
     try {
-        const { data } = await panelApi.get<BookCategory>(`/categories/${categoryId}`);
+        const { data } = await panelApi.get<BookCategory>(
+            `/categories/${categoryId}`
+        );
         return data;
     } catch (error) {
         console.error('Error al obtener la categoría:', error);
@@ -79,9 +96,15 @@ export interface UpdateCategoryResponse {
     message: string;
 }
 
-export const updateCategory = async (categoryId: string, categoryData: UpdateCategoryDto): Promise<UpdateCategoryResponse> => {
+export const updateCategory = async (
+    categoryId: string,
+    categoryData: UpdateCategoryDto
+): Promise<UpdateCategoryResponse> => {
     try {
-        const { data } = await panelApi.patch<UpdateCategoryResponse>(`/categories/${categoryId}`, categoryData);
+        const { data } = await panelApi.patch<UpdateCategoryResponse>(
+            `/categories/${categoryId}`,
+            categoryData
+        );
         return data;
     } catch (error) {
         console.error('Error al actualizar la categoría:', error);

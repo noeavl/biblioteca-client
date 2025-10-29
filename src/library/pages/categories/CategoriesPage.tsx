@@ -54,6 +54,7 @@ export const CategoriesPage = () => {
                     limit: ITEMS_PER_PAGE,
                     skip,
                     sort: selectedSort,
+                    hasBooks: true,
                 });
                 setCategories(response.categories);
                 setTotalPages(response.totalPages);
@@ -88,10 +89,12 @@ export const CategoriesPage = () => {
     ];
 
     // Transformar categorías al formato esperado por CategoriesGrid
-    const categoriesCards = categories.map(category => ({
+    const categoriesCards = categories.map((category) => ({
         name: category.name,
         img: category.featuredBookCover
-            ? `${import.meta.env.VITE_API_URL}/files/cover/${category.featuredBookCover}`
+            ? `${import.meta.env.VITE_API_URL}/files/cover/${
+                  category.featuredBookCover
+              }`
             : '',
         quantityBooks: category.books?.length || 0,
     }));
@@ -110,7 +113,9 @@ export const CategoriesPage = () => {
                     </div>
                 ) : categoriesCards.length === 0 ? (
                     <div className="flex items-center justify-center py-12">
-                        <p className="text-muted-foreground">No se encontraron categorías</p>
+                        <p className="text-muted-foreground">
+                            No se encontraron categorías
+                        </p>
                     </div>
                 ) : (
                     <>

@@ -4,9 +4,13 @@ import { AuthProvider } from './auth/context/AuthContext';
 
 function App() {
     return (
-        <AuthProvider>
-            <RouterProvider router={appRouter}></RouterProvider>
-        </AuthProvider>
+        <div>
+            <AuthProvider>
+                <div className={`min-h-screen`}>
+                    <RouterProvider router={appRouter}></RouterProvider>
+                </div>
+            </AuthProvider>
+        </div>
     );
 }
 

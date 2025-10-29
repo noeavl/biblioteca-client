@@ -59,11 +59,12 @@ export const BooksEditPage = () => {
 
             try {
                 setLoadingData(true);
-                const [bookData, authorsData, categoriesData] = await Promise.all([
-                    getBookById(bookId),
-                    getAuthors(),
-                    getCategories(),
-                ]);
+                const [bookData, authorsData, categoriesData] =
+                    await Promise.all([
+                        getBookById(bookId),
+                        getAuthors(),
+                        getCategories(),
+                    ]);
 
                 setBook(bookData);
                 setAuthors(authorsData.authors);
@@ -80,7 +81,9 @@ export const BooksEditPage = () => {
                 // Establecer portada actual
                 if (bookData.coverImage) {
                     setCurrentCoverUrl(
-                        `${import.meta.env.VITE_API_URL}/files/cover/${bookData.coverImage}`
+                        `${import.meta.env.VITE_API_URL}/files/cover/${
+                            bookData.coverImage
+                        }`
                     );
                 }
 
@@ -175,10 +178,7 @@ export const BooksEditPage = () => {
             return;
         }
 
-        if (
-            formData.publicationYear < 1 ||
-            formData.publicationYear > 2030
-        ) {
+        if (formData.publicationYear < 1 || formData.publicationYear > 2030) {
             toast.error('El año de publicación debe estar entre 1 y 2030');
             return;
         }
@@ -219,20 +219,30 @@ export const BooksEditPage = () => {
                 try {
                     await Promise.all(uploadPromises);
                     if (updatedCover && updatedPDF) {
-                        toast.success('Libro, portada y PDF actualizados exitosamente');
+                        toast.success(
+                            'Libro, portada y PDF actualizados exitosamente'
+                        );
                     } else if (updatedCover) {
-                        toast.success('Libro y portada actualizados exitosamente');
+                        toast.success(
+                            'Libro y portada actualizados exitosamente'
+                        );
                     } else if (updatedPDF) {
                         toast.success('Libro y PDF actualizados exitosamente');
                     }
                 } catch (uploadError) {
                     const errorMessage = (uploadError as Error).message;
                     if (errorMessage === 'cover') {
-                        toast.warning('Libro actualizado, pero hubo un error al subir la portada');
+                        toast.warning(
+                            'Libro actualizado, pero hubo un error al subir la portada'
+                        );
                     } else if (errorMessage === 'pdf') {
-                        toast.warning('Libro actualizado, pero hubo un error al subir el PDF');
+                        toast.warning(
+                            'Libro actualizado, pero hubo un error al subir el PDF'
+                        );
                     } else {
-                        toast.warning('Libro actualizado, pero hubo errores al subir los archivos');
+                        toast.warning(
+                            'Libro actualizado, pero hubo errores al subir los archivos'
+                        );
                     }
                 }
             } else {
@@ -294,7 +304,8 @@ export const BooksEditPage = () => {
                         {/* Título */}
                         <div className="space-y-2">
                             <Label htmlFor="title">
-                                Título <span className="text-destructive">*</span>
+                                Título{' '}
+                                <span className="text-destructive">*</span>
                             </Label>
                             <Input
                                 id="title"
@@ -313,12 +324,16 @@ export const BooksEditPage = () => {
                         {/* Autor */}
                         <div className="space-y-2">
                             <Label htmlFor="author">
-                                Autor <span className="text-destructive">*</span>
+                                Autor{' '}
+                                <span className="text-destructive">*</span>
                             </Label>
                             <Select
                                 value={formData.authorId}
                                 onValueChange={(value) =>
-                                    setFormData({ ...formData, authorId: value })
+                                    setFormData({
+                                        ...formData,
+                                        authorId: value,
+                                    })
                                 }
                                 required
                             >
@@ -342,7 +357,8 @@ export const BooksEditPage = () => {
                         {/* Categoría */}
                         <div className="space-y-2">
                             <Label htmlFor="category">
-                                Categoría <span className="text-destructive">*</span>
+                                Categoría{' '}
+                                <span className="text-destructive">*</span>
                             </Label>
                             <Select
                                 value={formData.categoryId || undefined}
@@ -466,7 +482,13 @@ export const BooksEditPage = () => {
                                                     type="button"
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => document.getElementById('cover-replace')?.click()}
+                                                    onClick={() =>
+                                                        document
+                                                            .getElementById(
+                                                                'cover-replace'
+                                                            )
+                                                            ?.click()
+                                                    }
                                                 >
                                                     <Upload className="h-4 w-4 mr-2" />
                                                     Cambiar portada
@@ -493,7 +515,8 @@ export const BooksEditPage = () => {
                                                     PDF actual del libro
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    Sube un nuevo archivo para reemplazarlo
+                                                    Sube un nuevo archivo para
+                                                    reemplazarlo
                                                 </p>
                                             </div>
                                         </div>
@@ -526,14 +549,18 @@ export const BooksEditPage = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-3 p-4 border-2 border-green-500/50 rounded-lg bg-green-50 dark:bg-green-950/20">
-                                    <FileText className="h-8 w-8 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <div className="flex items-center gap-3 p-4 border-2 border-green-500/50 rounded-lg bg-green-50 ">
+                                    <FileText className="h-8 w-8 text-green-600  flex-shrink-0" />
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-sm truncate text-green-900 dark:text-green-100">
+                                        <p className="font-medium text-sm truncate text-green-900 ">
                                             {pdfFile.name}
                                         </p>
-                                        <p className="text-xs text-green-700 dark:text-green-300">
-                                            {(pdfFile.size / (1024 * 1024)).toFixed(2)} MB
+                                        <p className="text-xs text-green-700 ">
+                                            {(
+                                                pdfFile.size /
+                                                (1024 * 1024)
+                                            ).toFixed(2)}{' '}
+                                            MB
                                         </p>
                                     </div>
                                     <Button
@@ -565,7 +592,9 @@ export const BooksEditPage = () => {
                                 disabled={loading}
                                 className="flex-1"
                             >
-                                {loading ? 'Actualizando...' : 'Actualizar Libro'}
+                                {loading
+                                    ? 'Actualizando...'
+                                    : 'Actualizar Libro'}
                             </Button>
                         </div>
                     </CardContent>

@@ -40,8 +40,11 @@ export const BookCardWithMenu = ({
     onRemoveFromCollection,
 }: BookCardWithMenuProps) => {
     return (
-        <div className="group bg-white dark:bg-gray-800/50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col">
-            <Link to={`/libros/detalle/${id}`} className="relative h-48 sm:h-52 md:h-56 lg:h-60 xl:h-64">
+        <div className="group bg-white  rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col">
+            <Link
+                to={`/libros/detalle/${id}`}
+                className="relative h-48 sm:h-52 md:h-56 lg:h-60 xl:h-64"
+            >
                 {img ? (
                     <img
                         className="w-full h-full object-cover object-center"
@@ -49,8 +52,8 @@ export const BookCardWithMenu = ({
                         alt={title}
                     />
                 ) : (
-                    <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                        <span className="material-symbols-outlined text-blue-400 dark:text-blue-300 text-6xl">
+                    <div className="w-full h-full bg-blue-100 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-blue-400 text-6xl">
                             book
                         </span>
                     </div>
@@ -66,15 +69,19 @@ export const BookCardWithMenu = ({
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7 w-7 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                className="h-7 w-7 p-0 hover:bg-gray-100"
                                 onClick={(e) => e.preventDefault()}
                             >
-                                <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-lg">
+                                <span className="material-symbols-outlined text-gray-600 text-lg">
                                     more_vert
                                 </span>
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" side="bottom" className="w-48">
+                        <DropdownMenuContent
+                            align="start"
+                            side="bottom"
+                            className="w-48"
+                        >
                             <DropdownMenuItem
                                 onClick={(e) => {
                                     e.preventDefault();
@@ -84,7 +91,9 @@ export const BookCardWithMenu = ({
                                 <span className="material-symbols-outlined text-sm mr-2">
                                     {isFavorite ? 'heart_minus' : 'favorite'}
                                 </span>
-                                {isFavorite ? 'Remover de favoritos' : 'Agregar a favoritos'}
+                                {isFavorite
+                                    ? 'Remover de favoritos'
+                                    : 'Agregar a favoritos'}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={(e) => {
@@ -95,7 +104,9 @@ export const BookCardWithMenu = ({
                                 <span className="material-symbols-outlined text-sm mr-2">
                                     {isRead ? 'book_2' : 'done'}
                                 </span>
-                                {isRead ? 'Marcar como no leído' : 'Marcar como leído'}
+                                {isRead
+                                    ? 'Marcar como no leído'
+                                    : 'Marcar como leído'}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={(e) => {
@@ -129,13 +140,13 @@ export const BookCardWithMenu = ({
                     </DropdownMenu>
                 </div>
                 <Link to={`/libros/detalle/${id}`}>
-                    <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate mb-1">
+                    <h3 className="font-bold text-gray-900 text-sm sm:text-base truncate mb-1">
                         {title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+                    <p className="text-xs sm:text-sm text-gray-500 truncate">
                         {author}
                     </p>
-                    <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500">
+                    <p className="text-xs sm:text-sm text-gray-400">
                         {publicationYear}
                     </p>
                 </Link>

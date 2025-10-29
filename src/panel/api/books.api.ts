@@ -1,12 +1,16 @@
 import { panelApi } from './panelApi.api';
-import type { Book, CreateBookDto, UpdateBookDto } from '@/library/interfaces/book.interface';
+import type {
+    Book,
+    CreateBookDto,
+    UpdateBookDto,
+} from '@/library/interfaces/book.interface';
 
 export interface GetBooksParams {
     limit?: number;
     skip?: number;
-    authors?: string[]; // Array de IDs de autores
-    categories?: string[]; // Array de IDs de categorías
-    search?: string; // Término de búsqueda
+    authors?: string[];
+    categories?: string[];
+    search?: string;
 }
 
 export interface GetBooksResponse {
@@ -16,7 +20,9 @@ export interface GetBooksResponse {
     totalPages: number;
 }
 
-export const getBooks = async (params?: GetBooksParams): Promise<GetBooksResponse> => {
+export const getBooks = async (
+    params?: GetBooksParams
+): Promise<GetBooksResponse> => {
     try {
         const queryParams = new URLSearchParams();
         if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -37,7 +43,9 @@ export const getBooks = async (params?: GetBooksParams): Promise<GetBooksRespons
             queryParams.append('search', params.search.trim());
         }
 
-        const url = `/books${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        const url = `/books${
+            queryParams.toString() ? `?${queryParams.toString()}` : ''
+        }`;
         const { data } = await panelApi.get<GetBooksResponse>(url);
         return data;
     } catch (error) {
@@ -65,7 +73,9 @@ export interface CreateBookResponse {
     };
 }
 
-export const createBook = async (bookData: CreateBookDto): Promise<CreateBookResponse> => {
+export const createBook = async (
+    bookData: CreateBookDto
+): Promise<CreateBookResponse> => {
     try {
         const payload = {
             authorId: bookData.authorId,
@@ -74,7 +84,10 @@ export const createBook = async (bookData: CreateBookDto): Promise<CreateBookRes
             categoryId: bookData.categoryId,
         };
 
-        const { data } = await panelApi.post<CreateBookResponse>('/books', payload);
+        const { data } = await panelApi.post<CreateBookResponse>(
+            '/books',
+            payload
+        );
         return data;
     } catch (error) {
         console.error('Error al crear el libro:', error);
@@ -82,9 +95,15 @@ export const createBook = async (bookData: CreateBookDto): Promise<CreateBookRes
     }
 };
 
-export const updateBook = async (bookId: string, bookData: UpdateBookDto): Promise<Book> => {
+export const updateBook = async (
+    bookId: string,
+    bookData: UpdateBookDto
+): Promise<Book> => {
     try {
-        const { data } = await panelApi.patch<Book>(`/books/${bookId}`, bookData);
+        const { data } = await panelApi.patch<Book>(
+            `/books/${bookId}`,
+            bookData
+        );
         return data;
     } catch (error) {
         console.error('Error al actualizar el libro:', error);

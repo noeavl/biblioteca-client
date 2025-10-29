@@ -22,7 +22,7 @@ export const CategoryCard = ({
                         src={img}
                     />
                 ) : (
-                    <div className="h-full w-full aspect-square bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-600 dark:to-purple-700 flex items-center justify-center">
+                    <div className="h-full w-full aspect-square bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-16 w-16 text-white/60"
@@ -40,11 +40,11 @@ export const CategoryCard = ({
                     </div>
                 )}
 
-                <div className="absolute inset-0 bg-black/40"></div>
+                <div className="absolute inset-0 bg-foreground/40"></div>
 
-                <p className="absolute bottom-4 left-4 text-xl font-bold text-white">
+                <span className="absolute bottom-4 left-4 text-xl font-bold text-blue-50">
                     {name}{' '}
-                </p>
+                </span>
             </div>
             <p className="text-blue-400 font-thin">
                 {showQuantityBooks &&

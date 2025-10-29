@@ -5,9 +5,9 @@ import type { SortType } from '@/mocks/filters.mock';
 export interface GetAuthorsParams {
     limit?: number;
     skip?: number;
-    categories?: string[]; // Array de IDs de categorías
-    sort?: SortType; // Tipo de ordenamiento
-    hasBooks?: boolean; // Filtrar solo autores con libros
+    categories?: string[];
+    sort?: SortType;
+    hasBooks?: boolean;
 }
 
 export interface GetAuthorsResponse {
@@ -17,7 +17,9 @@ export interface GetAuthorsResponse {
     totalPages: number;
 }
 
-export const getAuthors = async (params?: GetAuthorsParams): Promise<GetAuthorsResponse> => {
+export const getAuthors = async (
+    params?: GetAuthorsParams
+): Promise<GetAuthorsResponse> => {
     try {
         const queryParams = new URLSearchParams();
         if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -32,11 +34,23 @@ export const getAuthors = async (params?: GetAuthorsParams): Promise<GetAuthorsR
             queryParams.append('hasBooks', params.hasBooks.toString());
         }
 
-        const url = `/authors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        const url = `/authors${
+            queryParams.toString() ? `?${queryParams.toString()}` : ''
+        }`;
         const { data } = await libraryApi.get<GetAuthorsResponse>(url);
         return data;
     } catch (error) {
         console.error('Error al obtener los autores:', error);
+        throw error;
+    }
+};
+
+export const getAuthorById = async (authorId: string): Promise<Author> => {
+    try {
+        const { data } = await libraryApi.get<Author>(`/authors/${authorId}`);
+        return data;
+    } catch (error) {
+        console.error(error);
         throw error;
     }
 };

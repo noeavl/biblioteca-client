@@ -24,7 +24,11 @@ interface Props {
     onChange?: (value: string) => void;
 }
 
-export const SidebarGroupFilterRadioGroup = ({ label, items, onChange }: Props) => {
+export const SidebarGroupFilterRadioGroup = ({
+    label,
+    items,
+    onChange,
+}: Props) => {
     return (
         <Collapsible
             key={label}
@@ -35,7 +39,7 @@ export const SidebarGroupFilterRadioGroup = ({ label, items, onChange }: Props) 
             <SidebarGroup className="p-0">
                 <SidebarGroupLabel
                     asChild
-                    className="group/label text-black text-md p-0 mb-6"
+                    className="group/label text-md p-0 mb-6"
                 >
                     <CollapsibleTrigger>
                         {label}{' '}
@@ -52,12 +56,17 @@ export const SidebarGroupFilterRadioGroup = ({ label, items, onChange }: Props) 
                                 {items.map((item, index) => {
                                     const value = item.value || item.name;
                                     return (
-                                        <div key={value} className="flex items-center gap-3">
+                                        <div
+                                            key={value}
+                                            className="flex items-center gap-3"
+                                        >
                                             <RadioGroupItem
                                                 value={value}
                                                 id={`${item.name}${index}`}
                                             />
-                                            <Label htmlFor={`${item.name}${index}`}>
+                                            <Label
+                                                htmlFor={`${item.name}${index}`}
+                                            >
                                                 {item.name}
                                             </Label>
                                         </div>

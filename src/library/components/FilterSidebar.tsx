@@ -40,10 +40,13 @@ const FilterSkeleton = () => (
     </div>
 );
 
-export const FilterSideBar = ({ filters, isLoading = false }: FilterSideBarProps) => {
+export const FilterSideBar = ({
+    filters,
+    isLoading = false,
+}: FilterSideBarProps) => {
     return (
         <Sidebar className="absolute top-0 justify-center items-center border-none bg-none">
-            <SidebarContent className="bg-white shadow-xl rounded-2xl p-6">
+            <SidebarContent className="bg-background shadow-xl rounded-2xl p-6">
                 {filters.map((filter, index) => {
                     let component;
 
@@ -53,7 +56,9 @@ export const FilterSideBar = ({ filters, isLoading = false }: FilterSideBarProps
                                 <SidebarGroupFilterRadioGroup
                                     label={filter.label}
                                     items={filter.items}
-                                    onChange={(value) => filter.onChange?.(value)}
+                                    onChange={(value) =>
+                                        filter.onChange?.(value)
+                                    }
                                 />
                             );
                             break;

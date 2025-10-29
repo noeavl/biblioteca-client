@@ -22,7 +22,11 @@ interface Props {
     onChange?: (name: string, checked: boolean) => void;
 }
 
-export const SidebarGroupFilterCheckbox = ({ label, items, onChange }: Props) => {
+export const SidebarGroupFilterCheckbox = ({
+    label,
+    items,
+    onChange,
+}: Props) => {
     return (
         <Collapsible
             key={label}
@@ -33,7 +37,7 @@ export const SidebarGroupFilterCheckbox = ({ label, items, onChange }: Props) =>
             <SidebarGroup className="p-0">
                 <SidebarGroupLabel
                     asChild
-                    className="group/label text-black text-md p-0 mb-6"
+                    className="group/label text-md p-0 mb-6"
                 >
                     <CollapsibleTrigger>
                         {label}{' '}
@@ -53,7 +57,10 @@ export const SidebarGroupFilterCheckbox = ({ label, items, onChange }: Props) =>
                                         onCheckedChange={(checked) => {
                                             if (onChange) {
                                                 // Pasar el ID si existe, sino el nombre
-                                                onChange(item.id || item.name, checked === true);
+                                                onChange(
+                                                    item.id || item.name,
+                                                    checked === true
+                                                );
                                             }
                                         }}
                                     />

@@ -25,6 +25,7 @@ import { CategoriesEditPage } from '@/panel/pages/categories/CategoriesEditPage'
 import { AuthorsPage as PanelAuthorsPage } from '@/panel/pages/authors/AuthorsPage';
 import { AuthorsCreatePage } from '@/panel/pages/authors/AuthorsCreatePage';
 import { AuthorsEditPage } from '@/panel/pages/authors/AuthorsEditPage';
+import { AuthorsBooksPage } from './src/library/pages/authors/AuthorsBooksPage';
 
 export const appRouter = createBrowserRouter([
     {
@@ -62,7 +63,16 @@ export const appRouter = createBrowserRouter([
             },
             {
                 path: 'autores',
-                Component: AuthorsPage,
+                children: [
+                    {
+                        path: '',
+                        Component: AuthorsPage,
+                    },
+                    {
+                        path: 'detalle/:authorId',
+                        Component: AuthorsBooksPage,
+                    },
+                ],
             },
             {
                 path: 'mi-biblioteca',

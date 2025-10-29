@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/sonner';
 
 export const PanelLayout = () => {
     return (
-        <SidebarProvider>
+        <SidebarProvider className="bg-background text-foreground">
             <PanelSidebar />
             <main className="p-8 w-full">
                 <SidebarTrigger />

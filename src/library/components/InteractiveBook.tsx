@@ -28,7 +28,9 @@ export const InteractiveBook = ({
     onColorLoaded,
     preloadedColor,
 }: InteractiveBookProps) => {
-    const [spineColor, setSpineColor] = useState<string>(preloadedColor || '#3b82f6');
+    const [spineColor, setSpineColor] = useState<string>(
+        preloadedColor || '#3b82f6'
+    );
 
     // Extraer color dominante de la imagen de la portada (solo si no viene pre-cargado)
     useEffect(() => {
@@ -45,7 +47,9 @@ export const InteractiveBook = ({
 
         const img = new Image();
         img.crossOrigin = 'Anonymous';
-        img.src = `${import.meta.env.VITE_API_URL}/files/cover/${book.coverImage}`;
+        img.src = `${import.meta.env.VITE_API_URL}/files/cover/${
+            book.coverImage
+        }`;
 
         img.onload = () => {
             try {
@@ -69,7 +73,9 @@ export const InteractiveBook = ({
                 );
                 const data = imageData.data;
 
-                let r = 0, g = 0, b = 0;
+                let r = 0,
+                    g = 0,
+                    b = 0;
                 const pixelCount = data.length / 4;
 
                 for (let i = 0; i < data.length; i += 4) {
@@ -109,49 +115,57 @@ export const InteractiveBook = ({
         // Azul primary
         {
             background: '#3b82f6',
-            texture: 'radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 50%)',
+            texture:
+                'radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 50%)',
             textureSize: '4px 4px',
         },
         // Azul medio
         {
             background: '#2563eb',
-            texture: 'linear-gradient(45deg, rgba(0,0,0,0.15) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.15) 75%)',
+            texture:
+                'linear-gradient(45deg, rgba(0,0,0,0.15) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.15) 75%)',
             textureSize: '2px 2px',
         },
         // Azul sky
         {
             background: '#0284c7',
-            texture: 'radial-gradient(circle, rgba(0,0,0,0.2) 1px, transparent 1px)',
+            texture:
+                'radial-gradient(circle, rgba(0,0,0,0.2) 1px, transparent 1px)',
             textureSize: '6px 6px',
         },
         // Azul cyan
         {
             background: '#0891b2',
-            texture: 'repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, transparent 1px, transparent 2px)',
+            texture:
+                'repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, transparent 1px, transparent 2px)',
             textureSize: '3px 3px',
         },
         // Azul indigo
         {
             background: '#6366f1',
-            texture: 'radial-gradient(ellipse at top, rgba(255,255,255,0.15) 0%, transparent 60%)',
+            texture:
+                'radial-gradient(ellipse at top, rgba(255,255,255,0.15) 0%, transparent 60%)',
             textureSize: '8px 8px',
         },
         // Azul brillante
         {
             background: '#0ea5e9',
-            texture: 'linear-gradient(0deg, rgba(0,0,0,0.12) 50%, transparent 50%)',
+            texture:
+                'linear-gradient(0deg, rgba(0,0,0,0.12) 50%, transparent 50%)',
             textureSize: '1px 2px',
         },
         // Azul profundo
         {
             background: '#1d4ed8',
-            texture: 'radial-gradient(circle at center, rgba(0,0,0,0.25) 0%, transparent 70%)',
+            texture:
+                'radial-gradient(circle at center, rgba(0,0,0,0.25) 0%, transparent 70%)',
             textureSize: '5px 5px',
         },
         // Azul teal
         {
             background: '#06b6d4',
-            texture: 'linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%)',
+            texture:
+                'linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%)',
             textureSize: '3px 3px',
         },
     ];
@@ -275,7 +289,7 @@ export const InteractiveBook = ({
 
     return (
         <div
-            className="h-[200px] transition-all duration-300 ease-out flex-shrink-0 flex hover:-translate-y-2 hover:shadow-2xl group"
+            className="min-h-book transition-all duration-300 ease-out flex-shrink-0 flex hover:-translate-y-2 hover:shadow-2xl group"
             style={{
                 width: isOpen ? '332px' : '112px',
                 zIndex: isOpen ? 40 : 10 - index,
@@ -295,18 +309,20 @@ export const InteractiveBook = ({
                     rounded-r-lg
                     group-hover:brightness-105
                     relative
-                    block
                     ${
                         isOpen
                             ? 'w-56 opacity-100'
                             : 'w-0 opacity-0 pointer-events-none'
                     }
                 `}
+                style={{ zIndex: isOpen ? '1' : 'auto' }}
             >
                 {/* Imagen de fondo que ocupa toda la portada */}
                 {book.coverImage ? (
                     <img
-                        src={`${import.meta.env.VITE_API_URL}/files/cover/${book.coverImage}`}
+                        src={`${import.meta.env.VITE_API_URL}/files/cover/${
+                            book.coverImage
+                        }`}
                         alt={book.title}
                         className="absolute inset-0 w-full h-full object-cover"
                     />

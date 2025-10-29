@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
     Table,
     TableBody,
@@ -16,7 +16,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -24,7 +24,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
     Pagination,
     PaginationContent,
@@ -33,11 +33,18 @@ import {
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@/components/ui/pagination";
-import { MoreHorizontal, Plus, Pencil, Trash2, Search, BookOpen } from "lucide-react";
-import { getCategories, deleteCategory } from "@/panel/api/categories.api";
-import type { BookCategory } from "@/library/interfaces/book.interface";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/components/ui/pagination';
+import {
+    MoreHorizontal,
+    Plus,
+    Pencil,
+    Trash2,
+    Search,
+    BookOpen,
+} from 'lucide-react';
+import { getCategories, deleteCategory } from '@/panel/api/categories.api';
+import type { BookCategory } from '@/library/interfaces/book.interface';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -47,21 +54,22 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 const ITEMS_PER_PAGE = 8;
 
 export const CategoriesListPage = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState('');
     const [categories, setCategories] = useState<BookCategory[]>([]);
     const [totalCategories, setTotalCategories] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [categoryToDelete, setCategoryToDelete] = useState<BookCategory | null>(null);
+    const [categoryToDelete, setCategoryToDelete] =
+        useState<BookCategory | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
     // Obtener página actual de los query params
@@ -76,13 +84,13 @@ export const CategoriesListPage = () => {
                 const skip = (currentPage - 1) * ITEMS_PER_PAGE;
                 const response = await getCategories({
                     limit: ITEMS_PER_PAGE,
-                    skip
+                    skip,
                 });
                 setCategories(response.categories);
                 setTotalCategories(response.total);
                 setTotalPages(response.totalPages);
             } catch (err) {
-                setError("Error al cargar las categorías");
+                setError('Error al cargar las categorías');
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -125,9 +133,15 @@ export const CategoriesListPage = () => {
             await deleteCategory(categoryToDelete._id);
 
             // Actualizar la lista de categorías
-            setCategories(categories.filter(category => category._id !== categoryToDelete._id));
+            setCategories(
+                categories.filter(
+                    (category) => category._id !== categoryToDelete._id
+                )
+            );
 
-            toast.success(`Categoría "${categoryToDelete.name}" eliminada exitosamente`);
+            toast.success(
+                `Categoría "${categoryToDelete.name}" eliminada exitosamente`
+            );
             setCategoryToDelete(null);
         } catch (error: any) {
             console.error('Error al eliminar categoría:', error);
@@ -238,9 +252,15 @@ export const CategoriesListPage = () => {
                                 ) : (
                                     // Lista de categorías
                                     currentCategories.map((category) => {
-                                        const coverUrl = category.featuredBookCover
-                                            ? `${import.meta.env.VITE_API_URL}/files/cover/${category.featuredBookCover}`
-                                            : null;
+                                        const coverUrl =
+                                            category.featuredBookCover
+                                                ? `${
+                                                      import.meta.env
+                                                          .VITE_API_URL
+                                                  }/files/cover/${
+                                                      category.featuredBookCover
+                                                  }`
+                                                : null;
 
                                         return (
                                             <TableRow key={category._id}>
@@ -249,7 +269,9 @@ export const CategoriesListPage = () => {
                                                         {coverUrl ? (
                                                             <img
                                                                 src={coverUrl}
-                                                                alt={category.name}
+                                                                alt={
+                                                                    category.name
+                                                                }
                                                                 className="h-12 w-9 object-cover rounded shadow-sm"
                                                             />
                                                         ) : (
@@ -262,59 +284,68 @@ export const CategoriesListPage = () => {
                                                         </span>
                                                     </div>
                                                 </TableCell>
-                                            <TableCell className="text-center">
-                                                <span className="inline-flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400">
-                                                    {category.books?.length || 0}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                {category.featuredBookCover ? (
-                                                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                                        Sí
+                                                <TableCell className="text-center">
+                                                    <span className="inline-flex items-center justify-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+                                                        {category.books
+                                                            ?.length || 0}
                                                     </span>
-                                                ) : (
-                                                    <span className="text-xs text-muted-foreground">
-                                                        No
-                                                    </span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger
-                                                        asChild
-                                                    >
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon-sm"
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    {category.featuredBookCover ? (
+                                                        <span className="text-xs text-green-600 font-medium">
+                                                            Sí
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-xs text-muted-foreground">
+                                                            No
+                                                        </span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger
+                                                            asChild
                                                         >
-                                                            <MoreHorizontal />
-                                                            <span className="sr-only">
-                                                                Abrir menú
-                                                            </span>
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuLabel>
-                                                            Acciones
-                                                        </DropdownMenuLabel>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem
-                                                            onClick={() => navigate(`/panel/categorias/editar/${category._id}`)}
-                                                        >
-                                                            <Pencil />
-                                                            Editar
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem
-                                                            variant="destructive"
-                                                            onClick={() => setCategoryToDelete(category)}
-                                                        >
-                                                            <Trash2 />
-                                                            Eliminar
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon-sm"
+                                                            >
+                                                                <MoreHorizontal />
+                                                                <span className="sr-only">
+                                                                    Abrir menú
+                                                                </span>
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuLabel>
+                                                                Acciones
+                                                            </DropdownMenuLabel>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                onClick={() =>
+                                                                    navigate(
+                                                                        `/panel/categorias/editar/${category._id}`
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Pencil />
+                                                                Editar
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                variant="destructive"
+                                                                onClick={() =>
+                                                                    setCategoryToDelete(
+                                                                        category
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Trash2 />
+                                                                Eliminar
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </TableCell>
+                                            </TableRow>
                                         );
                                     })
                                 )}
@@ -324,8 +355,8 @@ export const CategoriesListPage = () => {
 
                     <div className="mt-4 flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
-                            Mostrando {startIndex + 1} a{" "}
-                            {Math.min(endIndex, totalCategories)} de{" "}
+                            Mostrando {startIndex + 1} a{' '}
+                            {Math.min(endIndex, totalCategories)} de{' '}
                             {totalCategories} categorías
                         </p>
 
@@ -338,13 +369,15 @@ export const CategoriesListPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 if (currentPage > 1) {
-                                                    handlePageChange(currentPage - 1);
+                                                    handlePageChange(
+                                                        currentPage - 1
+                                                    );
                                                 }
                                             }}
                                             className={
                                                 currentPage === 1
-                                                    ? "pointer-events-none opacity-50"
-                                                    : ""
+                                                    ? 'pointer-events-none opacity-50'
+                                                    : ''
                                             }
                                         />
                                     </PaginationItem>
@@ -370,7 +403,9 @@ export const CategoriesListPage = () => {
                                                         }
                                                         onClick={(e) => {
                                                             e.preventDefault();
-                                                            handlePageChange(pageNumber);
+                                                            handlePageChange(
+                                                                pageNumber
+                                                            );
                                                         }}
                                                     >
                                                         {pageNumber}
@@ -382,7 +417,9 @@ export const CategoriesListPage = () => {
                                             pageNumber === currentPage + 2
                                         ) {
                                             return (
-                                                <PaginationItem key={pageNumber}>
+                                                <PaginationItem
+                                                    key={pageNumber}
+                                                >
                                                     <PaginationEllipsis />
                                                 </PaginationItem>
                                             );
@@ -396,13 +433,15 @@ export const CategoriesListPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 if (currentPage < totalPages) {
-                                                    handlePageChange(currentPage + 1);
+                                                    handlePageChange(
+                                                        currentPage + 1
+                                                    );
                                                 }
                                             }}
                                             className={
                                                 currentPage === totalPages
-                                                    ? "pointer-events-none opacity-50"
-                                                    : ""
+                                                    ? 'pointer-events-none opacity-50'
+                                                    : ''
                                             }
                                         />
                                     </PaginationItem>
@@ -414,12 +453,18 @@ export const CategoriesListPage = () => {
             </Card>
 
             {/* AlertDialog para confirmar eliminación */}
-            <AlertDialog open={!!categoryToDelete} onOpenChange={(open) => !open && setCategoryToDelete(null)}>
+            <AlertDialog
+                open={!!categoryToDelete}
+                onOpenChange={(open) => !open && setCategoryToDelete(null)}
+            >
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>¿Estás seguro de eliminar esta categoría?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                            ¿Estás seguro de eliminar esta categoría?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                            Esta acción no se puede deshacer. Se eliminará permanentemente la categoría{' '}
+                            Esta acción no se puede deshacer. Se eliminará
+                            permanentemente la categoría{' '}
                             <span className="font-semibold capitalize">
                                 "{categoryToDelete?.name}"
                             </span>{' '}
@@ -427,7 +472,9 @@ export const CategoriesListPage = () => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel disabled={isDeleting}>
+                            Cancelar
+                        </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDeleteCategory}
                             disabled={isDeleting}

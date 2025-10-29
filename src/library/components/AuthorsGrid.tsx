@@ -14,6 +14,7 @@ export const AuthorsGrid = ({
             {authors.map((author) => (
                 <AuthorCard
                     key={author._id}
+                    id={author._id}
                     firstName={author.firstName}
                     lastName={author.lastName}
                     showQuantityBooks={showQuantityBooks}

@@ -58,17 +58,23 @@ export const AuthorsPage = () => {
                 const response = await getAuthors({
                     limit: ITEMS_PER_PAGE,
                     skip,
-                    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+                    categories:
+                        selectedCategories.length > 0
+                            ? selectedCategories
+                            : undefined,
                     sort: selectedSort,
+                    hasBooks: true,
                 });
 
-                const authorsCards: AuthorCard[] = response.authors.map((author) => ({
-                    _id: author._id,
-                    firstName: author.person.firstName,
-                    lastName: author.person.lastName,
-                    img: author.fileName,
-                    quantityBooks: author.books?.length || 0,
-                }));
+                const authorsCards: AuthorCard[] = response.authors.map(
+                    (author) => ({
+                        _id: author._id,
+                        firstName: author.person.firstName,
+                        lastName: author.person.lastName,
+                        img: author.fileName,
+                        quantityBooks: author.books?.length || 0,
+                    })
+                );
 
                 setAuthors(authorsCards);
                 setTotalPages(response.totalPages);
@@ -148,7 +154,12 @@ export const AuthorsPage = () => {
     return (
         <MainLayout
             title="Catálogo de Autores"
-            sidebar={<FilterSideBar filters={authorFilters} isLoading={filtersLoading} />}
+            sidebar={
+                <FilterSideBar
+                    filters={authorFilters}
+                    isLoading={filtersLoading}
+                />
+            }
         >
             <div className="space-y-6 sm:space-y-8">
                 {loading ? (
@@ -159,11 +170,16 @@ export const AuthorsPage = () => {
                     </div>
                 ) : authors.length === 0 ? (
                     <div className="flex items-center justify-center py-12">
-                        <p className="text-muted-foreground">No se encontraron autores</p>
+                        <p className="text-muted-foreground">
+                            No se encontraron autores
+                        </p>
                     </div>
                 ) : (
                     <>
-                        <AuthorsGrid authors={authors} showQuantityBooks={true} />
+                        <AuthorsGrid
+                            authors={authors}
+                            showQuantityBooks={true}
+                        />
                         {totalPages > 1 && (
                             <CustomPagination
                                 currentPage={currentPage}

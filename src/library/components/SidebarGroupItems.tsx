@@ -22,7 +22,7 @@ interface SidebarItemProps {
 export const SidebarGroupItems = ({ label, items }: SidebarItemProps) => {
     return (
         <SidebarGroup>
-            <SidebarGroupLabel className="text-2xl mb-6 text-black font-bold">
+            <SidebarGroupLabel className="text-2xl mb-6 font-bold">
                 {label}
             </SidebarGroupLabel>
             <SidebarMenu>

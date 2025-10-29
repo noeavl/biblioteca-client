@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-
 import {
     Popover,
     PopoverTrigger,
@@ -17,7 +16,6 @@ import {
 } from '@/components/ui/select';
 
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { getBookById } from '@/library/api/books.api';
 import type { Book } from '@/library/interfaces/book.interface';
@@ -29,7 +27,6 @@ import type { PDFDocumentProxy } from 'pdfjs-dist';
 import HTMLFlipBook from 'react-pageflip';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -64,22 +61,41 @@ export const ReaderPage = () => {
     const searchAbortControllerRef = useRef<AbortController | null>(null);
     const pdfDocumentRef = useRef<PDFDocumentProxy | null>(null);
     const flipBookRef = useRef<typeof HTMLFlipBook.prototype | null>(null);
-    const isMobile = useIsMobile();
     const [bookSize, setBookSize] = useState({ width: 550, height: 733 });
 
     // Estados para configuración de lectura
     const [fontSize, setFontSize] = useState<FontSize>('medium');
-    const [isDarkMode, setIsDarkMode] = useState(false);
     const [fontFamily, setFontFamily] = useState<FontFamily>('serif');
     const [scale, setScale] = useState<number>(1.0);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const readerContainerRef = useRef<HTMLDivElement>(null);
 
-    // Keep a fixed base book size; remove dynamic sizing/scroll logic for simplicity
+    // Tamaños responsivos para diferentes breakpoints
     useEffect(() => {
-        if (isMobile) setBookSize({ width: 300, height: 450 });
-        else setBookSize({ width: 550, height: 733 });
-    }, [isMobile]);
+        const updateBookSize = () => {
+            const width = window.innerWidth;
+            if (width < 640) {
+                // sm
+                setBookSize({ width: 300, height: 450 });
+            } else if (width < 768) {
+                // md
+                setBookSize({ width: 400, height: 600 });
+            } else if (width < 1024) {
+                // lg
+                setBookSize({ width: 450, height: 675 });
+            } else if (width < 1280) {
+                // xl
+                setBookSize({ width: 500, height: 750 });
+            } else {
+                // 2xl
+                setBookSize({ width: 550, height: 825 });
+            }
+        };
+
+        updateBookSize();
+        window.addEventListener('resize', updateBookSize);
+        return () => window.removeEventListener('resize', updateBookSize);
+    }, []);
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -140,7 +156,8 @@ export const ReaderPage = () => {
 
     // Actualizar escala según tamaño de letra y mantener la página
     useEffect(() => {
-        const newScale = fontSize === 'small' ? 0.8 : fontSize === 'large' ? 1.3 : 1.0;
+        const newScale =
+            fontSize === 'small' ? 0.8 : fontSize === 'large' ? 1.3 : 1.0;
 
         // Si la escala es diferente, actualizar
         if (newScale !== scale) {
@@ -155,15 +172,16 @@ export const ReaderPage = () => {
                             // Actualizar tamaño del flipbook
                             flipBookRef.current.pageFlip().updateState();
                         } catch (error) {
-                            console.warn('No se pudo actualizar el estado del flipbook:', error);
+                            console.warn(
+                                'No se pudo actualizar el estado del flipbook:',
+                                error
+                            );
                         }
                     }
                 }, 50);
             }
         }
     }, [fontSize, scale, currentPage]);
-
-
 
     // Manejar cambios de pantalla completa
     useEffect(() => {
@@ -238,7 +256,9 @@ export const ReaderPage = () => {
             const endPage = Math.min(startPage + 30, numPages); // Buscar solo en las próximas 30 páginas
 
             // Función auxiliar para procesar una página sin bloquear el UI
-            const processPage = async (pageNum: number): Promise<SearchResult | null> => {
+            const processPage = async (
+                pageNum: number
+            ): Promise<SearchResult | null> => {
                 return new Promise((resolve) => {
                     // Usar setTimeout para permitir que el navegador respire entre páginas
                     setTimeout(async () => {
@@ -248,7 +268,9 @@ export const ReaderPage = () => {
                                 return;
                             }
 
-                            const page = await pdfDocumentRef.current!.getPage(pageNum);
+                            const page = await pdfDocumentRef.current!.getPage(
+                                pageNum
+                            );
                             const textContent = await page.getTextContent();
 
                             // Optimización: Buscar directamente en los items sin crear string largo
@@ -260,7 +282,8 @@ export const ReaderPage = () => {
                             }
 
                             const lowerText = fullText.toLowerCase();
-                            const matchIndex = lowerText.indexOf(normalizedQuery);
+                            const matchIndex =
+                                lowerText.indexOf(normalizedQuery);
 
                             if (matchIndex !== -1) {
                                 resolve({
@@ -272,7 +295,10 @@ export const ReaderPage = () => {
                                 resolve(null);
                             }
                         } catch (error) {
-                            console.error(`Error procesando página ${pageNum}:`, error);
+                            console.error(
+                                `Error procesando página ${pageNum}:`,
+                                error
+                            );
                             resolve(null);
                         }
                     }, 0);
@@ -280,7 +306,11 @@ export const ReaderPage = () => {
             };
 
             // Procesar páginas en chunks para no bloquear el UI
-            for (let i = startPage; i <= endPage && results.length < MAX_RESULTS; i += CHUNK_SIZE) {
+            for (
+                let i = startPage;
+                i <= endPage && results.length < MAX_RESULTS;
+                i += CHUNK_SIZE
+            ) {
                 if (abortController.signal.aborted) {
                     return;
                 }
@@ -319,7 +349,6 @@ export const ReaderPage = () => {
 
             setSearchResults(results);
             setCurrentSearchIndex(results.length > 0 ? 0 : -1);
-
         } catch (error: unknown) {
             // Ignorar errores de cancelación
             if (error instanceof Error && error.name === 'AbortError') {
@@ -404,14 +433,17 @@ export const ReaderPage = () => {
     }, []);
 
     // Función para cambiar de página programáticamente (búsqueda, clics) - optimizada
-    const goToPage = useCallback((page: number) => {
-        if (flipBookRef.current && page >= 1 && page <= numPages) {
-            // Usar requestAnimationFrame para evitar bloqueos
-            requestAnimationFrame(() => {
-                flipBookRef.current?.pageFlip().turnToPage(page - 1);
-            });
-        }
-    }, [numPages]);
+    const goToPage = useCallback(
+        (page: number) => {
+            if (flipBookRef.current && page >= 1 && page <= numPages) {
+                // Usar requestAnimationFrame para evitar bloqueos
+                requestAnimationFrame(() => {
+                    flipBookRef.current?.pageFlip().turnToPage(page - 1);
+                });
+            }
+        },
+        [numPages]
+    );
 
     // Validación del libro después de todos los hooks
     if (loading) {
@@ -431,27 +463,14 @@ export const ReaderPage = () => {
     }
 
     return (
-        <div
-            ref={readerContainerRef}
-            className={`flex flex-col min-h-screen ${
-                isDarkMode ? 'bg-gray-900' : 'bg-white'
-            }`}
-        >
+        <div ref={readerContainerRef} className={`flex flex-col min-h-screen `}>
             <div
-                className={`flex flex-none justify-between items-center p-4 sm:p-8 border-b-1 ${
-                    isDarkMode ? 'bg-gray-900 border-gray-800' : ''
-                }`}
+                className={`flex flex-none justify-between items-center p-3 sm:p-4 md:p-6 lg:p-8 border-b-1 `}
             >
                 <div className="hidden sm:flex gap-3">
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button
-                                className={
-                                    isDarkMode
-                                        ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
-                                        : 'bg-blue-50 text-blue-400 hover:bg-blue-50'
-                                }
-                            >
+                            <Button>
                                 <span className="material-symbols-outlined">
                                     notes
                                 </span>
@@ -461,13 +480,7 @@ export const ReaderPage = () => {
                     </Popover>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button
-                                className={
-                                    isDarkMode
-                                        ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
-                                        : 'bg-blue-50 text-blue-400 hover:bg-blue-50'
-                                }
-                            >
+                            <Button>
                                 <span className="material-symbols-outlined">
                                     bookmarks
                                 </span>
@@ -476,18 +489,16 @@ export const ReaderPage = () => {
                         <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30 w-full sm:w-auto"></PopoverContent>
                     </Popover>
                 </div>
-                <div className="text-center space-y-2">
+                <div className="text-center space-y-1 sm:space-y-2">
                     <h2
-                        className={`text-2xl sm:text-3xl font-bold ${
-                            isDarkMode ? 'text-gray-100' : ''
-                        }`}
+                        className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold truncate max-w-[200px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-none `}
                     >
                         {book.title}
                     </h2>
                     <span
-                        className={`hidden sm:block font-thin text-lg ${
-                            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                        }`}
+                        className={
+                            'hidden sm:block font-thin text-sm sm:text-base md:text-lg'
+                        }
                     >
                         {book.author.person.firstName}
                         {book.author.person.lastName} - {book.publicationYear}
@@ -496,13 +507,7 @@ export const ReaderPage = () => {
                 <div className="space-x-3">
                     <Popover open={searchOpen} onOpenChange={setSearchOpen}>
                         <PopoverTrigger asChild>
-                            <Button
-                                className={
-                                    isDarkMode
-                                        ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
-                                        : 'bg-blue-50 text-blue-400 hover:bg-blue-50'
-                                }
-                            >
+                            <Button>
                                 <span className="material-symbols-outlined">
                                     search
                                 </span>
@@ -575,13 +580,21 @@ export const ReaderPage = () => {
                                         <button
                                             className="text-xs text-gray-500 p-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors cursor-pointer w-full text-left"
                                             onClick={() => {
-                                                const result = searchResults[currentSearchIndex];
+                                                const result =
+                                                    searchResults[
+                                                        currentSearchIndex
+                                                    ];
                                                 if (result) {
                                                     goToPage(result.pageNumber);
                                                 }
                                             }}
                                         >
-                                            Página {searchResults[currentSearchIndex]?.pageNumber}
+                                            Página{' '}
+                                            {
+                                                searchResults[
+                                                    currentSearchIndex
+                                                ]?.pageNumber
+                                            }
                                         </button>
                                     </div>
                                 )}
@@ -598,13 +611,7 @@ export const ReaderPage = () => {
                     </Popover>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button
-                                className={
-                                    isDarkMode
-                                        ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
-                                        : 'bg-blue-50 text-blue-400 hover:bg-blue-50'
-                                }
-                            >
+                            <Button>
                                 <span className="material-symbols-outlined">
                                     custom_typography
                                 </span>
@@ -650,39 +657,6 @@ export const ReaderPage = () => {
                                         >
                                             L
                                         </Button>
-                                    </div>
-                                </div>
-
-                                <Separator />
-
-                                {/* Tema */}
-                                <div>
-                                    <h3 className="font-bold mb-3">Tema</h3>
-                                    <div className="flex justify-between items-center">
-                                        <span
-                                            className={
-                                                isDarkMode
-                                                    ? 'text-gray-400'
-                                                    : 'text-gray-900'
-                                            }
-                                        >
-                                            Claro
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                            <Switch
-                                                checked={isDarkMode}
-                                                onCheckedChange={setIsDarkMode}
-                                            />
-                                            <span
-                                                className={
-                                                    isDarkMode
-                                                        ? 'text-white font-semibold'
-                                                        : 'text-gray-400'
-                                                }
-                                            >
-                                                Oscuro
-                                            </span>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -749,14 +723,7 @@ export const ReaderPage = () => {
                         </PopoverContent>
                     </Popover>
 
-                    <Button
-                        className={
-                            isDarkMode
-                                ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
-                                : 'bg-blue-50 text-blue-400 hover:bg-blue-50'
-                        }
-                        onClick={() => setIsBookmarked(!isBookmarked)}
-                    >
+                    <Button onClick={() => setIsBookmarked(!isBookmarked)}>
                         <span
                             className={`material-symbols-outlined ${
                                 isBookmarked ? 'fill' : ''
@@ -766,11 +733,6 @@ export const ReaderPage = () => {
                         </span>
                     </Button>
                     <Button
-                        className={
-                            isDarkMode
-                                ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
-                                : 'bg-blue-50 text-blue-400 hover:bg-blue-50'
-                        }
                         onClick={toggleFullscreen}
                         title={
                             isFullscreen
@@ -785,9 +747,7 @@ export const ReaderPage = () => {
                 </div>
             </div>
             <div
-                className={`relative flex-1 overflow-hidden ${getFontFamilyClass()} ${
-                    isDarkMode ? 'pdf-dark-mode bg-black' : 'pdf-light-mode'
-                }`}
+                className={`relative flex-1 overflow-hidden ${getFontFamilyClass()} `}
             >
                 <>
                     <style>{`.react-pdf__Page__canvas{width:100% !important;height:100% !important;display:block}.react-pdf__Page__svg{width:100% !important;height:100% !important;display:block}`}</style>
@@ -804,22 +764,20 @@ export const ReaderPage = () => {
                         }}
                     >
                         <div
-                            className={`flex justify-center items-center max-w-screen-lg mx-auto py-8 ${
-                                isDarkMode ? 'bg-gray-800' : 'bg-white'
-                            }`}
+                            className={`flex justify-center items-center max-w-screen-2xl mx-auto p-2 sm:p-4 md:p-6 lg:p-8 `}
                         >
                             <HTMLFlipBook
                                 ref={flipBookRef}
                                 width={bookSize.width * scale}
                                 height={bookSize.height * scale}
                                 size="stretch"
-                                minWidth={315}
+                                minWidth={280}
                                 minHeight={0}
-                                maxWidth={1000}
-                                maxHeight={1000}
-                                maxShadowOpacity={0.3}
+                                maxWidth={1200}
+                                maxHeight={1600}
+                                maxShadowOpacity={0.2}
                                 showCover={true}
-                                mobileScrollSupport={false}
+                                mobileScrollSupport={true}
                                 onFlip={(e: { data: number }) => {
                                     handleFlipPageChange(e.data);
                                 }}
@@ -841,15 +799,7 @@ export const ReaderPage = () => {
                                     { length: numPages },
                                     (_, i) => i + 1
                                 ).map((pageNum) => (
-                                    <div
-                                        key={pageNum}
-                                        className="bg-blue-400"
-                                        style={{
-                                            backgroundColor: isDarkMode
-                                                ? '#1a1a1a'
-                                                : '#ffffff',
-                                        }}
-                                    >
+                                    <div key={pageNum} className="bg-blue-400">
                                         <Page
                                             pageNumber={pageNum}
                                             renderAnnotationLayer={false}
@@ -871,27 +821,19 @@ export const ReaderPage = () => {
 
                 {/* Botón Anterior - Costado Izquierdo */}
                 <Button
-                    className={`fixed left-2 sm:left-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-10 h-10 sm:w-14 sm:h-14 z-50 disabled:opacity-50 ${
-                        isDarkMode
-                            ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
-                            : 'bg-blue-400 text-white hover:bg-blue-500'
-                    }`}
+                    className={`fixed left-1 sm:left-2 md:left-4 lg:left-6 xl:left-8 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 z-50 disabled:opacity-50 `}
                     onClick={prevPage}
                     disabled={currentPage === 1}
                     title="Página anterior (Flecha izquierda)"
                 >
-                    <span className="material-symbols-outlined text-2xl sm:text-3xl">
+                    <span className="material-symbols-outlined text-xl sm:text-2xl md:text-3xl">
                         chevron_left
                     </span>
                 </Button>
 
                 {/* Botón Siguiente - Costado Derecho */}
                 <Button
-                    className={`fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-10 h-10 sm:w-14 sm:h-14 z-50 disabled:opacity-50 ${
-                        isDarkMode
-                            ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
-                            : 'bg-blue-400 text-white hover:bg-blue-500'
-                    }`}
+                    className={`fixed right-1 sm:right-2 md:right-4 lg:right-6 xl:right-8 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 z-50 disabled:opacity-50`}
                     onClick={nextPage}
                     disabled={currentPage + 2 > numPages}
                     title="Página siguiente (Flecha derecha)"
@@ -901,16 +843,10 @@ export const ReaderPage = () => {
                     </span>
                 </Button>
             </div>
-            <div
-                className={`flex-none p-4 sm:p-8 ${
-                    isDarkMode ? 'bg-gray-900' : ''
-                }`}
-            >
-                <div className="mb-3 flex justify-center">
+            <div className={`flex-none p-3 sm:p-4 md:p-6 lg:p-8 `}>
+                <div className="mb-2 sm:mb-3 flex justify-center">
                     <span
-                        className={`font-normal ${
-                            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                        }`}
+                        className={`text-sm sm:text-base md:text-lg font-normal `}
                     >
                         Page{' '}
                         <span className="font-bold text-blue-400">
@@ -923,22 +859,21 @@ export const ReaderPage = () => {
                     </span>
                 </div>
                 <Slider
-                    className={
-                        isDarkMode
-                            ? '[&>span]:bg-gray-700 [&>span>span]:bg-blue-500'
-                            : '[&>span]:bg-blue-100 [&>span>span]:bg-blue-400'
-                    }
                     value={[sliderValue]}
                     min={1}
-                    max={numPages - 1}
-                    step={2}
+                    max={numPages}
+                    step={1}
                     onValueChange={(value) => {
                         const page = value[0];
                         setSliderValue(page);
                         setCurrentPage(page);
                         // Navegar el flipbook a la página correspondiente
                         if (flipBookRef.current) {
-                            flipBookRef.current.pageFlip().turnToPage(page - 1);
+                            requestAnimationFrame(() => {
+                                flipBookRef.current
+                                    ?.pageFlip()
+                                    .turnToPage(page - 1);
+                            });
                         }
                     }}
                 />

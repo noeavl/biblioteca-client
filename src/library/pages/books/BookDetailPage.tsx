@@ -4,12 +4,17 @@ import { Link, useParams } from 'react-router';
 import { useEffect, useState } from 'react';
 import { getBookById } from '@/library/api/books.api';
 import type { Book } from '@/library/interfaces/book.interface';
+import { BooksGrid } from '@/library/components/BooksGrid';
+import { getBooks } from '@/panel/api/books.api';
 
 export const BookDetailPage = () => {
     const { bookId } = useParams<{ bookId: string }>();
     const [book, setBook] = useState<Book | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [categoryId, setCategoryId] = useState<string | null>(null);
+    const [books, setBooks] = useState<Book[] | []>([]);
+    const [relatedLoading, setRelatedLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -24,6 +29,7 @@ export const BookDetailPage = () => {
                 setError(null);
                 const bookData = await getBookById(bookId);
                 setBook(bookData);
+                setCategoryId(bookData.category._id);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (err) {
                 setError('Error al cargar el libro');
@@ -35,6 +41,41 @@ export const BookDetailPage = () => {
 
         fetchBook();
     }, [bookId]);
+
+    useEffect(() => {
+        const fetchBooksByCategory = async () => {
+            if (!categoryId) return;
+            setRelatedLoading(true);
+
+            try {
+                const { books } = await getBooks({
+                    limit: 7,
+                    categories: [categoryId as string],
+                });
+                setBooks(books);
+            } catch (error) {
+                setError('Error al cargar el libro');
+                console.error(error);
+            } finally {
+                setRelatedLoading(false);
+            }
+        };
+        fetchBooksByCategory();
+    }, [categoryId]);
+
+    const transformedBooks = books
+        .filter((b) => b._id != book?._id)
+        .map((b) => ({
+            id: b._id,
+            title: b.title,
+            publicationYear: b.publicationYear,
+            img: b.coverImage
+                ? `${import.meta.env.VITE_API_URL}/files/cover/${b.coverImage}`
+                : null,
+            pdf: '',
+            category: b.category.name,
+            author: `${b.author.person.firstName} ${b.author.person.lastName}`,
+        }));
 
     if (loading) {
         return (
@@ -50,7 +91,9 @@ export const BookDetailPage = () => {
         return (
             <MainContainer>
                 <div className="flex items-center justify-center py-12">
-                    <p className="text-destructive">{error || 'Libro no encontrado'}</p>
+                    <p className="text-destructive">
+                        {error || 'Libro no encontrado'}
+                    </p>
                 </div>
             </MainContainer>
         );
@@ -136,7 +179,25 @@ export const BookDetailPage = () => {
                         Ver todo
                     </Link>
                 </div>
-                {/* TODO: Implementar recomendaciones basadas en categoría o autor */}
+                {relatedLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                        <p className="text-muted-foreground">
+                            Cargando recomendaciones...
+                        </p>
+                    </div>
+                ) : transformedBooks.length > 0 ? (
+                    <BooksGrid books={transformedBooks} />
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <span className="material-symbols-outlined text-blue-300 text-6xl mb-3">
+                            sentiment_satisfied
+                        </span>
+                        <p className="text-gray-500 dark:text-gray-400">
+                            No hay libros relacionados disponibles por el
+                            momento.
+                        </p>
+                    </div>
+                )}
             </section>
         </MainContainer>
     );

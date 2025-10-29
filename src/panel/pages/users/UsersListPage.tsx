@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
     Table,
     TableBody,
@@ -16,7 +16,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -24,7 +24,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
     Pagination,
     PaginationContent,
@@ -33,12 +33,21 @@ import {
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@/components/ui/pagination";
-import { MoreHorizontal, Plus, Pencil, Trash2, Search, Shield, CheckCircle, XCircle } from "lucide-react";
-import { getUsers, deleteUser } from "@/panel/api/users.api";
-import type { User } from "@/library/interfaces/user.interface";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+} from '@/components/ui/pagination';
+import {
+    MoreHorizontal,
+    Plus,
+    Pencil,
+    Trash2,
+    Search,
+    Shield,
+    CheckCircle,
+    XCircle,
+} from 'lucide-react';
+import { getUsers, deleteUser } from '@/panel/api/users.api';
+import type { User } from '@/library/interfaces/user.interface';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -48,23 +57,35 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 const ITEMS_PER_PAGE = 8;
 
 // Mapeo de roles a colores y etiquetas en español
 const roleConfig: Record<string, { label: string; color: string }> = {
-    admin: { label: "Administrador", color: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" },
-    librarian: { label: "Bibliotecario", color: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400" },
-    executive: { label: "Ejecutivo", color: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400" },
-    reader: { label: "Lector", color: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" },
+    admin: {
+        label: 'Administrador',
+        color: '',
+    },
+    librarian: {
+        label: 'Bibliotecario',
+        color: '',
+    },
+    executive: {
+        label: 'Ejecutivo',
+        color: '',
+    },
+    reader: {
+        label: 'Lector',
+        color: '',
+    },
 };
 
 export const UsersListPage = () => {
     const navigate = useNavigate();
-    const [searchTerm, setSearchTerm] = useState("");
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [users, setUsers] = useState<User[]>([]);
     const [totalPages, setTotalPages] = useState(0);
@@ -99,7 +120,7 @@ export const UsersListPage = () => {
                 setTotalPages(data.totalPages);
                 setTotalUsers(data.total);
             } catch (err) {
-                setError("Error al cargar los usuarios");
+                setError('Error al cargar los usuarios');
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -130,7 +151,9 @@ export const UsersListPage = () => {
             setIsDeleting(true);
             await deleteUser(userToDelete._id);
 
-            toast.success(`Usuario ${userToDelete.name} eliminado exitosamente`);
+            toast.success(
+                `Usuario ${userToDelete.name} eliminado exitosamente`
+            );
             setUserToDelete(null);
 
             // Recargar los usuarios después de eliminar
@@ -163,16 +186,21 @@ export const UsersListPage = () => {
     // Obtener iniciales del nombre
     const getInitials = (name: string) => {
         return name
-            .split(" ")
+            .split(' ')
             .map((word) => word[0])
-            .join("")
+            .join('')
             .toUpperCase()
             .slice(0, 2);
     };
 
     // Obtener configuración de rol
     const getRoleConfig = (roleName: string) => {
-        return roleConfig[roleName] || { label: roleName, color: "bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400" };
+        return (
+            roleConfig[roleName] || {
+                label: roleName,
+                color: '',
+            }
+        );
     };
 
     return (
@@ -271,7 +299,7 @@ export const UsersListPage = () => {
                                     <TableRow>
                                         <TableCell
                                             colSpan={5}
-                                            className="text-center h-24 text-muted-foreground"
+                                            className="text-center h-24"
                                         >
                                             No se encontraron usuarios
                                         </TableCell>
@@ -279,7 +307,9 @@ export const UsersListPage = () => {
                                 ) : (
                                     // Lista de usuarios
                                     currentUsers.map((user) => {
-                                        const roleInfo = getRoleConfig(user.role.name);
+                                        const roleInfo = getRoleConfig(
+                                            user.role.name
+                                        );
 
                                         return (
                                             <TableRow key={user._id}>
@@ -287,7 +317,9 @@ export const UsersListPage = () => {
                                                     <div className="flex items-center gap-3">
                                                         <Avatar>
                                                             <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
-                                                                {getInitials(user.name)}
+                                                                {getInitials(
+                                                                    user.name
+                                                                )}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         <span className="capitalize">
@@ -299,19 +331,21 @@ export const UsersListPage = () => {
                                                     {user.email}
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${roleInfo.color}`}>
+                                                    <span
+                                                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${roleInfo.color}`}
+                                                    >
                                                         <Shield className="h-3 w-3" />
                                                         {roleInfo.label}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     {user.status ? (
-                                                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+                                                        <span className="inline-flex items-center gap-1 rounded-full  px-2.5 py-0.5 text-xs font-medium ">
                                                             <CheckCircle className="h-3 w-3" />
                                                             Activo
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900/30 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-400">
+                                                        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium">
                                                             <XCircle className="h-3 w-3" />
                                                             Inactivo
                                                         </span>
@@ -338,14 +372,22 @@ export const UsersListPage = () => {
                                                             </DropdownMenuLabel>
                                                             <DropdownMenuSeparator />
                                                             <DropdownMenuItem
-                                                                onClick={() => navigate(`/panel/usuarios/editar/${user._id}`)}
+                                                                onClick={() =>
+                                                                    navigate(
+                                                                        `/panel/usuarios/editar/${user._id}`
+                                                                    )
+                                                                }
                                                             >
                                                                 <Pencil />
                                                                 Editar
                                                             </DropdownMenuItem>
                                                             <DropdownMenuItem
                                                                 variant="destructive"
-                                                                onClick={() => setUserToDelete(user)}
+                                                                onClick={() =>
+                                                                    setUserToDelete(
+                                                                        user
+                                                                    )
+                                                                }
                                                             >
                                                                 <Trash2 />
                                                                 Eliminar
@@ -363,9 +405,9 @@ export const UsersListPage = () => {
 
                     <div className="mt-4 flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
-                            Mostrando {startIndex + 1} a{" "}
-                            {Math.min(endIndex, totalUsers)} de{" "}
-                            {totalUsers} usuarios
+                            Mostrando {startIndex + 1} a{' '}
+                            {Math.min(endIndex, totalUsers)} de {totalUsers}{' '}
+                            usuarios
                         </p>
 
                         {totalPages > 1 && (
@@ -384,8 +426,8 @@ export const UsersListPage = () => {
                                             }}
                                             className={
                                                 currentPage === 1
-                                                    ? "pointer-events-none opacity-50"
-                                                    : ""
+                                                    ? 'pointer-events-none opacity-50'
+                                                    : ''
                                             }
                                         />
                                     </PaginationItem>
@@ -425,7 +467,9 @@ export const UsersListPage = () => {
                                             pageNumber === currentPage + 2
                                         ) {
                                             return (
-                                                <PaginationItem key={pageNumber}>
+                                                <PaginationItem
+                                                    key={pageNumber}
+                                                >
                                                     <PaginationEllipsis />
                                                 </PaginationItem>
                                             );
@@ -446,8 +490,8 @@ export const UsersListPage = () => {
                                             }}
                                             className={
                                                 currentPage === totalPages
-                                                    ? "pointer-events-none opacity-50"
-                                                    : ""
+                                                    ? 'pointer-events-none opacity-50'
+                                                    : ''
                                             }
                                         />
                                     </PaginationItem>
@@ -459,12 +503,18 @@ export const UsersListPage = () => {
             </Card>
 
             {/* AlertDialog para confirmar eliminación */}
-            <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+            <AlertDialog
+                open={!!userToDelete}
+                onOpenChange={(open) => !open && setUserToDelete(null)}
+            >
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>¿Estás seguro de eliminar este usuario?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                            ¿Estás seguro de eliminar este usuario?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                            Esta acción no se puede deshacer. Se eliminará permanentemente el usuario{' '}
+                            Esta acción no se puede deshacer. Se eliminará
+                            permanentemente el usuario{' '}
                             <span className="font-semibold">
                                 {userToDelete?.name}
                             </span>{' '}
@@ -472,7 +522,9 @@ export const UsersListPage = () => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel disabled={isDeleting}>
+                            Cancelar
+                        </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDeleteUser}
                             disabled={isDeleting}

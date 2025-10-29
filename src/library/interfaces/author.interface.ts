@@ -1,3 +1,5 @@
+import type { Book } from './book.interface';
+
 export interface AuthorPerson {
     _id: string;
     firstName: string;
@@ -8,7 +10,7 @@ export interface AuthorPerson {
 export interface Author {
     _id: string;
     person: AuthorPerson;
-    books: string[];
+    books: Book[];
     __v: number;
     fileName?: string;
 }

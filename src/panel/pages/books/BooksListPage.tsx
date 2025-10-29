@@ -34,7 +34,14 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
-import { MoreHorizontal, Plus, Pencil, Trash2, Search, BookOpen } from 'lucide-react';
+import {
+    MoreHorizontal,
+    Plus,
+    Pencil,
+    Trash2,
+    Search,
+    BookOpen,
+} from 'lucide-react';
 import { getBooks } from '@/panel/api/books.api';
 import type { Book } from '@/library/interfaces/book.interface';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -220,12 +227,17 @@ export const BooksListPage = () => {
                                                 <div className="h-14 w-10 overflow-hidden rounded shadow-sm">
                                                     {book.coverImage ? (
                                                         <img
-                                                            src={`${import.meta.env.VITE_API_URL}/files/cover/${book.coverImage}`}
+                                                            src={`${
+                                                                import.meta.env
+                                                                    .VITE_API_URL
+                                                            }/files/cover/${
+                                                                book.coverImage
+                                                            }`}
                                                             alt={book.title}
                                                             className="h-full w-full object-cover"
                                                         />
                                                     ) : (
-                                                        <div className="h-full w-full bg-gradient-to-br from-slate-400 to-slate-600 dark:from-slate-600 dark:to-slate-800 flex items-center justify-center">
+                                                        <div className="h-full w-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center">
                                                             <BookOpen className="text-white size-5" />
                                                         </div>
                                                     )}
@@ -235,13 +247,14 @@ export const BooksListPage = () => {
                                                 {book.title}
                                             </TableCell>
                                             <TableCell>
-                                                {book.author.person.firstName} {book.author.person.lastName}
+                                                {book.author.person.firstName}{' '}
+                                                {book.author.person.lastName}
                                             </TableCell>
                                             <TableCell className="capitalize">
                                                 {book.category.name}
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <span className="inline-flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+                                                <span className="inline-flex items-center justify-center rounded-full bg-green-100  px-2.5 py-0.5 text-xs font-medium text-green-700 ">
                                                     Activo
                                                 </span>
                                             </TableCell>
@@ -270,7 +283,11 @@ export const BooksListPage = () => {
                                                             Ver detalles
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
-                                                            onClick={() => navigate(`/panel/libros/editar/${book._id}`)}
+                                                            onClick={() =>
+                                                                navigate(
+                                                                    `/panel/libros/editar/${book._id}`
+                                                                )
+                                                            }
                                                         >
                                                             <Pencil />
                                                             Editar
@@ -292,8 +309,8 @@ export const BooksListPage = () => {
                     <div className="mt-4 flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
                             Mostrando {startIndex + 1} a{' '}
-                            {Math.min(endIndex, totalBooks)} de{' '}
-                            {totalBooks} libros
+                            {Math.min(endIndex, totalBooks)} de {totalBooks}{' '}
+                            libros
                         </p>
 
                         {totalPages > 1 && (
@@ -305,7 +322,9 @@ export const BooksListPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 if (currentPage > 1) {
-                                                    handlePageChange(currentPage - 1);
+                                                    handlePageChange(
+                                                        currentPage - 1
+                                                    );
                                                 }
                                             }}
                                             className={
@@ -337,7 +356,9 @@ export const BooksListPage = () => {
                                                         }
                                                         onClick={(e) => {
                                                             e.preventDefault();
-                                                            handlePageChange(pageNumber);
+                                                            handlePageChange(
+                                                                pageNumber
+                                                            );
                                                         }}
                                                     >
                                                         {pageNumber}
@@ -349,7 +370,9 @@ export const BooksListPage = () => {
                                             pageNumber === currentPage + 2
                                         ) {
                                             return (
-                                                <PaginationItem key={pageNumber}>
+                                                <PaginationItem
+                                                    key={pageNumber}
+                                                >
                                                     <PaginationEllipsis />
                                                 </PaginationItem>
                                             );
@@ -363,7 +386,9 @@ export const BooksListPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 if (currentPage < totalPages) {
-                                                    handlePageChange(currentPage + 1);
+                                                    handlePageChange(
+                                                        currentPage + 1
+                                                    );
                                                 }
                                             }}
                                             className={
