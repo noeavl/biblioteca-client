@@ -2,7 +2,6 @@ import { Link, useNavigate } from 'react-router';
 import { CustomLogo } from '../../components/custom/CustomLogo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 import {
     Sheet,
     SheetContent,
@@ -75,7 +74,9 @@ export const CustomHeader = () => {
                         <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                            onClick={() =>
+                                setTheme(theme === 'dark' ? 'light' : 'dark')
+                            }
                             aria-label="Toggle theme"
                             className="p-2"
                         >
@@ -212,7 +213,9 @@ export const CustomHeader = () => {
                         <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                            onClick={() =>
+                                setTheme(theme === 'dark' ? 'light' : 'dark')
+                            }
                             aria-label="Toggle theme"
                         >
                             {theme === 'dark' ? (

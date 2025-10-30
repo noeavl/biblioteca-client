@@ -118,7 +118,7 @@ export const AuthorsBooksPage = () => {
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Author Header Section */}
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 py-16">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 py-16C">
                 <div className="w-32 h-32 sm:w-40 sm:h-40 flex-shrink-0">
                     {authorImageUrl ? (
                         <img

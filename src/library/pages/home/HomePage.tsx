@@ -221,9 +221,9 @@ export const HomePage = () => {
     return (
         <>
             {/* Nueva sección interactiva de estante con tres filas */}
-            <section className="bg-background h-screen flex items-center overflow-hidden">
+            <section className="bg-background h-screen flex items-center p-6 overflow-hidden">
                 {books.length === 0 ? (
-                    <div className="relative px-4 w-full h-full py-6">
+                    <div className="relative w-full h-full">
                         <div className="max-w-7xl mx-auto flex flex-col justify-center h-full gap-16">
                             {/* Mensaje de Bienvenida */}
                             <div className="text-center">
@@ -247,11 +247,17 @@ export const HomePage = () => {
                                     </p>
                                 </div>
                                 {/* Repisa */}
-                                <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
-                                    background: 'linear-gradient(to bottom, #b45309, #92400e)',
-                                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
-                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
-                                }}></div>
+                                <div
+                                    className="h-3 rounded-sm shadow-md w-[85%] mx-auto"
+                                    style={{
+                                        background:
+                                            'linear-gradient(to bottom, #b45309, #92400e)',
+                                        backgroundImage:
+                                            'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                        boxShadow:
+                                            'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)',
+                                    }}
+                                ></div>
                             </div>
 
                             {/* Estante 2 */}
@@ -262,11 +268,17 @@ export const HomePage = () => {
                                     </p>
                                 </div>
                                 {/* Repisa */}
-                                <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
-                                    background: 'linear-gradient(to bottom, #b45309, #92400e)',
-                                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
-                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
-                                }}></div>
+                                <div
+                                    className="h-3 rounded-sm shadow-md w-[85%] mx-auto"
+                                    style={{
+                                        background:
+                                            'linear-gradient(to bottom, #b45309, #92400e)',
+                                        backgroundImage:
+                                            'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                        boxShadow:
+                                            'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)',
+                                    }}
+                                ></div>
                             </div>
 
                             {/* Estante 3 */}
@@ -277,11 +289,17 @@ export const HomePage = () => {
                                     </p>
                                 </div>
                                 {/* Repisa */}
-                                <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
-                                    background: 'linear-gradient(to bottom, #b45309, #92400e)',
-                                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
-                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
-                                }}></div>
+                                <div
+                                    className="h-3 rounded-sm shadow-md w-[85%] mx-auto"
+                                    style={{
+                                        background:
+                                            'linear-gradient(to bottom, #b45309, #92400e)',
+                                        backgroundImage:
+                                            'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                        boxShadow:
+                                            'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)',
+                                    }}
+                                ></div>
                             </div>
                         </div>
                     </div>
@@ -331,11 +349,17 @@ export const HomePage = () => {
                                         ))}
                                     </div>
                                     {/* Repisa */}
-                                    <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
-                                        background: 'linear-gradient(to bottom, #b45309, #92400e)',
-                                        backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
-                                        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
-                                    }}></div>
+                                    <div
+                                        className="h-3 rounded-sm shadow-md w-[85%] mx-auto"
+                                        style={{
+                                            background:
+                                                'linear-gradient(to bottom, #b45309, #92400e)',
+                                            backgroundImage:
+                                                'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                            boxShadow:
+                                                'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)',
+                                        }}
+                                    ></div>
                                     {/* Postit - Call to Action 1 */}
                                     <div className="hidden md:block absolute bg-amber-400 dark:bg-amber-500 bottom-0 left-[10%] shadow-lg px-4 py-2 rounded-sm transform -rotate-2 z-10">
                                         <span className="text-lg text-white font-medium">
@@ -374,11 +398,17 @@ export const HomePage = () => {
                                         ))}
                                     </div>
                                     {/* Repisa */}
-                                    <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
-                                        background: 'linear-gradient(to bottom, #b45309, #92400e)',
-                                        backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
-                                        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
-                                    }}></div>
+                                    <div
+                                        className="h-3 rounded-sm shadow-md w-[85%] mx-auto"
+                                        style={{
+                                            background:
+                                                'linear-gradient(to bottom, #b45309, #92400e)',
+                                            backgroundImage:
+                                                'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                            boxShadow:
+                                                'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)',
+                                        }}
+                                    ></div>
                                     {/* Postit - Call to Action 2 */}
                                     <div className="hidden md:block absolute bottom-0 right-[8%] bg-pink-200 dark:bg-pink-300 shadow-lg px-4 py-2 rounded-sm transform -rotate-1 z-10">
                                         <span className="text-sm text-gray-800 font-medium">
@@ -417,11 +447,17 @@ export const HomePage = () => {
                                         ))}
                                     </div>
                                     {/* Repisa */}
-                                    <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
-                                        background: 'linear-gradient(to bottom, #b45309, #92400e)',
-                                        backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
-                                        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
-                                    }}></div>
+                                    <div
+                                        className="h-3 rounded-sm shadow-md w-[85%] mx-auto"
+                                        style={{
+                                            background:
+                                                'linear-gradient(to bottom, #b45309, #92400e)',
+                                            backgroundImage:
+                                                'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                            boxShadow:
+                                                'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)',
+                                        }}
+                                    ></div>
                                     {/* Postit - Call to Action 3 */}
                                     <div className="hidden md:block absolute bottom-0 left-[8%] bg-green-200 dark:bg-green-300 shadow-lg px-4 py-2 rounded-sm transform -rotate-1 z-10">
                                         <span className="text-sm text-gray-800 font-medium">
@@ -434,7 +470,7 @@ export const HomePage = () => {
                     </div>
                 )}
             </section>
-            <section className="bg-muted/30 p-16 sm:pb-24">
+            <section className="bg-muted/30 p-6 sm:pb-24">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
                         <h3 className="text-3xl font-bold text-foreground">
@@ -495,7 +531,7 @@ export const HomePage = () => {
                     )}
                 </div>
             </section>
-            <section className="pb-16 sm:pb-24 bg-background">
+            <section className="p-6 sm:pb-24 bg-background">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
                         <h3 className="text-3xl font-bold text-foreground">
