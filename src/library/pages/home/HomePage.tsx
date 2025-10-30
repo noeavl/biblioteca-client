@@ -30,7 +30,7 @@ export const HomePage = () => {
     useEffect(() => {
         const fetchBooks = async () => {
             try {
-                const data = await getBooks({ limit: 24 });
+                const data = await getBooks({ limit: 24, status: 'true' });
                 setBooks(data.books);
             } catch (error) {
                 console.error('Error al cargar los libros:', error);

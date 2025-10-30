@@ -8,6 +8,7 @@ export interface GetBooksParams {
     authors?: string[]; // Array de IDs de autores
     categories?: string[]; // Array de IDs de categorías
     sort?: SortType; // Tipo de ordenamiento
+    status?: string;
 }
 
 export interface GetBooksResponse {
@@ -17,28 +18,30 @@ export interface GetBooksResponse {
     totalPages: number;
 }
 
-export const getBooks = async (params?: GetBooksParams): Promise<GetBooksResponse> => {
+export const getBooks = async (
+    params?: GetBooksParams
+): Promise<GetBooksResponse> => {
     try {
         const queryParams = new URLSearchParams();
         if (params?.limit) queryParams.append('limit', params.limit.toString());
         if (params?.skip) queryParams.append('skip', params.skip.toString());
 
         // Agregar filtros de autores (comma-separated IDs)
-        if (params?.authors && params.authors.length > 0) {
+        if (params?.authors && params.authors.length > 0)
             queryParams.append('authors', params.authors.join(','));
-        }
 
         // Agregar filtros de categorías (comma-separated IDs)
-        if (params?.categories && params.categories.length > 0) {
+        if (params?.categories && params.categories.length > 0)
             queryParams.append('categories', params.categories.join(','));
-        }
 
         // Agregar ordenamiento
-        if (params?.sort) {
-            queryParams.append('sort', params.sort);
-        }
+        if (params?.sort) queryParams.append('sort', params.sort);
 
-        const url = `/books${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        if (params?.status != null) queryParams.append('status', params.status);
+
+        const url = `/books${
+            queryParams.toString() ? `?${queryParams.toString()}` : ''
+        }`;
         const { data } = await libraryApi.get<GetBooksResponse>(url);
         return data;
     } catch (error) {

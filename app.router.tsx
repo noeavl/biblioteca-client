@@ -19,6 +19,7 @@ import { UsersEditPage } from '@/panel/pages/users/UsersEditPage';
 import { BooksListPage } from '@/panel/pages/books/BooksListPage';
 import { BooksCreatePage } from '@/panel/pages/books/BooksCreatePage';
 import { BooksEditPage } from '@/panel/pages/books/BooksEditPage';
+import { BookDetailPage as PanelBookDetailPage } from '@/panel/pages/books/BookDetailPage';
 import { CategoriesListPage } from '@/panel/pages/categories/CategoriesListPage';
 import { CategoriesCreatePage } from '@/panel/pages/categories/CategoriesCreatePage';
 import { CategoriesEditPage } from '@/panel/pages/categories/CategoriesEditPage';
@@ -128,6 +129,10 @@ export const appRouter = createBrowserRouter([
                     {
                         path: 'editar/:bookId',
                         Component: BooksEditPage,
+                    },
+                    {
+                        path: 'detalle/:bookId',
+                        Component: PanelBookDetailPage,
                     },
                 ],
             },

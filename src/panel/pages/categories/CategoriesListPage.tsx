@@ -8,7 +8,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import {
     Table,
     TableBody,
@@ -39,7 +38,6 @@ import {
     Plus,
     Pencil,
     Trash2,
-    Search,
     BookOpen,
 } from 'lucide-react';
 import { getCategories, deleteCategory } from '@/panel/api/categories.api';
@@ -62,7 +60,6 @@ const ITEMS_PER_PAGE = 8;
 export const CategoriesListPage = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [searchTerm, setSearchTerm] = useState('');
     const [categories, setCategories] = useState<BookCategory[]>([]);
     const [totalCategories, setTotalCategories] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -100,28 +97,14 @@ export const CategoriesListPage = () => {
         fetchCategories();
     }, [currentPage]);
 
-    // Filtrar categorías por término de búsqueda (localmente sobre la página actual)
-    const filteredCategories = categories.filter((category) => {
-        if (!searchTerm) return true;
-        return category.name.toLowerCase().includes(searchTerm.toLowerCase());
-    });
-
     // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + categories.length;
-    const currentCategories = filteredCategories;
+    const currentCategories = categories;
 
     // Función para cambiar de página
     const handlePageChange = (page: number) => {
         setSearchParams({ page: page.toString() });
-    };
-
-    // Resetear a página 1 cuando cambia la búsqueda
-    const handleSearchChange = (value: string) => {
-        setSearchTerm(value);
-        if (currentPage !== 1) {
-            setSearchParams({ page: '1' });
-        }
     };
 
     // Manejar eliminación de categoría
@@ -180,20 +163,6 @@ export const CategoriesListPage = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="mb-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                            <Input
-                                placeholder="Buscar categorías..."
-                                value={searchTerm}
-                                onChange={(e) =>
-                                    handleSearchChange(e.target.value)
-                                }
-                                className="pl-9"
-                            />
-                        </div>
-                    </div>
-
                     <div className="rounded-md border">
                         <Table>
                             <TableHeader>

@@ -465,7 +465,7 @@ export const ReaderPage = () => {
     return (
         <div ref={readerContainerRef} className={`flex flex-col min-h-screen `}>
             <div
-                className={`flex flex-none justify-between items-center p-3 sm:p-4 md:p-6 lg:p-8 border-b-1 `}
+                className={`flex flex-none justify-between items-center p-3 sm:p-4 md:p-6 lg:p-8 border-b-1  border-foreground/20`}
             >
                 <div className="hidden sm:flex gap-3">
                     <Popover>

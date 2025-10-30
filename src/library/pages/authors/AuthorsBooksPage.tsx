@@ -55,7 +55,9 @@ export const AuthorsBooksPage = () => {
                     authors: [authorId],
                     limit: BOOKS_PER_PAGE,
                     skip,
+                    status: 'true',
                 });
+
                 setBooks(response.books);
                 setTotalBooks(response.total);
                 window.scrollTo({ top: 0, behavior: 'smooth' });

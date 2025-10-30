@@ -82,6 +82,7 @@ export const createBook = async (
             title: bookData.title,
             publicationYear: bookData.publicationYear,
             categoryId: bookData.categoryId,
+            synopsis: bookData.synopsis,
         };
 
         const { data } = await panelApi.post<CreateBookResponse>(

@@ -17,6 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Upload, X, FileText } from 'lucide-react';
 import { getAuthors } from '@/panel/api/authors.api';
 import { getCategories } from '@/panel/api/categories.api';
@@ -25,6 +26,7 @@ import { uploadBookPDF, uploadBookCover } from '@/panel/api/files.api';
 import type { Author } from '@/library/interfaces/author.interface';
 import type { BookCategory } from '@/library/interfaces/book.interface';
 import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
 
 export const BooksCreatePage = () => {
     const navigate = useNavigate();
@@ -35,9 +37,11 @@ export const BooksCreatePage = () => {
 
     const [formData, setFormData] = useState({
         title: '',
+        synopsis: '',
         authorId: '',
         categoryId: '',
         publicationYear: new Date().getFullYear(),
+        status: true,
     });
 
     const [coverImage, setCoverImage] = useState<File | null>(null);
@@ -131,6 +135,15 @@ export const BooksCreatePage = () => {
         if (!formData.title.trim()) {
             toast.error('El título es requerido');
             return;
+        }
+
+        if (!formData.synopsis.trim()) {
+            toast.error('La sinopsis es requerida');
+            return;
+        }
+
+        if (formData.synopsis && formData.synopsis.length > 500) {
+            toast.error('La sinopsis no debe ser mayor a 500 caracteres');
         }
 
         if (!formData.authorId) {
@@ -278,6 +291,27 @@ export const BooksCreatePage = () => {
                                 required
                             />
                         </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="synopsis">
+                                Sinopsis{' '}
+                                <span className="text-destructive">*</span>
+                            </Label>
+                            <Textarea
+                                id="synopsis"
+                                placeholder="Escribe aquí una breve sinopsis del libro…"
+                                value={formData.synopsis}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        synopsis: e.target.value,
+                                    })
+                                }
+                                required
+                            />
+                            <p className="text-muted-foreground text-sm">
+                                Debe estar entre 1 y 500 caracteres.
+                            </p>
+                        </div>
 
                         {/* Autor */}
                         <div className="space-y-2">
@@ -372,6 +406,30 @@ export const BooksCreatePage = () => {
                             <p className="text-xs text-muted-foreground">
                                 Debe estar entre 1 y 2030
                             </p>
+                        </div>
+
+                        {/* Estado */}
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <Label htmlFor="status" className="text-base">
+                                    Estado del Libro
+                                </Label>
+                                <p className="text-sm text-muted-foreground">
+                                    {formData.status
+                                        ? 'El libro estará visible para los usuarios'
+                                        : 'El libro no estará visible para los usuarios'}
+                                </p>
+                            </div>
+                            <Switch
+                                id="status"
+                                checked={formData.status}
+                                onCheckedChange={(checked) =>
+                                    setFormData({
+                                        ...formData,
+                                        status: checked,
+                                    })
+                                }
+                            />
                         </div>
 
                         {/* Portada */}

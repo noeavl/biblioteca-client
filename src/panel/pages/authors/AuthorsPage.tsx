@@ -8,7 +8,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
     Table,
     TableBody,
@@ -34,7 +33,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
-import { MoreHorizontal, Plus, Pencil, Trash2, Search } from "lucide-react";
+import { MoreHorizontal, Plus, Pencil, Trash2 } from "lucide-react";
 import { getAuthors, deleteAuthor } from "@/panel/api/authors.api";
 import type { Author } from "@/library/interfaces/author.interface";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -54,8 +53,6 @@ const ITEMS_PER_PAGE = 8;
 
 export const AuthorsPage = () => {
     const navigate = useNavigate();
-    const [searchTerm, setSearchTerm] = useState("");
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [authors, setAuthors] = useState<Author[]>([]);
     const [totalPages, setTotalPages] = useState(0);
@@ -65,16 +62,7 @@ export const AuthorsPage = () => {
     const [authorToDelete, setAuthorToDelete] = useState<Author | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Debounce del término de búsqueda
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-        }, 500); // Esperar 500ms después de que el usuario deje de escribir
-
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
-
-    // Cargar autores desde la API con paginación y búsqueda del lado del servidor
+    // Cargar autores desde la API con paginación
     useEffect(() => {
         const fetchAuthors = async () => {
             try {
@@ -84,7 +72,6 @@ export const AuthorsPage = () => {
                 const data = await getAuthors({
                     limit: ITEMS_PER_PAGE,
                     skip,
-                    search: debouncedSearchTerm || undefined,
                 });
                 setAuthors(data.authors);
                 setTotalPages(data.totalPages);
@@ -98,25 +85,18 @@ export const AuthorsPage = () => {
         };
 
         fetchAuthors();
-    }, [currentPage, debouncedSearchTerm]);
+    }, [currentPage]);
 
     // Función para generar iniciales
     const getInitials = (firstName: string, lastName: string) => {
         return `${firstName.charAt(0)}${lastName.charAt(0)}`;
     };
 
-    // Los autores ya vienen filtrados y paginados del servidor
     const currentAuthors = authors;
 
     // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + authors.length;
-
-    // Resetear a página 1 cuando cambia la búsqueda
-    const handleSearchChange = (value: string) => {
-        setSearchTerm(value);
-        setCurrentPage(1);
-    };
 
     // Manejar eliminación de autor
     const handleDeleteAuthor = async () => {
@@ -181,20 +161,6 @@ export const AuthorsPage = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="mb-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                            <Input
-                                placeholder="Buscar autores..."
-                                value={searchTerm}
-                                onChange={(e) =>
-                                    handleSearchChange(e.target.value)
-                                }
-                                className="pl-9"
-                            />
-                        </div>
-                    </div>
-
                     <div className="rounded-md border">
                         <Table>
                             <TableHeader>

@@ -8,7 +8,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import {
     Table,
     TableBody,
@@ -39,7 +38,6 @@ import {
     Plus,
     Pencil,
     Trash2,
-    Search,
     Shield,
     CheckCircle,
     XCircle,
@@ -84,8 +82,6 @@ const roleConfig: Record<string, { label: string; color: string }> = {
 
 export const UsersListPage = () => {
     const navigate = useNavigate();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [users, setUsers] = useState<User[]>([]);
     const [totalPages, setTotalPages] = useState(0);
@@ -95,16 +91,7 @@ export const UsersListPage = () => {
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Debounce del término de búsqueda
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-        }, 500); // Esperar 500ms después de que el usuario deje de escribir
-
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
-
-    // Cargar usuarios desde la API con paginación y búsqueda del lado del servidor
+    // Cargar usuarios desde la API con paginación
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -114,7 +101,6 @@ export const UsersListPage = () => {
                 const data = await getUsers({
                     limit: ITEMS_PER_PAGE,
                     skip,
-                    search: debouncedSearchTerm || undefined,
                 });
                 setUsers(data.users);
                 setTotalPages(data.totalPages);
@@ -128,20 +114,13 @@ export const UsersListPage = () => {
         };
 
         fetchUsers();
-    }, [currentPage, debouncedSearchTerm]);
+    }, [currentPage]);
 
-    // Los usuarios ya vienen filtrados y paginados del servidor
     const currentUsers = users;
 
     // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + users.length;
-
-    // Resetear a página 1 cuando cambia la búsqueda
-    const handleSearchChange = (value: string) => {
-        setSearchTerm(value);
-        setCurrentPage(1);
-    };
 
     // Manejar eliminación de usuario
     const handleDeleteUser = async () => {
@@ -228,20 +207,6 @@ export const UsersListPage = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="mb-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                            <Input
-                                placeholder="Buscar usuarios por nombre, email o rol..."
-                                value={searchTerm}
-                                onChange={(e) =>
-                                    handleSearchChange(e.target.value)
-                                }
-                                className="pl-9"
-                            />
-                        </div>
-                    </div>
-
                     <div className="rounded-md border">
                         <Table>
                             <TableHeader>

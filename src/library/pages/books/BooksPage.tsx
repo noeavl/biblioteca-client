@@ -66,9 +66,16 @@ export const BooksPage = () => {
                 const response = await getBooks({
                     limit: ITEMS_PER_PAGE,
                     skip,
-                    authors: selectedAuthors.length > 0 ? selectedAuthors : undefined,
-                    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+                    authors:
+                        selectedAuthors.length > 0
+                            ? selectedAuthors
+                            : undefined,
+                    categories:
+                        selectedCategories.length > 0
+                            ? selectedCategories
+                            : undefined,
                     sort: selectedSort,
+                    status: 'true',
                 });
 
                 setBooks(response.books);
@@ -90,10 +97,12 @@ export const BooksPage = () => {
             try {
                 setFiltersLoading(true);
                 // Ejecutar ambas peticiones en paralelo para mejor rendimiento
-                const [categoriesResponse, authorsResponse] = await Promise.all([
-                    getCategories({ hasBooks: true }),
-                    getAuthors({ hasBooks: true })
-                ]);
+                const [categoriesResponse, authorsResponse] = await Promise.all(
+                    [
+                        getCategories({ hasBooks: true }),
+                        getAuthors({ hasBooks: true }),
+                    ]
+                );
 
                 setCategories(categoriesResponse.categories);
                 setAuthors(authorsResponse.authors);
@@ -129,15 +138,17 @@ export const BooksPage = () => {
 
     // Handlers para los filtros - ahora usan IDs
     const handleCategoryChange = (categoryId: string, checked: boolean) => {
-        setSelectedCategories(prev =>
-            checked ? [...prev, categoryId] : prev.filter(c => c !== categoryId)
+        setSelectedCategories((prev) =>
+            checked
+                ? [...prev, categoryId]
+                : prev.filter((c) => c !== categoryId)
         );
         setSearchParams({ page: '1' }); // Reset a página 1 al filtrar
     };
 
     const handleAuthorChange = (authorId: string, checked: boolean) => {
-        setSelectedAuthors(prev =>
-            checked ? [...prev, authorId] : prev.filter(a => a !== authorId)
+        setSelectedAuthors((prev) =>
+            checked ? [...prev, authorId] : prev.filter((a) => a !== authorId)
         );
         setSearchParams({ page: '1' }); // Reset a página 1 al filtrar
     };
@@ -158,32 +169,31 @@ export const BooksPage = () => {
         ...(filtersLoading
             ? []
             : [
-                {
-                    type: 'checkbox' as const,
-                    label: 'Categorías',
-                    items: categories.map((category) => ({
-                        name: category.name,
-                        id: category._id,
-                        quantityBooks: category.books?.length || 0,
-                    })),
-                    onChange: (categoryId: string, checked?: boolean) => {
-                        handleCategoryChange(categoryId, checked ?? false);
-                    },
-                },
-                {
-                    type: 'checkbox' as const,
-                    label: 'Autores',
-                    items: authors.map((author) => ({
-                        name: `${author.person.firstName} ${author.person.lastName}`,
-                        id: author._id,
-                        quantityBooks: author.books?.length || 0,
-                    })),
-                    onChange: (authorId: string, checked?: boolean) => {
-                        handleAuthorChange(authorId, checked ?? false);
-                    },
-                },
-            ]
-        ),
+                  {
+                      type: 'checkbox' as const,
+                      label: 'Categorías',
+                      items: categories.map((category) => ({
+                          name: category.name,
+                          id: category._id,
+                          quantityBooks: category.books?.length || 0,
+                      })),
+                      onChange: (categoryId: string, checked?: boolean) => {
+                          handleCategoryChange(categoryId, checked ?? false);
+                      },
+                  },
+                  {
+                      type: 'checkbox' as const,
+                      label: 'Autores',
+                      items: authors.map((author) => ({
+                          name: `${author.person.firstName} ${author.person.lastName}`,
+                          id: author._id,
+                          quantityBooks: author.books?.length || 0,
+                      })),
+                      onChange: (authorId: string, checked?: boolean) => {
+                          handleAuthorChange(authorId, checked ?? false);
+                      },
+                  },
+              ]),
     ];
 
     // Transformar libros al formato esperado por BooksGrid
@@ -203,7 +213,12 @@ export const BooksPage = () => {
     return (
         <MainLayout
             title="Catálogo de Libros"
-            sidebar={<FilterSideBar filters={bookFilters} isLoading={filtersLoading} />}
+            sidebar={
+                <FilterSideBar
+                    filters={bookFilters}
+                    isLoading={filtersLoading}
+                />
+            }
         >
             <div className="space-y-6 sm:space-y-8">
                 {loading ? (
@@ -214,7 +229,9 @@ export const BooksPage = () => {
                     </div>
                 ) : transformedBooks.length === 0 ? (
                     <div className="flex items-center justify-center py-12">
-                        <p className="text-muted-foreground">No se encontraron libros</p>
+                        <p className="text-muted-foreground">
+                            No se encontraron libros
+                        </p>
                     </div>
                 ) : (
                     <>

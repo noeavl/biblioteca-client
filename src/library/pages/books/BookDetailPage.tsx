@@ -137,15 +137,15 @@ export const BookDetailPage = () => {
                             </h3>
                         </div>
                         <div className="flex flex-wrap justify-start items-center gap-2 sm:gap-3">
-                            <span className="text-sm sm:text-base text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-3 py-2 rounded-full">
+                            <span className="text-sm sm:text-base text-blue-400 bg-blue-100 px-3 py-2 rounded-full">
                                 {book.category.name}
                             </span>
                             <span className="text-sm sm:text-base text-gray-400">
                                 Publicado en {book.publicationYear}
                             </span>
                         </div>
-                        <p className="text-sm sm:text-base leading-relaxed">
-                            Sin sinopsis disponible
+                        <p className="text-sm sm:text-base leading-relaxed text-muted-foreground">
+                            {book.synopsis || 'Sin sinopsis disponible'}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3">
                             <Link to={`/libros/lector/${book._id}`}>

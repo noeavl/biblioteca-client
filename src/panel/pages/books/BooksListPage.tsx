@@ -8,7 +8,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import {
     Table,
     TableBody,
@@ -39,7 +38,6 @@ import {
     Plus,
     Pencil,
     Trash2,
-    Search,
     BookOpen,
 } from 'lucide-react';
 import { getBooks } from '@/panel/api/books.api';
@@ -51,8 +49,6 @@ const ITEMS_PER_PAGE = 8;
 export const BooksListPage = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [books, setBooks] = useState<Book[]>([]);
     const [totalBooks, setTotalBooks] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -62,16 +58,7 @@ export const BooksListPage = () => {
     // Obtener página actual de los query params
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
-    // Debounce del término de búsqueda
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-        }, 500); // Esperar 500ms después de que el usuario deje de escribir
-
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
-
-    // Cargar libros desde la API con paginación y búsqueda del lado del servidor
+    // Cargar libros desde la API con paginación
     useEffect(() => {
         const fetchBooks = async () => {
             try {
@@ -81,7 +68,6 @@ export const BooksListPage = () => {
                 const response = await getBooks({
                     limit: ITEMS_PER_PAGE,
                     skip,
-                    search: debouncedSearchTerm || undefined, // Usar el término con debounce
                 });
                 setBooks(response.books);
                 setTotalBooks(response.total);
@@ -95,9 +81,8 @@ export const BooksListPage = () => {
         };
 
         fetchBooks();
-    }, [currentPage, debouncedSearchTerm]);
+    }, [currentPage]);
 
-    // Los libros ya vienen filtrados del servidor
     const currentBooks = books;
 
     // Calcular índices para mostrar en la UI
@@ -107,14 +92,6 @@ export const BooksListPage = () => {
     // Función para cambiar de página
     const handlePageChange = (page: number) => {
         setSearchParams({ page: page.toString() });
-    };
-
-    // Resetear a página 1 cuando cambia la búsqueda
-    const handleSearchChange = (value: string) => {
-        setSearchTerm(value);
-        if (currentPage !== 1) {
-            setSearchParams({ page: '1' });
-        }
     };
 
     return (
@@ -142,20 +119,6 @@ export const BooksListPage = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="mb-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                            <Input
-                                placeholder="Buscar libros..."
-                                value={searchTerm}
-                                onChange={(e) =>
-                                    handleSearchChange(e.target.value)
-                                }
-                                className="pl-9"
-                            />
-                        </div>
-                    </div>
-
                     <div className="rounded-md border">
                         <Table>
                             <TableHeader>
@@ -254,9 +217,15 @@ export const BooksListPage = () => {
                                                 {book.category.name}
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <span className="inline-flex items-center justify-center rounded-full bg-green-100  px-2.5 py-0.5 text-xs font-medium text-green-700 ">
-                                                    Activo
-                                                </span>
+                                                {book.status ? (
+                                                    <span className="inline-flex items-center justify-center rounded-full bg-green-100  px-2.5 py-0.5 text-xs font-medium text-green-700 ">
+                                                        Activo
+                                                    </span>
+                                                ) : (
+                                                    <div className="inline-flex items-center justify-center rounded-full bg-red-100  px-2.5 py-0.5 text-xs font-medium text-destructive">
+                                                        Inactivo
+                                                    </div>
+                                                )}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <DropdownMenu>
@@ -278,7 +247,13 @@ export const BooksListPage = () => {
                                                             Acciones
                                                         </DropdownMenuLabel>
                                                         <DropdownMenuSeparator />
-                                                        <DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() =>
+                                                                navigate(
+                                                                    `/panel/libros/detalle/${book._id}`
+                                                                )
+                                                            }
+                                                        >
                                                             <BookOpen />
                                                             Ver detalles
                                                         </DropdownMenuItem>

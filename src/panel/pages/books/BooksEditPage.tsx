@@ -17,7 +17,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Upload, X, FileText } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { ArrowLeft, Upload, X, FileText, ExternalLink } from 'lucide-react';
 import { getAuthors } from '@/panel/api/authors.api';
 import { getCategories } from '@/panel/api/categories.api';
 import { getBookById, updateBook } from '@/panel/api/books.api';
@@ -25,6 +26,7 @@ import { uploadBookPDF, uploadBookCover } from '@/panel/api/files.api';
 import type { Author } from '@/library/interfaces/author.interface';
 import type { BookCategory, Book } from '@/library/interfaces/book.interface';
 import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
 
 export const BooksEditPage = () => {
     const navigate = useNavigate();
@@ -40,6 +42,8 @@ export const BooksEditPage = () => {
         authorId: '',
         categoryId: '',
         publicationYear: new Date().getFullYear(),
+        synopsis: '',
+        status: true,
     });
 
     const [coverImage, setCoverImage] = useState<File | null>(null);
@@ -76,6 +80,8 @@ export const BooksEditPage = () => {
                     authorId: bookData.author._id,
                     categoryId: bookData.category._id,
                     publicationYear: bookData.publicationYear,
+                    synopsis: bookData.synopsis,
+                    status: bookData.status,
                 });
 
                 // Establecer portada actual
@@ -165,6 +171,16 @@ export const BooksEditPage = () => {
         // Validaciones
         if (!formData.title.trim()) {
             toast.error('El título es requerido');
+            return;
+        }
+
+        if (!formData.synopsis.trim()) {
+            toast.error('La sinopsis es requerida');
+            return;
+        }
+
+        if (formData.synopsis && formData.synopsis.length > 500) {
+            toast.error('La sinopsis no debe ser mayor a 500 caracteres');
             return;
         }
 
@@ -320,6 +336,27 @@ export const BooksEditPage = () => {
                                 required
                             />
                         </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="synopsis">
+                                Sinopsis{' '}
+                                <span className="text-destructive">*</span>
+                            </Label>
+                            <Textarea
+                                id="synopsis"
+                                placeholder="Escribe una sinopsis breve aquí..."
+                                value={formData.synopsis}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        synopsis: e.target.value,
+                                    })
+                                }
+                                required
+                            ></Textarea>
+                            <p className="text-muted-foreground text-sm">
+                                Debe estar entre 1 y 500 caracteres.
+                            </p>
+                        </div>
 
                         {/* Autor */}
                         <div className="space-y-2">
@@ -416,6 +453,30 @@ export const BooksEditPage = () => {
                             </p>
                         </div>
 
+                        {/* Estado */}
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <Label htmlFor="status" className="text-base">
+                                    Estado del Libro
+                                </Label>
+                                <p className="text-sm text-muted-foreground">
+                                    {formData.status
+                                        ? 'El libro está visible para los usuarios'
+                                        : 'El libro no está visible para los usuarios'}
+                                </p>
+                            </div>
+                            <Switch
+                                id="status"
+                                checked={formData.status}
+                                onCheckedChange={(checked) =>
+                                    setFormData({
+                                        ...formData,
+                                        status: checked,
+                                    })
+                                }
+                            />
+                        </div>
+
                         {/* Portada */}
                         <div className="space-y-2">
                             <Label htmlFor="cover">
@@ -507,7 +568,7 @@ export const BooksEditPage = () => {
                             </Label>
                             {!pdfFile ? (
                                 <div className="space-y-2">
-                                    {hasPDF && (
+                                    {hasPDF && book?.fileName && (
                                         <div className="flex items-center gap-3 p-4 border-2 rounded-lg bg-muted/50">
                                             <FileText className="h-8 w-8 text-muted-foreground flex-shrink-0" />
                                             <div className="flex-1">
@@ -519,6 +580,18 @@ export const BooksEditPage = () => {
                                                     reemplazarlo
                                                 </p>
                                             </div>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    const pdfUrl = `${import.meta.env.VITE_API_URL}/files/book/${book.fileName}`;
+                                                    window.open(pdfUrl, '_blank');
+                                                }}
+                                            >
+                                                <ExternalLink className="h-4 w-4 mr-2" />
+                                                Ver PDF
+                                            </Button>
                                         </div>
                                     )}
                                     <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
