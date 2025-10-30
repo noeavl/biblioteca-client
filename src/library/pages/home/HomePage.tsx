@@ -194,7 +194,7 @@ export const HomePage = () => {
     // Mostrar splash screen mientras carga
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50  dark:to-slate-800">
+            <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="text-center">
                     {/* Logo o animación */}
                     <div className="mb-8">
@@ -221,20 +221,20 @@ export const HomePage = () => {
     return (
         <>
             {/* Nueva sección interactiva de estante con tres filas */}
-            <section className="bg-gradient-to-br from-background to-background-light h-screen flex items-center overflow-hidden">
+            <section className="bg-background h-screen flex items-center overflow-hidden">
                 {books.length === 0 ? (
                     <div className="relative px-4 w-full h-full py-6">
                         <div className="max-w-7xl mx-auto flex flex-col justify-center h-full gap-16">
                             {/* Mensaje de Bienvenida */}
                             <div className="text-center">
-                                <h2 className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-white mb-2">
+                                <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-2">
                                     ¡Bienvenido,{' '}
-                                    <span className="text-blue-500">
+                                    <span className="text-primary">
                                         {user?.name || 'Usuario'}
                                     </span>
                                     !
                                 </h2>
-                                <p className="text-lg text-slate-600 dark:text-slate-300">
+                                <p className="text-lg text-muted-foreground">
                                     Nuestra biblioteca está creciendo
                                 </p>
                             </div>
@@ -242,34 +242,46 @@ export const HomePage = () => {
                             {/* Estante 1 */}
                             <div className="overflow-visible flex flex-col justify-end">
                                 <div className="text-center py-12">
-                                    <p className="text-2xl md:text-3xl font-semibold text-slate-600 dark:text-slate-400">
+                                    <p className="text-2xl md:text-3xl font-semibold text-muted-foreground">
                                         Próximamente nuevos títulos
                                     </p>
                                 </div>
                                 {/* Repisa */}
-                                <div className="h-3 bg-gradient-to-b from-card to-card-darker  rounded-sm shadow-md w-[85%] mx-auto"></div>
+                                <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
+                                    background: 'linear-gradient(to bottom, #b45309, #92400e)',
+                                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
+                                }}></div>
                             </div>
 
                             {/* Estante 2 */}
                             <div className="overflow-visible flex flex-col justify-end">
                                 <div className="text-center py-12">
-                                    <p className="text-2xl md:text-3xl font-semibold text-slate-600 dark:text-slate-400">
+                                    <p className="text-2xl md:text-3xl font-semibold text-muted-foreground">
                                         Grandes obras en camino
                                     </p>
                                 </div>
                                 {/* Repisa */}
-                                <div className="h-3 bg-gradient-to-b from-slate-300 to-slate-400  rounded-sm shadow-md w-[85%] mx-auto"></div>
+                                <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
+                                    background: 'linear-gradient(to bottom, #b45309, #92400e)',
+                                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
+                                }}></div>
                             </div>
 
                             {/* Estante 3 */}
                             <div className="overflow-visible flex flex-col justify-end">
                                 <div className="text-center py-12">
-                                    <p className="text-2xl md:text-3xl font-semibold text-slate-600 dark:text-slate-400">
+                                    <p className="text-2xl md:text-3xl font-semibold text-muted-foreground">
                                         ¡Espera lo mejor!
                                     </p>
                                 </div>
                                 {/* Repisa */}
-                                <div className="h-3 bg-gradient-to-b from-slate-300 to-slate-400 rounded-sm shadow-md w-[85%] mx-auto"></div>
+                                <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
+                                    background: 'linear-gradient(to bottom, #b45309, #92400e)',
+                                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
+                                }}></div>
                             </div>
                         </div>
                     </div>
@@ -278,22 +290,22 @@ export const HomePage = () => {
                         <div className="max-w-7xl mx-auto flex flex-col justify-center h-full gap-8">
                             {/* Mensaje de Bienvenida */}
                             <div className="text-center mb-4">
-                                <h2 className="text-4xl md:text-5xl font-bold mb-2">
+                                <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-2">
                                     ¡Bienvenido,{' '}
-                                    <span className="text-blue-500">
+                                    <span className="text-primary">
                                         {user?.name || 'Usuario'}
                                     </span>
                                     !
                                 </h2>
-                                <p className="text-lg">
+                                <p className="text-lg text-muted-foreground">
                                     Descubre tu próxima gran lectura
                                 </p>
                             </div>
 
                             {/* Fila 1 - Diseño Classic */}
                             {row1Books.length > 0 && (
-                                <div className="overflow-visible flex flex-col justify-end relative">
-                                    <div className="flex gap-3 justify-center items-end">
+                                <div className="overflow-visible md:overflow-visible flex flex-col justify-end relative">
+                                    <div className="flex gap-3 md:justify-center items-end overflow-x-auto md:overflow-x-visible pb-2 px-4 md:px-0 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
                                         {row1Books.map((book, index) => (
                                             <InteractiveBook
                                                 key={book._id}
@@ -319,9 +331,13 @@ export const HomePage = () => {
                                         ))}
                                     </div>
                                     {/* Repisa */}
-                                    <div className="h-3 bg-stone-400 rounded-sm shadow-md w-[85%] mx-auto"></div>
+                                    <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
+                                        background: 'linear-gradient(to bottom, #b45309, #92400e)',
+                                        backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
+                                    }}></div>
                                     {/* Postit - Call to Action 1 */}
-                                    <div className="absolute bg-amber-400 bottom-0 left-[10%] bg-yellow-20 shadow-lg px-4 py-2 rounded-sm transform -rotate-2 z-10">
+                                    <div className="hidden md:block absolute bg-amber-400 dark:bg-amber-500 bottom-0 left-[10%] shadow-lg px-4 py-2 rounded-sm transform -rotate-2 z-10">
                                         <span className="text-lg text-white font-medium">
                                             Nuevos libros
                                         </span>
@@ -331,8 +347,8 @@ export const HomePage = () => {
 
                             {/* Fila 2 - Diseño Elegant */}
                             {row2Books.length > 0 && (
-                                <div className="overflow-visible flex flex-col justify-end relative">
-                                    <div className="flex gap-3 justify-center items-end">
+                                <div className="overflow-visible md:overflow-visible flex flex-col justify-end relative">
+                                    <div className="flex gap-3 md:justify-center items-end overflow-x-auto md:overflow-x-visible pb-2 px-4 md:px-0 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
                                         {row2Books.map((book, index) => (
                                             <InteractiveBook
                                                 key={book._id}
@@ -358,9 +374,13 @@ export const HomePage = () => {
                                         ))}
                                     </div>
                                     {/* Repisa */}
-                                    <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto"></div>
+                                    <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
+                                        background: 'linear-gradient(to bottom, #b45309, #92400e)',
+                                        backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
+                                    }}></div>
                                     {/* Postit - Call to Action 2 */}
-                                    <div className="absolute bottom-0 right-[8%] shadow-lg px-4 py-2 rounded-sm transform -rotate-1 z-10">
+                                    <div className="hidden md:block absolute bottom-0 right-[8%] bg-pink-200 dark:bg-pink-300 shadow-lg px-4 py-2 rounded-sm transform -rotate-1 z-10">
                                         <span className="text-sm text-gray-800 font-medium">
                                             Descúbrelo
                                         </span>
@@ -370,8 +390,8 @@ export const HomePage = () => {
 
                             {/* Fila 3 - Diseño Minimalist */}
                             {row3Books.length > 0 && (
-                                <div className="overflow-visible flex flex-col justify-end relative">
-                                    <div className="flex gap-3 justify-center items-end">
+                                <div className="overflow-visible md:overflow-visible flex flex-col justify-end relative">
+                                    <div className="flex gap-3 md:justify-center items-end overflow-x-auto md:overflow-x-visible pb-2 px-4 md:px-0 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
                                         {row3Books.map((book, index) => (
                                             <InteractiveBook
                                                 key={book._id}
@@ -397,9 +417,13 @@ export const HomePage = () => {
                                         ))}
                                     </div>
                                     {/* Repisa */}
-                                    <div className="h-3 bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-800 rounded-sm shadow-md w-[85%] mx-auto"></div>
+                                    <div className="h-3 rounded-sm shadow-md w-[85%] mx-auto" style={{
+                                        background: 'linear-gradient(to bottom, #b45309, #92400e)',
+                                        backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px), linear-gradient(to bottom, #b45309, #92400e)',
+                                        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3)'
+                                    }}></div>
                                     {/* Postit - Call to Action 3 */}
-                                    <div className="absolute bottom-0 left-[8%] bg-green-200 dark:bg-green-300 shadow-lg px-4 py-2 rounded-sm transform -rotate-1 z-10">
+                                    <div className="hidden md:block absolute bottom-0 left-[8%] bg-green-200 dark:bg-green-300 shadow-lg px-4 py-2 rounded-sm transform -rotate-1 z-10">
                                         <span className="text-sm text-gray-800 font-medium">
                                             ¡Empieza ya!
                                         </span>
@@ -410,14 +434,14 @@ export const HomePage = () => {
                     </div>
                 )}
             </section>
-            <section className="bg-background-light p-16 sm:pb-24 dark:bg-background/50">
+            <section className="bg-muted/30 p-16 sm:pb-24">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-3xl font-bold">
+                        <h3 className="text-3xl font-bold text-foreground">
                             Autores Populares
                         </h3>
                         <Link
-                            className="text-sm font-medium hover:underline text-blue-500"
+                            className="text-sm font-medium hover:underline text-primary"
                             to={'autores'}
                         >
                             Ver todo
@@ -455,10 +479,10 @@ export const HomePage = () => {
                                             </svg>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-sm font-medium">
+                                            <p className="text-sm font-medium text-foreground">
                                                 {text}
                                             </p>
-                                            <p className="text-xs">
+                                            <p className="text-xs text-muted-foreground">
                                                 Muy pronto
                                             </p>
                                         </div>
@@ -471,14 +495,14 @@ export const HomePage = () => {
                     )}
                 </div>
             </section>
-            <section className="pb-16 sm:pb-24">
+            <section className="pb-16 sm:pb-24 bg-background">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-3xl font-bold">
+                        <h3 className="text-3xl font-bold text-foreground">
                             Explorar por categoría
                         </h3>
                         <Link
-                            className="text-sm font-medium hover:underline text-blue-500"
+                            className="text-sm font-medium hover:underline text-primary"
                             to={'categorias'}
                         >
                             Ver todo
@@ -523,13 +547,13 @@ export const HomePage = () => {
                                 ].map((category, index) => (
                                     <div
                                         key={index}
-                                        className="relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow group"
+                                        className="relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow group bg-muted"
                                     >
                                         <div className="aspect-[4/3] relative">
-                                            <div className="absolute inset-0"></div>
+                                            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5"></div>
                                             <div className="absolute inset-0 flex items-center justify-center">
                                                 <svg
-                                                    className="w-16 h-16 text-white opacity-70"
+                                                    className="w-16 h-16 text-primary opacity-70"
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     fill="none"
                                                     viewBox="0 0 24 24"
@@ -544,10 +568,10 @@ export const HomePage = () => {
                                                 </svg>
                                             </div>
                                             <div className="absolute bottom-0 left-0 right-0 p-4">
-                                                <h4 className="text-lg font-bold">
+                                                <h4 className="text-lg font-bold text-foreground">
                                                     {category.name}
                                                 </h4>
-                                                <p className="text-sm">
+                                                <p className="text-sm text-muted-foreground">
                                                     Próximamente
                                                 </p>
                                             </div>

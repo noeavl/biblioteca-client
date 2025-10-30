@@ -21,6 +21,8 @@ import {
     Library,
     BookOpen,
     Users,
+    Moon,
+    Sun,
 } from 'lucide-react';
 import { useAuth } from '@/auth/hooks/useAuth';
 import {
@@ -32,10 +34,12 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useTheme } from 'next-themes';
 
 export const CustomHeader = () => {
     const { isAuthenticated, user, logout } = useAuth();
     const navigate = useNavigate();
+    const { theme, setTheme } = useTheme();
     const canAccessPanel = user?.role === 'admin' || user?.role === 'librarian';
 
     const handleLogout = () => {
@@ -54,7 +58,7 @@ export const CustomHeader = () => {
 
     return (
         <header
-            className={`sticky z-50 top-0 w-full mx-auto px-4 sm:px-6 lg:px-8 border-b `}
+            className={`sticky z-50 top-0 w-full mx-auto px-4 sm:px-6 lg:px-8 border-b bg-background`}
         >
             <div className="flex my-4 sm:my-6 md:my-10 items-center justify-between space-x-4 sm:space-x-8">
                 <CustomLogo />
@@ -67,7 +71,20 @@ export const CustomHeader = () => {
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 " />
                 </div>
                 <div className="flex-none items-center space-x-2">
-                    <div className="sm:hidden">
+                    <div className="sm:hidden flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                            aria-label="Toggle theme"
+                            className="p-2"
+                        >
+                            {theme === 'dark' ? (
+                                <Sun className="h-5 w-5" />
+                            ) : (
+                                <Moon className="h-5 w-5" />
+                            )}
+                        </Button>
                         <Sheet>
                             <SheetTrigger asChild>
                                 <Button
@@ -183,12 +200,6 @@ export const CustomHeader = () => {
                                                             Cerrar sesión
                                                         </span>
                                                     </Button>
-                                                    <div className="flex items-center justify-between p-2">
-                                                        <span className="text-sm">
-                                                            Tema Oscuro
-                                                        </span>
-                                                        <Switch aria-label="Toggle theme" />
-                                                    </div>
                                                 </nav>
                                             </div>
                                         )}
@@ -198,6 +209,18 @@ export const CustomHeader = () => {
                         </Sheet>
                     </div>
                     <div className="hidden sm:flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                            aria-label="Toggle theme"
+                        >
+                            {theme === 'dark' ? (
+                                <Sun className="h-5 w-5" />
+                            ) : (
+                                <Moon className="h-5 w-5" />
+                            )}
+                        </Button>
                         {!isAuthenticated && (
                             <Button variant={'link'}>
                                 <Link to={'iniciar-sesion'}>
@@ -256,13 +279,6 @@ export const CustomHeader = () => {
                                             <LogOut className="mr-2 h-4 w-4" />
                                             <span>Cerrar sesión</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <div className="flex items-center justify-between px-2 py-2">
-                                            <span className="text-sm">
-                                                Tema Oscuro
-                                            </span>
-                                            <Switch aria-label="Toggle theme" />
-                                        </div>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </>

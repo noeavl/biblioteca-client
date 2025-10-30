@@ -316,7 +316,7 @@ export const UsersListPage = () => {
                                                 <TableCell className="font-medium">
                                                     <div className="flex items-center gap-3">
                                                         <Avatar>
-                                                            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
+                                                            <AvatarFallback className="bg-blue-500 text-white">
                                                                 {getInitials(
                                                                     user.name
                                                                 )}

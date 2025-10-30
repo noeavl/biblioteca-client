@@ -260,7 +260,7 @@ export const AuthorsEditPage = () => {
                                                     className="object-cover"
                                                 />
                                             ) : null}
-                                            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-primary/10">
+                                            <AvatarFallback className="text-2xl bg-blue-500 text-white">
                                                 {getInitials() || '?'}
                                             </AvatarFallback>
                                         </Avatar>

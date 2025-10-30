@@ -45,10 +45,10 @@ const items = [
 export const PanelSidebar = () => {
     return (
         <Sidebar className="border-none p-6 shadow-lg">
-            <SidebarHeader className="bg-white">
+            <SidebarHeader className="bg-background">
                 <CustomLogo />
             </SidebarHeader>
-            <SidebarContent className="bg-white">
+            <SidebarContent className="bg-background">
                 <SidebarGroup>
                     <SidebarGroupContent>
                         <SidebarMenu>
@@ -66,7 +66,7 @@ export const PanelSidebar = () => {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter className="bg-white"></SidebarFooter>
+            <SidebarFooter className="bg-background"></SidebarFooter>
         </Sidebar>
     );
 };

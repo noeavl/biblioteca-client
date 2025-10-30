@@ -275,8 +275,8 @@ export const CategoriesListPage = () => {
                                                                 className="h-12 w-9 object-cover rounded shadow-sm"
                                                             />
                                                         ) : (
-                                                            <div className="h-12 w-9 rounded bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                                                                <BookOpen className="h-5 w-5 text-primary" />
+                                                            <div className="h-12 w-9 rounded bg-blue-500 flex items-center justify-center">
+                                                                <BookOpen className="h-5 w-5 text-white" />
                                                             </div>
                                                         )}
                                                         <span className="capitalize">

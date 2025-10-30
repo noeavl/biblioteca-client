@@ -207,7 +207,7 @@ export const AuthorsCreatePage = () => {
                                         className="cursor-pointer flex flex-col items-center gap-2"
                                     >
                                         <Avatar className="h-24 w-24">
-                                            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-primary/10">
+                                            <AvatarFallback className="text-2xl bg-blue-500 text-white">
                                                 {getInitials() || '?'}
                                             </AvatarFallback>
                                         </Avatar>

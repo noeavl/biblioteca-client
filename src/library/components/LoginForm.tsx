@@ -55,12 +55,12 @@ export const LoginForm = () => {
                     <form onSubmit={handleSubmit}>
                         <FieldGroup>
                             {error && (
-                                <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
+                                <div className="text-destructive text-sm text-center bg-destructive/10 p-2 rounded">
                                     {error}
                                 </div>
                             )}
                             {showSlowWarning && (
-                                <div className="text-amber-600 text-sm text-center bg-amber-50 p-2 rounded">
+                                <div className="text-amber-600 dark:text-amber-400 text-sm text-center bg-amber-50 dark:bg-amber-950/30 p-2 rounded">
                                     El servidor está iniciando, esto puede tardar unos segundos...
                                 </div>
                             )}
@@ -85,7 +85,7 @@ export const LoginForm = () => {
                                     </FieldLabel>
                                     <Link
                                         to={'/'}
-                                        className="ml-auto text-sm font-thin text-blue-400 underline-offset-4 hover:underline"
+                                        className="ml-auto text-sm font-thin text-primary underline-offset-4 hover:underline"
                                     >
                                         ¿Olvidé mi contraseña?
                                     </Link>
@@ -102,7 +102,6 @@ export const LoginForm = () => {
                             </Field>
                             <Field>
                                 <Button
-                                    className="bg-blue-400 shadow-md shadow-blue-400/50 hover:bg-blue-400"
                                     type="submit"
                                     disabled={isLoading}
                                 >

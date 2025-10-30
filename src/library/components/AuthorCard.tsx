@@ -21,7 +21,7 @@ export const AuthorCard = ({
     return (
         <div className="group text-center cursor-pointer">
             <Link to={`/autores/detalle/${id}`}>
-                <div className="mx-auto h-32 w-32 overflow-hidden rounded-full bg-gradient-to-br from-primary/60 to-primary flex items-center justify-center bg-gray-400">
+                <div className="mx-auto h-32 w-32 overflow-hidden rounded-full bg-blue-500 flex items-center justify-center">
                     {img ? (
                         <img
                             alt={`${firstName} ${lastName}`}
@@ -31,7 +31,7 @@ export const AuthorCard = ({
                             }/files/author/${img}`}
                         />
                     ) : (
-                        <span className="text-4xl font-bold text-blue-50">
+                        <span className="text-4xl font-bold text-white">
                             {initials}
                         </span>
                     )}

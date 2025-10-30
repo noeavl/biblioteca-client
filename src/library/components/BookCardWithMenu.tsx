@@ -40,7 +40,7 @@ export const BookCardWithMenu = ({
     onRemoveFromCollection,
 }: BookCardWithMenuProps) => {
     return (
-        <div className="group bg-white  rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col">
+        <div className="group bg-card rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col border">
             <Link
                 to={`/libros/detalle/${id}`}
                 className="relative h-48 sm:h-52 md:h-56 lg:h-60 xl:h-64"
@@ -52,8 +52,8 @@ export const BookCardWithMenu = ({
                         alt={title}
                     />
                 ) : (
-                    <div className="w-full h-full bg-blue-100 flex items-center justify-center">
-                        <span className="material-symbols-outlined text-blue-400 text-6xl">
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                        <span className="material-symbols-outlined text-primary text-6xl">
                             book
                         </span>
                     </div>
@@ -61,7 +61,7 @@ export const BookCardWithMenu = ({
             </Link>
             <div className="p-3 sm:p-4 flex-1 flex flex-col">
                 <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-xs sm:text-xs text-blue-500 font-semibold">
+                    <p className="text-xs sm:text-xs text-primary font-semibold">
                         {category}
                     </p>
                     <DropdownMenu>
@@ -69,10 +69,10 @@ export const BookCardWithMenu = ({
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7 w-7 p-0 hover:bg-gray-100"
+                                className="h-7 w-7 p-0 hover:bg-accent"
                                 onClick={(e) => e.preventDefault()}
                             >
-                                <span className="material-symbols-outlined text-gray-600 text-lg">
+                                <span className="material-symbols-outlined text-muted-foreground text-lg">
                                     more_vert
                                 </span>
                             </Button>
@@ -140,13 +140,13 @@ export const BookCardWithMenu = ({
                     </DropdownMenu>
                 </div>
                 <Link to={`/libros/detalle/${id}`}>
-                    <h3 className="font-bold text-gray-900 text-sm sm:text-base truncate mb-1">
+                    <h3 className="font-bold text-foreground text-sm sm:text-base truncate mb-1">
                         {title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-500 truncate">
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
                         {author}
                     </p>
-                    <p className="text-xs sm:text-sm text-gray-400">
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                         {publicationYear}
                     </p>
                 </Link>

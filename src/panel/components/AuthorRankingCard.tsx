@@ -37,7 +37,7 @@ export function AuthorRankingCard({
                                     alt={`${author.firstName} ${author.lastName}`}
                                 />
                             )}
-                            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-lg">
+                            <AvatarFallback className="bg-blue-500 text-white text-lg">
                                 {getInitials(author.firstName, author.lastName)}
                             </AvatarFallback>
                         </Avatar>
