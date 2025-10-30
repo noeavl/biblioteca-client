@@ -361,8 +361,15 @@ export const HomePage = () => {
                                         }}
                                     ></div>
                                     {/* Postit - Call to Action 1 */}
-                                    <div className="hidden md:block absolute bg-amber-400 dark:bg-amber-500 bottom-0 left-[10%] shadow-lg px-4 py-2 rounded-sm transform -rotate-2 z-10">
-                                        <span className="text-lg text-white font-medium">
+                                    <div
+                                        className="hidden md:block absolute bottom-0 left-[10%] shadow-xl px-6 py-3 rounded-sm transform -rotate-2 z-10"
+                                        style={{
+                                            backgroundColor: '#fde047',
+                                            boxShadow:
+                                                '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)',
+                                        }}
+                                    >
+                                        <span className="text-xl text-gray-800 font-semibold">
                                             Nuevos libros
                                         </span>
                                     </div>
@@ -410,8 +417,15 @@ export const HomePage = () => {
                                         }}
                                     ></div>
                                     {/* Postit - Call to Action 2 */}
-                                    <div className="hidden md:block absolute bottom-0 right-[8%] bg-pink-200 dark:bg-pink-300 shadow-lg px-4 py-2 rounded-sm transform -rotate-1 z-10">
-                                        <span className="text-sm text-gray-800 font-medium">
+                                    <div
+                                        className="hidden md:block absolute bottom-0 right-[8%] shadow-xl px-6 py-3 rounded-sm transform -rotate-1 z-10"
+                                        style={{
+                                            backgroundColor: '#5eead4',
+                                            boxShadow:
+                                                '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)',
+                                        }}
+                                    >
+                                        <span className="text-xl text-gray-800 font-semibold">
                                             Descúbrelo
                                         </span>
                                     </div>
@@ -459,8 +473,15 @@ export const HomePage = () => {
                                         }}
                                     ></div>
                                     {/* Postit - Call to Action 3 */}
-                                    <div className="hidden md:block absolute bottom-0 left-[8%] bg-green-200 dark:bg-green-300 shadow-lg px-4 py-2 rounded-sm transform -rotate-1 z-10">
-                                        <span className="text-sm text-gray-800 font-medium">
+                                    <div
+                                        className="hidden md:block absolute bottom-0 left-[8%] shadow-xl px-6 py-3 rounded-sm transform -rotate-1 z-10"
+                                        style={{
+                                            backgroundColor: '#fb7185',
+                                            boxShadow:
+                                                '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)',
+                                        }}
+                                    >
+                                        <span className="text-xl text-white font-semibold">
                                             ¡Empieza ya!
                                         </span>
                                     </div>
@@ -470,7 +491,7 @@ export const HomePage = () => {
                     </div>
                 )}
             </section>
-            <section className="bg-muted/30 p-6 sm:pb-24">
+            <section className="bg-muted/30 p-6 sm:py-24">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
                         <h3 className="text-3xl font-bold text-foreground">
@@ -531,7 +552,7 @@ export const HomePage = () => {
                     )}
                 </div>
             </section>
-            <section className="p-6 sm:pb-24 bg-background">
+            <section className="p-6 sm:py-24 bg-background">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
                         <h3 className="text-3xl font-bold text-foreground">

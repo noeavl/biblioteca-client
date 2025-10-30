@@ -40,7 +40,7 @@ export const CategoryCard = ({
                     </div>
                 )}
 
-                <div className="absolute inset-0 bg-foreground/40"></div>
+                <div className="absolute inset-0 bg-black/40"></div>
 
                 <span className="absolute bottom-4 left-4 text-xl font-bold text-primary-foreground">
                     {name}{' '}

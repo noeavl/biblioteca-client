@@ -116,9 +116,9 @@ export const AuthorsBooksPage = () => {
     const totalPages = Math.ceil(totalBooks / BOOKS_PER_PAGE);
 
     return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="container mx-auto px-4 sm:p-6 p-8">
             {/* Author Header Section */}
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 py-16C">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 py-16">
                 <div className="w-32 h-32 sm:w-40 sm:h-40 flex-shrink-0">
                     {authorImageUrl ? (
                         <img

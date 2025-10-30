@@ -6,39 +6,39 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                background: 'rgb(var(--color-background) / <alpha-value>)',
-                foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
+                background: 'var(--color-background)',
+                foreground: 'var(--color-foreground)',
                 card: {
-                    DEFAULT: 'rgb(var(--color-card) / <alpha-value>)',
-                    foreground: 'rgb(var(--color-card-foreground) / <alpha-value>)',
+                    DEFAULT: 'var(--color-card)',
+                    foreground: 'var(--color-card-foreground)',
                 },
                 popover: {
-                    DEFAULT: 'rgb(var(--color-popover) / <alpha-value>)',
-                    foreground: 'rgb(var(--color-popover-foreground) / <alpha-value>)',
+                    DEFAULT: 'var(--color-popover)',
+                    foreground: 'var(--color-popover-foreground)',
                 },
                 primary: {
-                    DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
-                    foreground: 'rgb(var(--color-primary-foreground) / <alpha-value>)',
+                    DEFAULT: 'var(--color-primary)',
+                    foreground: 'var(--color-primary-foreground)',
                 },
                 secondary: {
-                    DEFAULT: 'rgb(var(--color-secondary) / <alpha-value>)',
-                    foreground: 'rgb(var(--color-secondary-foreground) / <alpha-value>)',
+                    DEFAULT: 'var(--color-secondary)',
+                    foreground: 'var(--color-secondary-foreground)',
                 },
                 muted: {
-                    DEFAULT: 'rgb(var(--color-muted) / <alpha-value>)',
-                    foreground: 'rgb(var(--color-muted-foreground) / <alpha-value>)',
+                    DEFAULT: 'var(--color-muted)',
+                    foreground: 'var(--color-muted-foreground)',
                 },
                 accent: {
-                    DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
-                    foreground: 'rgb(var(--color-accent-foreground) / <alpha-value>)',
+                    DEFAULT: 'var(--color-accent)',
+                    foreground: 'var(--color-accent-foreground)',
                 },
                 destructive: {
-                    DEFAULT: 'rgb(var(--color-destructive) / <alpha-value>)',
-                    foreground: 'rgb(var(--color-destructive-foreground) / <alpha-value>)',
+                    DEFAULT: 'var(--color-destructive)',
+                    foreground: 'var(--color-destructive-foreground)',
                 },
-                border: 'rgb(var(--color-border) / <alpha-value>)',
-                input: 'rgb(var(--color-input) / <alpha-value>)',
-                ring: 'rgb(var(--color-ring) / <alpha-value>)',
+                border: 'var(--color-border)',
+                input: 'var(--color-input)',
+                ring: 'var(--color-ring)',
             },
         },
     },

@@ -57,7 +57,7 @@ export const CustomHeader = () => {
 
     return (
         <header
-            className={`sticky z-50 top-0 w-full mx-auto px-4 sm:px-6 lg:px-8 border-b bg-background`}
+            className={`sticky z-50 top-0 w-full mx-auto px-4 sm:px-6 lg:px-8 border-b border-foreground/20 bg-background`}
         >
             <div className="flex my-4 sm:my-6 md:my-10 items-center justify-between space-x-4 sm:space-x-8">
                 <CustomLogo />
@@ -98,7 +98,7 @@ export const CustomHeader = () => {
                             </SheetTrigger>
                             <SheetContent
                                 side="left"
-                                className={`w-[80%] sm:w-[385px] p-0 `}
+                                className={`w-[80%] sm:w-[385px] p-0 bg-background`}
                             >
                                 <SheetHeader className={`p-4 border-b`}>
                                     <SheetTitle className={`text-left `}>

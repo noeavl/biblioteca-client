@@ -40,7 +40,7 @@ export const BookCardWithMenu = ({
     onRemoveFromCollection,
 }: BookCardWithMenuProps) => {
     return (
-        <div className="group bg-card rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col border">
+        <div className="group bg-card rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col border border-foreground/30">
             <Link
                 to={`/libros/detalle/${id}`}
                 className="relative h-48 sm:h-52 md:h-56 lg:h-60 xl:h-64"
