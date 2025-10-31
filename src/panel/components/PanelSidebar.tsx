@@ -40,6 +40,11 @@ const items = [
         url: '/panel/usuarios',
         icon: 'person',
     },
+    {
+        title: 'Lectores',
+        url: '/panel/lectores',
+        icon: 'groups',
+    },
 ];
 
 export const PanelSidebar = () => {

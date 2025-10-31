@@ -38,12 +38,12 @@ import {
     Plus,
     Pencil,
     Trash2,
-    Shield,
     CheckCircle,
     XCircle,
+    BookOpen,
 } from 'lucide-react';
-import { getUsers, deleteUser } from '@/panel/api/users.api';
-import type { User } from '@/library/interfaces/user.interface';
+import { getReaders, deleteReader } from '@/panel/api/readers.api';
+import type { Reader } from '@/library/interfaces/reader.interface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -57,105 +57,85 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 const ITEMS_PER_PAGE = 8;
 
-// Mapeo de roles a colores y etiquetas en español
-const roleConfig: Record<string, { label: string; color: string }> = {
-    admin: {
-        label: 'Administrador',
-        color: '',
-    },
-    librarian: {
-        label: 'Bibliotecario',
-        color: '',
-    },
-    executive: {
-        label: 'Ejecutivo',
-        color: '',
-    },
-    reader: {
-        label: 'Lector',
-        color: '',
-    },
-};
-
-export const UsersListPage = () => {
+export const ReadersListPage = () => {
     const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(1);
-    const [users, setUsers] = useState<User[]>([]);
+    const [readers, setReaders] = useState<Reader[]>([]);
     const [totalPages, setTotalPages] = useState(0);
-    const [totalUsers, setTotalUsers] = useState(0);
+    const [totalReaders, setTotalReaders] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [userToDelete, setUserToDelete] = useState<User | null>(null);
+    const [readerToDelete, setReaderToDelete] = useState<Reader | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Cargar usuarios desde la API con paginación
+    // Cargar lectores desde la API con paginación
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchReaders = async () => {
             try {
                 setLoading(true);
                 setError(null);
                 const skip = (currentPage - 1) * ITEMS_PER_PAGE;
-                const data = await getUsers({
+                const data = await getReaders({
                     limit: ITEMS_PER_PAGE,
                     skip,
                 });
-                setUsers(data.users);
+                setReaders(data.readers);
                 setTotalPages(data.totalPages);
-                setTotalUsers(data.total);
+                setTotalReaders(data.total);
             } catch (err) {
-                setError('Error al cargar los usuarios');
+                setError('Error al cargar los lectores');
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchUsers();
+        fetchReaders();
     }, [currentPage]);
 
-    const currentUsers = users;
+    const currentReaders = readers;
 
     // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + users.length;
+    const endIndex = startIndex + readers.length;
 
-    // Manejar eliminación de usuario
-    const handleDeleteUser = async () => {
-        if (!userToDelete) return;
+    // Manejar eliminación de lector
+    const handleDeleteReader = async () => {
+        if (!readerToDelete) return;
 
         try {
             setIsDeleting(true);
-            await deleteUser(userToDelete._id);
+            await deleteReader(readerToDelete._id);
 
             toast.success(
-                `Usuario ${userToDelete.name} eliminado exitosamente`
+                `Lector ${readerToDelete.user.name} eliminado exitosamente`
             );
-            setUserToDelete(null);
+            setReaderToDelete(null);
 
-            // Recargar los usuarios después de eliminar
+            // Recargar los lectores después de eliminar
             const skip = (currentPage - 1) * ITEMS_PER_PAGE;
-            const data = await getUsers({
+            const data = await getReaders({
                 limit: ITEMS_PER_PAGE,
                 skip,
-                search: debouncedSearchTerm || undefined,
             });
-            setUsers(data.users);
+            setReaders(data.readers);
             setTotalPages(data.totalPages);
-            setTotalUsers(data.total);
+            setTotalReaders(data.total);
 
             // Si la página actual quedó vacía y no es la primera, volver a la anterior
-            if (data.users.length === 0 && currentPage > 1) {
+            if (data.readers.length === 0 && currentPage > 1) {
                 setCurrentPage(currentPage - 1);
             }
         } catch (error: any) {
-            console.error('Error al eliminar usuario:', error);
+            console.error('Error al eliminar lector:', error);
             if (error?.response?.data?.message) {
                 toast.error(error.response.data.message);
             } else {
-                toast.error('Error al eliminar el usuario');
+                toast.error('Error al eliminar el lector');
             }
         } finally {
             setIsDeleting(false);
@@ -172,38 +152,28 @@ export const UsersListPage = () => {
             .slice(0, 2);
     };
 
-    // Obtener configuración de rol
-    const getRoleConfig = (roleName: string) => {
-        return (
-            roleConfig[roleName] || {
-                label: roleName,
-                color: '',
-            }
-        );
-    };
-
     return (
         <div className="flex flex-col gap-6 p-6 w-full max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">
-                        Usuarios
+                        Lectores
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Gestiona los usuarios del sistema
+                        Gestiona los lectores registrados en la biblioteca
                     </p>
                 </div>
-                <Button onClick={() => navigate('/panel/usuarios/crear')}>
+                <Button onClick={() => navigate('/panel/lectores/crear')}>
                     <Plus />
-                    Nuevo Usuario
+                    Nuevo Lector
                 </Button>
             </div>
 
             <Card className="w-full">
                 <CardHeader>
-                    <CardTitle>Lista de Usuarios</CardTitle>
+                    <CardTitle>Lista de Lectores</CardTitle>
                     <CardDescription>
-                        Administra y visualiza todos los usuarios registrados
+                        Administra y visualiza todos los lectores registrados
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -211,10 +181,10 @@ export const UsersListPage = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Usuario</TableHead>
+                                    <TableHead>Lector</TableHead>
                                     <TableHead>Email</TableHead>
                                     <TableHead className="text-center">
-                                        Rol
+                                        Suscripción
                                     </TableHead>
                                     <TableHead className="text-center">
                                         Estado
@@ -259,52 +229,60 @@ export const UsersListPage = () => {
                                             {error}
                                         </TableCell>
                                     </TableRow>
-                                ) : currentUsers.length === 0 ? (
+                                ) : currentReaders.length === 0 ? (
                                     // Sin resultados
                                     <TableRow>
                                         <TableCell
                                             colSpan={5}
                                             className="text-center h-24"
                                         >
-                                            No se encontraron usuarios
+                                            No se encontraron lectores
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    // Lista de usuarios
-                                    currentUsers.map((user) => {
-                                        const roleInfo = getRoleConfig(
-                                            user.role.name
-                                        );
-
+                                    // Lista de lectores
+                                    currentReaders.map((reader) => {
                                         return (
-                                            <TableRow key={user._id}>
+                                            <TableRow key={reader._id}>
                                                 <TableCell className="font-medium">
                                                     <div className="flex items-center gap-3">
                                                         <Avatar>
                                                             <AvatarFallback className="bg-blue-500 text-white">
                                                                 {getInitials(
-                                                                    user.name
+                                                                    reader.user
+                                                                        .name
                                                                 )}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         <span>
-                                                            {user.name}
+                                                            {reader.user.name}
                                                         </span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    {user.email}
+                                                    {reader.user.email}
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    <span
-                                                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${roleInfo.color}`}
-                                                    >
-                                                        <Shield className="h-3 w-3" />
-                                                        {roleInfo.label}
-                                                    </span>
+                                                    {reader.suscription ? (
+                                                        <Badge
+                                                            variant="default"
+                                                            className="gap-1"
+                                                        >
+                                                            <BookOpen className="h-3 w-3" />
+                                                            Activa
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className="gap-1"
+                                                        >
+                                                            <BookOpen className="h-3 w-3" />
+                                                            Inactiva
+                                                        </Badge>
+                                                    )}
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    {user.status ? (
+                                                    {reader.user.status ? (
                                                         <span className="inline-flex items-center gap-1 rounded-full  px-2.5 py-0.5 text-xs font-medium ">
                                                             <CheckCircle className="h-3 w-3" />
                                                             Activo
@@ -339,7 +317,7 @@ export const UsersListPage = () => {
                                                             <DropdownMenuItem
                                                                 onClick={() =>
                                                                     navigate(
-                                                                        `/panel/usuarios/editar/${user._id}`
+                                                                        `/panel/lectores/editar/${reader._id}`
                                                                     )
                                                                 }
                                                             >
@@ -349,8 +327,8 @@ export const UsersListPage = () => {
                                                             <DropdownMenuItem
                                                                 variant="destructive"
                                                                 onClick={() =>
-                                                                    setUserToDelete(
-                                                                        user
+                                                                    setReaderToDelete(
+                                                                        reader
                                                                     )
                                                                 }
                                                             >
@@ -371,8 +349,8 @@ export const UsersListPage = () => {
                     <div className="mt-4 flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
                             Mostrando {startIndex + 1} a{' '}
-                            {Math.min(endIndex, totalUsers)} de {totalUsers}{' '}
-                            usuarios
+                            {Math.min(endIndex, totalReaders)} de{' '}
+                            {totalReaders} lectores
                         </p>
 
                         {totalPages > 1 && (
@@ -469,21 +447,21 @@ export const UsersListPage = () => {
 
             {/* AlertDialog para confirmar eliminación */}
             <AlertDialog
-                open={!!userToDelete}
-                onOpenChange={(open) => !open && setUserToDelete(null)}
+                open={!!readerToDelete}
+                onOpenChange={(open) => !open && setReaderToDelete(null)}
             >
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>
-                            ¿Estás seguro de eliminar este usuario?
+                            ¿Estás seguro de eliminar este lector?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             Esta acción no se puede deshacer. Se eliminará
-                            permanentemente el usuario{' '}
+                            permanentemente el lector{' '}
                             <span className="font-semibold">
-                                {userToDelete?.name}
+                                {readerToDelete?.user.name}
                             </span>{' '}
-                            ({userToDelete?.email}) de la base de datos.
+                            ({readerToDelete?.user.email}) de la base de datos.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -491,7 +469,7 @@ export const UsersListPage = () => {
                             Cancelar
                         </AlertDialogCancel>
                         <AlertDialogAction
-                            onClick={handleDeleteUser}
+                            onClick={handleDeleteReader}
                             disabled={isDeleting}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >

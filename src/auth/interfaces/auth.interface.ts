@@ -1,7 +1,12 @@
 export interface User {
+  _id: string;
   name: string;
   email: string;
-  role: string;
+  role: {
+    _id: string;
+    name: string;
+  };
+  status: boolean;
 }
 
 export interface LoginResponse {
