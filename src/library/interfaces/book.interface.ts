@@ -18,6 +18,7 @@ export interface BookCategory {
     __v: number;
     books?: string[];
     featuredBookCover?: string | null;
+    status: boolean;
 }
 
 export interface Book {

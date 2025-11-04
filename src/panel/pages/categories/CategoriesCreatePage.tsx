@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { ArrowLeft } from 'lucide-react';
 import { createCategory } from '@/panel/api/categories.api';
 import { toast } from 'sonner';
@@ -18,6 +19,7 @@ export const CategoriesCreatePage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState('');
+    const [status, setStatus] = useState(true);
 
     // Manejar submit
     const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +45,7 @@ export const CategoriesCreatePage = () => {
             setLoading(true);
 
             // Crear la categoría
-            await createCategory({ name: name.trim() });
+            await createCategory({ name: name.trim(), status });
 
             toast.success('Categoría creada exitosamente');
             navigate('/panel/categorias');
@@ -110,6 +112,21 @@ export const CategoriesCreatePage = () => {
                             <p className="text-xs text-muted-foreground">
                                 {name.length}/100 caracteres
                             </p>
+                        </div>
+
+                        {/* Estado */}
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div>
+                                <Label htmlFor="status">Estado</Label>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Define si la categoría está activa o inactiva.
+                                </p>
+                            </div>
+                            <Switch
+                                id="status"
+                                checked={status}
+                                onCheckedChange={setStatus}
+                            />
                         </div>
 
                         {/* Botones */}

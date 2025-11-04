@@ -73,6 +73,7 @@ export const HomePage = () => {
                 const response = await getCategories({ hasBooks: true });
                 const categoriesCards: Category[] = response.categories.map(
                     (category: BookCategory) => ({
+                        id: category._id,
                         name: category.name,
                         img: category.featuredBookCover
                             ? `${import.meta.env.VITE_API_URL}/files/cover/${

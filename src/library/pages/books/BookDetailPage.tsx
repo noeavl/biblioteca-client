@@ -6,15 +6,24 @@ import { getBookById } from '@/library/api/books.api';
 import type { Book } from '@/library/interfaces/book.interface';
 import { BooksGrid } from '@/library/components/BooksGrid';
 import { getBooks } from '@/panel/api/books.api';
+import { useAuth } from '@/auth/hooks/useAuth';
+import { addFavorite, removeFavorite, checkIsFavorite } from '@/library/api/favorites.api';
+import { toast } from 'sonner';
+import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
 
 export const BookDetailPage = () => {
     const { bookId } = useParams<{ bookId: string }>();
+    const { user } = useAuth();
     const [book, setBook] = useState<Book | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [categoryId, setCategoryId] = useState<string | null>(null);
     const [books, setBooks] = useState<Book[] | []>([]);
     const [relatedLoading, setRelatedLoading] = useState<boolean>(true);
+    const [isFavorite, setIsFavorite] = useState<boolean>(false);
+    const [isAddingFavorite, setIsAddingFavorite] = useState<boolean>(false);
+
+    const isReader = user?.role?.name === 'reader';
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -31,6 +40,12 @@ export const BookDetailPage = () => {
                 setBook(bookData);
                 setCategoryId(bookData.category._id);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Verificar si el libro está en favoritos (solo para readers)
+                if (isReader) {
+                    const isFav = await checkIsFavorite(bookId);
+                    setIsFavorite(isFav);
+                }
             } catch (err) {
                 setError('Error al cargar el libro');
                 console.error(err);
@@ -40,7 +55,7 @@ export const BookDetailPage = () => {
         };
 
         fetchBook();
-    }, [bookId]);
+    }, [bookId, isReader]);
 
     useEffect(() => {
         const fetchBooksByCategory = async () => {
@@ -62,6 +77,42 @@ export const BookDetailPage = () => {
         };
         fetchBooksByCategory();
     }, [categoryId]);
+
+    const handleToggleFavorite = async () => {
+        if (!isReader) {
+            toast.error('Solo los lectores pueden agregar libros a favoritos');
+            return;
+        }
+
+        const readerId = getReaderIdFromToken();
+        if (!readerId || !bookId) {
+            toast.error('No se pudo agregar a favoritos');
+            return;
+        }
+
+        try {
+            setIsAddingFavorite(true);
+
+            if (isFavorite) {
+                await removeFavorite({ book: bookId, reader: readerId });
+                setIsFavorite(false);
+                toast.success('Libro removido de favoritos');
+            } else {
+                await addFavorite({ book: bookId, reader: readerId });
+                setIsFavorite(true);
+                toast.success('Libro agregado a favoritos');
+            }
+        } catch (error: any) {
+            console.error('Error al gestionar favoritos:', error);
+            if (error?.response?.data?.message) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error('Error al gestionar favoritos');
+            }
+        } finally {
+            setIsAddingFavorite(false);
+        }
+    };
 
     const transformedBooks = books
         .filter((b) => b._id != book?._id)
@@ -157,12 +208,22 @@ export const BookDetailPage = () => {
                                 </Button>
                             </Link>
 
-                            <Button className="bg-blue-50 text-blue-400 hover:bg-blue-50 font-bold w-full sm:w-auto">
-                                <span className="material-symbols-outlined">
-                                    favorite
-                                </span>
-                                Añadir a favoritos
-                            </Button>
+                            {isReader && (
+                                <Button
+                                    onClick={handleToggleFavorite}
+                                    disabled={isAddingFavorite}
+                                    className="bg-blue-50 text-blue-400 hover:bg-blue-50 font-bold w-full sm:w-auto"
+                                >
+                                    <span className="material-symbols-outlined">
+                                        {isFavorite ? 'heart_minus' : 'favorite'}
+                                    </span>
+                                    {isAddingFavorite
+                                        ? 'Procesando...'
+                                        : isFavorite
+                                          ? 'Remover de favoritos'
+                                          : 'Añadir a favoritos'}
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </article>

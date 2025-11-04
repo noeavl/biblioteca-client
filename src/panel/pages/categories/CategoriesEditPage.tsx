@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { ArrowLeft } from 'lucide-react';
 import { getCategoryById, updateCategory } from '@/panel/api/categories.api';
 import { toast } from 'sonner';
@@ -20,6 +21,7 @@ export const CategoriesEditPage = () => {
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
     const [name, setName] = useState('');
+    const [status, setStatus] = useState(true);
 
     // Cargar datos de la categoría
     useEffect(() => {
@@ -34,6 +36,7 @@ export const CategoriesEditPage = () => {
                 setLoadingData(true);
                 const category = await getCategoryById(categoryId);
                 setName(category.name);
+                setStatus(category.status);
             } catch (error) {
                 toast.error('Error al cargar los datos de la categoría');
                 console.error(error);
@@ -65,11 +68,13 @@ export const CategoriesEditPage = () => {
             setLoading(true);
 
             // Preparar datos de actualización
-            const updateData: { name?: string } = {};
+            const updateData: { name?: string; status?: boolean } = {};
 
             if (name.trim()) {
                 updateData.name = name.trim();
             }
+
+            updateData.status = status;
 
             // Actualizar categoría
             await updateCategory(categoryId, updateData);
@@ -144,6 +149,21 @@ export const CategoriesEditPage = () => {
                             <p className="text-xs text-muted-foreground">
                                 {name.length}/100 caracteres
                             </p>
+                        </div>
+
+                        {/* Estado */}
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div>
+                                <Label htmlFor="status">Estado</Label>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Define si la categoría está activa o inactiva.
+                                </p>
+                            </div>
+                            <Switch
+                                id="status"
+                                checked={status}
+                                onCheckedChange={setStatus}
+                            />
                         </div>
 
                         {/* Botones */}

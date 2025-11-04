@@ -6,6 +6,7 @@ import fantasia from '@/assets/images/fantasia.png';
 import historia from '@/assets/images/historia.png';
 
 export interface Category {
+    id?: string;
     name: string;
     img: string;
     quantityBooks: number;

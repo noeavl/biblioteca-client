@@ -37,6 +37,7 @@ export const getAuthors = async (params?: GetAuthorsParams): Promise<GetAuthorsR
 export interface CreateAuthorDto {
     firstName: string;
     lastName: string;
+    status: boolean;
 }
 
 export interface CreateAuthorResponse {
@@ -96,6 +97,7 @@ export const getAuthorById = async (authorId: string): Promise<Author> => {
 export interface UpdateAuthorDto {
     firstName?: string;
     lastName?: string;
+    status?: boolean;
 }
 
 export interface UpdateAuthorResponse {

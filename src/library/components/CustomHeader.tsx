@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { CustomLogo } from '../../components/custom/CustomLogo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,14 +36,15 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useTheme } from 'next-themes';
 
 export const CustomHeader = () => {
-    const { isAuthenticated, user, logout } = useAuth();
-    const navigate = useNavigate();
+    const { user, isAuthenticated, logout } = useAuth();
     const { theme, setTheme } = useTheme();
-    const canAccessPanel = user?.role === 'admin' || user?.role === 'librarian';
+    const canAccessPanel = user?.role?.name === 'admin' || user?.role?.name === 'librarian';
+    const isReader = user?.role?.name === 'reader';
 
     const handleLogout = () => {
         logout();
-        navigate('/iniciar-sesion');
+        // Usar window.location.href para forzar recarga y limpiar el contexto
+        window.location.href = '/iniciar-sesion';
     };
 
     const getUserInitials = () => {
@@ -138,13 +139,15 @@ export const CustomHeader = () => {
                                                 <Users className="h-4 w-4" />
                                                 <span>Autores</span>
                                             </Link>
-                                            <Link
-                                                className="flex items-center gap-2 py-2 px-3 hover:bg-accent rounded-lg text-sm"
-                                                to={'/mi-biblioteca'}
-                                            >
-                                                <Home className="h-4 w-4" />
-                                                <span>Mi biblioteca</span>
-                                            </Link>
+                                            {isReader && (
+                                                <Link
+                                                    className="flex items-center gap-2 py-2 px-3 hover:bg-accent rounded-lg text-sm"
+                                                    to={'/mi-biblioteca'}
+                                                >
+                                                    <Home className="h-4 w-4" />
+                                                    <span>Mi biblioteca</span>
+                                                </Link>
+                                            )}
                                         </nav>
                                     </div>
 
@@ -267,13 +270,11 @@ export const CustomHeader = () => {
                                             </div>
                                         </DropdownMenuLabel>
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem>
-                                            <User className="mr-2 h-4 w-4" />
-                                            <span>Perfil</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem>
-                                            <Settings className="mr-2 h-4 w-4" />
-                                            <span>Configuración</span>
+                                        <DropdownMenuItem className="p-0">
+                                            <Link to="/perfil" className="flex items-center px-2 py-1.5 w-full">
+                                                <User className="mr-2 h-4 w-4" />
+                                                <span>Perfil</span>
+                                            </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
@@ -294,7 +295,7 @@ export const CustomHeader = () => {
                     <Link to={'/libros'}>Libros</Link>
                     <Link to={'/categorias'}>Categorías</Link>
                     <Link to={'/autores'}>Autores</Link>
-                    <Link to={'/mi-biblioteca'}>Mi biblioteca</Link>
+                    {isReader && <Link to={'/mi-biblioteca'}>Mi biblioteca</Link>}
                 </nav>
             </div>
         </header>

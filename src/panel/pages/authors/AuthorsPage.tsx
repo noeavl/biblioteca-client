@@ -114,7 +114,6 @@ export const AuthorsPage = () => {
             const data = await getAuthors({
                 limit: ITEMS_PER_PAGE,
                 skip,
-                search: debouncedSearchTerm || undefined,
             });
             setAuthors(data.authors);
             setTotalPages(data.totalPages);
@@ -173,6 +172,9 @@ export const AuthorsPage = () => {
                                     <TableHead className="text-center">
                                         Libros
                                     </TableHead>
+                                    <TableHead className="text-center">
+                                        Estado
+                                    </TableHead>
                                     <TableHead className="w-[80px] text-right">
                                         Acciones
                                     </TableHead>
@@ -195,6 +197,9 @@ export const AuthorsPage = () => {
                                             <TableCell className="text-center">
                                                 <Skeleton className="h-6 w-8 mx-auto rounded-full" />
                                             </TableCell>
+                                            <TableCell className="text-center">
+                                                <Skeleton className="h-6 w-16 mx-auto rounded-full" />
+                                            </TableCell>
                                             <TableCell className="text-right">
                                                 <Skeleton className="h-8 w-8 ml-auto" />
                                             </TableCell>
@@ -204,7 +209,7 @@ export const AuthorsPage = () => {
                                     // Estado de error
                                     <TableRow>
                                         <TableCell
-                                            colSpan={5}
+                                            colSpan={6}
                                             className="text-center h-24 text-destructive"
                                         >
                                             {error}
@@ -214,7 +219,7 @@ export const AuthorsPage = () => {
                                     // Sin resultados
                                     <TableRow>
                                         <TableCell
-                                            colSpan={5}
+                                            colSpan={6}
                                             className="text-center h-24 text-muted-foreground"
                                         >
                                             No se encontraron autores
@@ -254,6 +259,17 @@ export const AuthorsPage = () => {
                                                 <span className="inline-flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400">
                                                     {author.books.length}
                                                 </span>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {author.status ? (
+                                                    <span className="inline-flex items-center justify-center rounded-full bg-green-100  px-2.5 py-0.5 text-xs font-medium text-green-700 ">
+                                                        Activo
+                                                    </span>
+                                                ) : (
+                                                    <div className="inline-flex items-center justify-center rounded-full bg-red-100  px-2.5 py-0.5 text-xs font-medium text-destructive">
+                                                        Inactivo
+                                                    </div>
+                                                )}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <DropdownMenu>

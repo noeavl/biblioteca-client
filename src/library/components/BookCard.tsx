@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Link } from 'react-router';
 
 interface BookProps {
@@ -37,13 +36,6 @@ export const BookCard = ({
                         </span>
                     </div>
                 )}
-                <div className="absolute top-2 right-2">
-                    <Button className="size-7 sm:size-8 bg-background/80 text-primary rounded-full flex items-center justify-center hover:bg-background transition-colors">
-                        <span className="material-symbols-outlined text-primary text-lg sm:text-xl">
-                            favorite
-                        </span>
-                    </Button>
-                </div>
             </div>
             <div className="p-3 sm:p-4 flex-1 flex flex-col">
                 <p className="text-xs sm:text-xs text-primary font-semibold mb-1">

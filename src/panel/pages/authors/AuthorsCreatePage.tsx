@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, X } from 'lucide-react';
 import { createAuthor, uploadAuthorImage } from '@/panel/api/authors.api';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const AuthorsCreatePage = () => {
@@ -22,6 +23,7 @@ export const AuthorsCreatePage = () => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
+        status: true,
     });
 
     const [authorImage, setAuthorImage] = useState<File | null>(null);
@@ -251,6 +253,23 @@ export const AuthorsCreatePage = () => {
                                     </p>
                                 </div>
                             )}
+                        </div>
+
+                        {/* Estado */}
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div>
+                                <Label htmlFor="status">Estado</Label>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Define si el autor está activo o inactivo.
+                                </p>
+                            </div>
+                            <Switch
+                                id="status"
+                                checked={formData.status}
+                                onCheckedChange={(value) =>
+                                    setFormData({ ...formData, status: value })
+                                }
+                            />
                         </div>
 
                         {/* Botones */}

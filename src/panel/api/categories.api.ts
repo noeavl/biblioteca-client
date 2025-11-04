@@ -52,6 +52,7 @@ export const deleteCategory = async (
 
 export interface CreateCategoryDto {
     name: string;
+    status: boolean;
 }
 
 export interface CreateCategoryResponse {
@@ -90,6 +91,7 @@ export const getCategoryById = async (
 
 export interface UpdateCategoryDto {
     name?: string;
+    status?: boolean;
 }
 
 export interface UpdateCategoryResponse {

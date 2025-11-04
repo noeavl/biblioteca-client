@@ -74,28 +74,45 @@ export const ReaderPage = () => {
     useEffect(() => {
         const updateBookSize = () => {
             const width = window.innerWidth;
-            if (width < 640) {
-                // sm
-                setBookSize({ width: 300, height: 450 });
-            } else if (width < 768) {
-                // md
-                setBookSize({ width: 400, height: 600 });
-            } else if (width < 1024) {
-                // lg
-                setBookSize({ width: 450, height: 675 });
-            } else if (width < 1280) {
-                // xl
-                setBookSize({ width: 500, height: 750 });
+            const height = window.innerHeight;
+
+            // Si está en fullscreen, optimizar para aprovechar toda la pantalla
+            if (isFullscreen) {
+                // Calcular tamaño óptimo basado en el viewport disponible
+                // Dejando espacio para header (~80px) y footer (~120px)
+                const availableHeight = height - 200;
+                const availableWidth = width - 100;
+
+                // Relación de aspecto típica de un libro (3:4)
+                const bookWidth = Math.min(availableWidth * 0.45, 600);
+                const bookHeight = Math.min(availableHeight, bookWidth * 1.4);
+
+                setBookSize({ width: bookWidth, height: bookHeight });
             } else {
-                // 2xl
-                setBookSize({ width: 550, height: 825 });
+                // Tamaños normales para modo no-fullscreen
+                if (width < 640) {
+                    // sm
+                    setBookSize({ width: 300, height: 450 });
+                } else if (width < 768) {
+                    // md
+                    setBookSize({ width: 400, height: 600 });
+                } else if (width < 1024) {
+                    // lg
+                    setBookSize({ width: 450, height: 675 });
+                } else if (width < 1280) {
+                    // xl
+                    setBookSize({ width: 500, height: 750 });
+                } else {
+                    // 2xl
+                    setBookSize({ width: 550, height: 825 });
+                }
             }
         };
 
         updateBookSize();
         window.addEventListener('resize', updateBookSize);
         return () => window.removeEventListener('resize', updateBookSize);
-    }, []);
+    }, [isFullscreen]);
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -463,9 +480,9 @@ export const ReaderPage = () => {
     }
 
     return (
-        <div ref={readerContainerRef} className={`flex flex-col min-h-screen `}>
+        <div ref={readerContainerRef} className="flex flex-col min-h-screen bg-background text-foreground">
             <div
-                className={`flex flex-none justify-between items-center p-3 sm:p-4 md:p-6 lg:p-8 border-b-1  border-foreground/20`}
+                className={`flex flex-none justify-between items-center ${isFullscreen ? 'p-2 sm:p-3' : 'p-3 sm:p-4 md:p-6 lg:p-8'} border-b border-foreground/20`}
             >
                 <div className="hidden sm:flex gap-3">
                     <Popover>
@@ -490,16 +507,10 @@ export const ReaderPage = () => {
                     </Popover>
                 </div>
                 <div className="text-center space-y-1 sm:space-y-2">
-                    <h2
-                        className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold truncate max-w-[200px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-none `}
-                    >
+                    <h2 className={`${isFullscreen ? 'text-base sm:text-lg' : 'text-lg sm:text-xl md:text-2xl lg:text-3xl'} font-bold truncate max-w-[200px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-none text-foreground`}>
                         {book.title}
                     </h2>
-                    <span
-                        className={
-                            'hidden sm:block font-thin text-sm sm:text-base md:text-lg'
-                        }
-                    >
+                    <span className={`hidden sm:block font-thin ${isFullscreen ? 'text-xs sm:text-sm' : 'text-sm sm:text-base md:text-lg'} text-muted-foreground`}>
                         {book.author.person.firstName}
                         {book.author.person.lastName} - {book.publicationYear}
                     </span>
@@ -746,11 +757,28 @@ export const ReaderPage = () => {
                     </Button>
                 </div>
             </div>
-            <div
-                className={`relative flex-1 overflow-hidden ${getFontFamilyClass()} `}
-            >
+            <div className={`relative flex-1 ${isFullscreen ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden'} ${getFontFamilyClass()} bg-background`}>
                 <>
-                    <style>{`.react-pdf__Page__canvas{width:100% !important;height:100% !important;display:block}.react-pdf__Page__svg{width:100% !important;height:100% !important;display:block}`}</style>
+                    <style>{`
+                        .react-pdf__Page__canvas{width:100% !important;height:100% !important;display:block}
+                        .react-pdf__Page__svg{width:100% !important;height:100% !important;display:block}
+                        /* Smooth scrolling en fullscreen */
+                        ${isFullscreen ? `
+                            ::-webkit-scrollbar {
+                                width: 10px;
+                            }
+                            ::-webkit-scrollbar-track {
+                                background: transparent;
+                            }
+                            ::-webkit-scrollbar-thumb {
+                                background: rgba(100, 100, 100, 0.3);
+                                border-radius: 5px;
+                            }
+                            ::-webkit-scrollbar-thumb:hover {
+                                background: rgba(100, 100, 100, 0.5);
+                            }
+                        ` : ''}
+                    `}</style>
                     <Document
                         file={pdfUrl}
                         loading={
@@ -763,9 +791,7 @@ export const ReaderPage = () => {
                             pdfDocumentRef.current = pdf;
                         }}
                     >
-                        <div
-                            className={`flex justify-center items-center max-w-screen-2xl mx-auto p-2 sm:p-4 md:p-6 lg:p-8 `}
-                        >
+                        <div className={`flex justify-center ${isFullscreen ? 'items-start pt-4' : 'items-center'} max-w-screen-2xl mx-auto p-2 sm:p-4 md:p-6 lg:p-8 bg-background min-h-full`}>
                             <HTMLFlipBook
                                 ref={flipBookRef}
                                 width={bookSize.width * scale}
@@ -821,7 +847,7 @@ export const ReaderPage = () => {
 
                 {/* Botón Anterior - Costado Izquierdo */}
                 <Button
-                    className={`fixed left-1 sm:left-2 md:left-4 lg:left-6 xl:left-8 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 z-50 disabled:opacity-50 `}
+                    className="fixed left-1 sm:left-2 md:left-4 lg:left-6 xl:left-8 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 z-50 disabled:opacity-50"
                     onClick={prevPage}
                     disabled={currentPage === 1}
                     title="Página anterior (Flecha izquierda)"
@@ -833,7 +859,7 @@ export const ReaderPage = () => {
 
                 {/* Botón Siguiente - Costado Derecho */}
                 <Button
-                    className={`fixed right-1 sm:right-2 md:right-4 lg:right-6 xl:right-8 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 z-50 disabled:opacity-50`}
+                    className="fixed right-1 sm:right-2 md:right-4 lg:right-6 xl:right-8 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 z-50 disabled:opacity-50"
                     onClick={nextPage}
                     disabled={currentPage + 2 > numPages}
                     title="Página siguiente (Flecha derecha)"
@@ -843,11 +869,9 @@ export const ReaderPage = () => {
                     </span>
                 </Button>
             </div>
-            <div className={`flex-none p-3 sm:p-4 md:p-6 lg:p-8 `}>
+            <div className={`flex-none ${isFullscreen ? 'p-2 sm:p-3' : 'p-3 sm:p-4 md:p-6 lg:p-8'} bg-background border-t border-foreground/20`}>
                 <div className="mb-2 sm:mb-3 flex justify-center">
-                    <span
-                        className={`text-sm sm:text-base md:text-lg font-normal `}
-                    >
+                    <span className="text-sm sm:text-base md:text-lg font-normal text-foreground">
                         Page{' '}
                         <span className="font-bold text-blue-400">
                             {sliderValue}

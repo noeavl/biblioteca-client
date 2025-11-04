@@ -172,7 +172,7 @@ export const CategoriesListPage = () => {
                                         Libros
                                     </TableHead>
                                     <TableHead className="text-center">
-                                        Portada Destacada
+                                        Estado
                                     </TableHead>
                                     <TableHead className="w-[80px] text-right">
                                         Acciones
@@ -260,14 +260,14 @@ export const CategoriesListPage = () => {
                                                     </span>
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    {category.featuredBookCover ? (
-                                                        <span className="text-xs text-green-600 font-medium">
-                                                            Sí
+                                                    {category.status ? (
+                                                        <span className="inline-flex items-center justify-center rounded-full bg-green-100  px-2.5 py-0.5 text-xs font-medium text-green-700 ">
+                                                            Activo
                                                         </span>
                                                     ) : (
-                                                        <span className="text-xs text-muted-foreground">
-                                                            No
-                                                        </span>
+                                                        <div className="inline-flex items-center justify-center rounded-full bg-red-100  px-2.5 py-0.5 text-xs font-medium text-destructive">
+                                                            Inactivo
+                                                        </div>
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="text-right">

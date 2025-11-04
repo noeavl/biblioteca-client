@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, X } from 'lucide-react';
 import { getAuthorById, updateAuthor, uploadAuthorImage } from '@/panel/api/authors.api';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const AuthorsEditPage = () => {
@@ -24,6 +25,7 @@ export const AuthorsEditPage = () => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
+        status: true,
     });
 
     const [currentImageFileName, setCurrentImageFileName] = useState<string | null>(null);
@@ -45,6 +47,7 @@ export const AuthorsEditPage = () => {
                 setFormData({
                     firstName: author.person.firstName,
                     lastName: author.person.lastName,
+                    status: author.status,
                 });
                 setCurrentImageFileName(author.fileName || null);
             } catch (error) {
@@ -103,7 +106,7 @@ export const AuthorsEditPage = () => {
             setLoading(true);
 
             // Preparar datos de actualización (solo enviar si hay cambios)
-            const updateData: { firstName?: string; lastName?: string } = {};
+            const updateData: { firstName?: string; lastName?: string; status?: boolean } = {};
 
             if (formData.firstName.trim()) {
                 updateData.firstName = formData.firstName.trim();
@@ -112,6 +115,8 @@ export const AuthorsEditPage = () => {
             if (formData.lastName.trim()) {
                 updateData.lastName = formData.lastName.trim();
             }
+
+            updateData.status = formData.status;
 
             // Actualizar datos básicos del autor
             await updateAuthor(authorId, updateData);
@@ -308,6 +313,23 @@ export const AuthorsEditPage = () => {
                                     </p>
                                 </div>
                             )}
+                        </div>
+
+                        {/* Estado */}
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div>
+                                <Label htmlFor="status">Estado</Label>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Define si el autor está activo o inactivo.
+                                </p>
+                            </div>
+                            <Switch
+                                id="status"
+                                checked={formData.status}
+                                onCheckedChange={(value) =>
+                                    setFormData({ ...formData, status: value })
+                                }
+                            />
                         </div>
 
                         {/* Botones */}

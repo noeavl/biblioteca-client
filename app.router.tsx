@@ -4,6 +4,7 @@ import { HomePage as LibraryHomePage } from './src/library/pages/home/HomePage';
 import { HomePage as PanelHomePage } from '@/panel/pages/home/HomePage';
 import { MyLibraryPage } from '@/library/pages/my-library/MyLibraryPage';
 import { CategoriesPage } from '@/library/pages/categories/CategoriesPage';
+import { CategoryDetailPage } from '@/library/pages/categories/CategoryDetailPage';
 import { BooksPage } from '@/library/pages/books/BooksPage';
 import { AuthorsPage } from '@/library/pages/authors/AuthorsPage';
 import { BookDetailPage } from '@/library/pages/books/BookDetailPage';
@@ -31,6 +32,8 @@ import { ReadersListPage } from '@/panel/pages/readers/ReadersListPage';
 import { ReadersCreatePage } from '@/panel/pages/readers/ReadersCreatePage';
 import { ReadersEditPage } from '@/panel/pages/readers/ReadersEditPage';
 import { ProtectedRoute } from '@/auth/components/ProtectedRoute';
+import { ReaderRoute } from '@/auth/components/ReaderRoute';
+import ProfilePage from '@/library/pages/profile/ProfilePage';
 
 export const appRouter = createBrowserRouter([
     {
@@ -44,6 +47,14 @@ export const appRouter = createBrowserRouter([
             {
                 path: 'iniciar-sesion',
                 Component: LoginPage,
+            },
+            {
+                path: 'perfil',
+                element: (
+                    <ProtectedRoute>
+                        <ProfilePage />
+                    </ProtectedRoute>
+                ),
             },
             {
                 path: 'libros',
@@ -64,7 +75,16 @@ export const appRouter = createBrowserRouter([
             },
             {
                 path: 'categorias',
-                Component: CategoriesPage,
+                children: [
+                    {
+                        path: '',
+                        Component: CategoriesPage,
+                    },
+                    {
+                        path: 'detalle/:categoryId',
+                        Component: CategoryDetailPage,
+                    },
+                ],
             },
             {
                 path: 'autores',
@@ -81,7 +101,11 @@ export const appRouter = createBrowserRouter([
             },
             {
                 path: 'mi-biblioteca',
-                Component: MyLibraryPage,
+                element: (
+                    <ReaderRoute>
+                        <MyLibraryPage />
+                    </ReaderRoute>
+                ),
                 children: [
                     {
                         index: true,
@@ -199,6 +223,6 @@ export const appRouter = createBrowserRouter([
     },
     {
         path: '*',
-        Component: LibraryHomePage,
+        element: <Navigate to="/" replace />,
     },
 ]);

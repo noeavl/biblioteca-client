@@ -140,7 +140,6 @@ export const UsersListPage = () => {
             const data = await getUsers({
                 limit: ITEMS_PER_PAGE,
                 skip,
-                search: debouncedSearchTerm || undefined,
             });
             setUsers(data.users);
             setTotalPages(data.totalPages);

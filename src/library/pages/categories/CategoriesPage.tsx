@@ -90,6 +90,7 @@ export const CategoriesPage = () => {
 
     // Transformar categorías al formato esperado por CategoriesGrid
     const categoriesCards = categories.map((category) => ({
+        id: category._id,
         name: category.name,
         img: category.featuredBookCover
             ? `${import.meta.env.VITE_API_URL}/files/cover/${

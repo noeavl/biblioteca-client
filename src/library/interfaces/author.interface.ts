@@ -13,6 +13,7 @@ export interface Author {
     books: Book[];
     __v: number;
     fileName?: string;
+    status: boolean;
 }
 
 export interface AuthorCard {

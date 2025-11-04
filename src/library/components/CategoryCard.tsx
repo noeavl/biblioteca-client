@@ -1,19 +1,21 @@
 import { Link } from 'react-router';
 
 interface CategoryProps {
+    id: string;
     name: string;
     img: string;
     showQuantityBooks?: boolean;
     quantityBooks?: number;
 }
 export const CategoryCard = ({
+    id,
     name,
     img,
     quantityBooks,
     showQuantityBooks,
 }: CategoryProps) => {
     return (
-        <Link className="group" to={'/'}>
+        <Link className="group" to={`/categorias/detalle/${id}`}>
             <div className="relative overflow-hidden rounded-lg mb-3">
                 {img ? (
                     <img

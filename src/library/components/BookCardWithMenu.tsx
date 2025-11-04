@@ -7,6 +7,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Link } from 'react-router';
+import { useAuth } from '@/auth/hooks/useAuth';
 
 interface BookCardWithMenuProps {
     id: string;
@@ -39,6 +40,9 @@ export const BookCardWithMenu = ({
     onAddToCollection,
     onRemoveFromCollection,
 }: BookCardWithMenuProps) => {
+    const { user } = useAuth();
+    const isReader = user?.role?.name === 'reader';
+
     return (
         <div className="group bg-card rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col border border-foreground/30">
             <Link
@@ -64,80 +68,82 @@ export const BookCardWithMenu = ({
                     <p className="text-xs sm:text-xs text-primary font-semibold">
                         {category}
                     </p>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0 hover:bg-accent"
-                                onClick={(e) => e.preventDefault()}
+                    {isReader && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 hover:bg-accent"
+                                    onClick={(e) => e.preventDefault()}
+                                >
+                                    <span className="material-symbols-outlined text-muted-foreground text-lg">
+                                        more_vert
+                                    </span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                align="start"
+                                side="bottom"
+                                className="w-48"
                             >
-                                <span className="material-symbols-outlined text-muted-foreground text-lg">
-                                    more_vert
-                                </span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            align="start"
-                            side="bottom"
-                            className="w-48"
-                        >
-                            <DropdownMenuItem
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onToggleFavorite?.(id);
-                                }}
-                            >
-                                <span className="material-symbols-outlined text-sm mr-2">
-                                    {isFavorite ? 'heart_minus' : 'favorite'}
-                                </span>
-                                {isFavorite
-                                    ? 'Remover de favoritos'
-                                    : 'Agregar a favoritos'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onToggleRead?.(id);
-                                }}
-                            >
-                                <span className="material-symbols-outlined text-sm mr-2">
-                                    {isRead ? 'book_2' : 'done'}
-                                </span>
-                                {isRead
-                                    ? 'Marcar como no leído'
-                                    : 'Marcar como leído'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onAddToCollection?.(id);
-                                }}
-                            >
-                                <span className="material-symbols-outlined text-sm mr-2">
-                                    library_add
-                                </span>
-                                Añadir a colección
-                            </DropdownMenuItem>
-                            {collectionName && (
-                                <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        variant="destructive"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            onRemoveFromCollection?.(id);
-                                        }}
-                                    >
-                                        <span className="material-symbols-outlined text-sm mr-2">
-                                            remove_circle
-                                        </span>
-                                        Remover
-                                    </DropdownMenuItem>
-                                </>
-                            )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onToggleFavorite?.(id);
+                                    }}
+                                >
+                                    <span className="material-symbols-outlined text-sm mr-2">
+                                        {isFavorite ? 'heart_minus' : 'favorite'}
+                                    </span>
+                                    {isFavorite
+                                        ? 'Remover de favoritos'
+                                        : 'Agregar a favoritos'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onToggleRead?.(id);
+                                    }}
+                                >
+                                    <span className="material-symbols-outlined text-sm mr-2">
+                                        {isRead ? 'book_2' : 'done'}
+                                    </span>
+                                    {isRead
+                                        ? 'Marcar como no leído'
+                                        : 'Marcar como leído'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onAddToCollection?.(id);
+                                    }}
+                                >
+                                    <span className="material-symbols-outlined text-sm mr-2">
+                                        library_add
+                                    </span>
+                                    Añadir a colección
+                                </DropdownMenuItem>
+                                {collectionName && (
+                                    <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            variant="destructive"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                onRemoveFromCollection?.(id);
+                                            }}
+                                        >
+                                            <span className="material-symbols-outlined text-sm mr-2">
+                                                remove_circle
+                                            </span>
+                                            Remover
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
                 <Link to={`/libros/detalle/${id}`}>
                     <h3 className="font-bold text-foreground text-sm sm:text-base truncate mb-1">

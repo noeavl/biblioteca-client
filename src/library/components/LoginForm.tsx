@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { useState, type FormEvent } from 'react';
 import { loginAction } from '../actions/login.action';
 import { useAuth } from '@/auth/hooks/useAuth';
@@ -15,7 +15,6 @@ export const LoginForm = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showSlowWarning, setShowSlowWarning] = useState(false);
     const { login } = useAuth();
-    const navigate = useNavigate();
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -31,7 +30,8 @@ export const LoginForm = () => {
         try {
             const response = await loginAction(email, password);
             login(response.access_token, response.user);
-            navigate('/');
+            // Usar window.location.href para forzar recarga y actualizar el contexto
+            window.location.href = '/';
         } catch (err: any) {
             // Mostrar el mensaje específico del backend si existe
             if (err?.response?.data?.message) {
@@ -39,7 +39,9 @@ export const LoginForm = () => {
             } else if (err?.message) {
                 setError(err.message);
             } else {
-                setError('Credenciales inválidas. Por favor, intenta de nuevo.');
+                setError(
+                    'Credenciales inválidas. Por favor, intenta de nuevo.'
+                );
             }
         } finally {
             clearTimeout(warningTimeout);
@@ -61,7 +63,8 @@ export const LoginForm = () => {
                             )}
                             {showSlowWarning && (
                                 <div className="text-amber-600 dark:text-amber-400 text-sm text-center bg-amber-50 dark:bg-amber-950/30 p-2 rounded">
-                                    El servidor está iniciando, esto puede tardar unos segundos...
+                                    El servidor está iniciando, esto puede
+                                    tardar unos segundos...
                                 </div>
                             )}
                             <Field>
@@ -95,17 +98,18 @@ export const LoginForm = () => {
                                     type="password"
                                     placeholder="********"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
                                     required
                                     disabled={isLoading}
                                 />
                             </Field>
                             <Field>
-                                <Button
-                                    type="submit"
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+                                <Button type="submit" disabled={isLoading}>
+                                    {isLoading
+                                        ? 'Iniciando sesión...'
+                                        : 'Iniciar sesión'}
                                 </Button>
                             </Field>
                         </FieldGroup>

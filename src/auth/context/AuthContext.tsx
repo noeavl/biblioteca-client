@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     setToken(null);
                     setUser(null);
                     // Redirigir al login
-                    window.location.href = '/login';
+                    window.location.href = '/iniciar-sesion';
                 }
             }
 
@@ -54,6 +54,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
     };
 
+    const updateUser = (updatedUser: User) => {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+    };
+
     // Mostrar un loader mientras se valida el token
     if (isLoading) {
         return (
@@ -71,6 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 isAuthenticated: !!token,
                 login,
                 logout,
+                updateUser,
             }}
         >
             {children}

@@ -36,3 +36,13 @@ export const getCategories = async (params?: GetCategoriesParams): Promise<GetCa
         throw error;
     }
 };
+
+export const getCategoryById = async (categoryId: string): Promise<BookCategory> => {
+    try {
+        const { data } = await libraryApi.get<BookCategory>(`/categories/${categoryId}`);
+        return data;
+    } catch (error) {
+        console.error('Error al obtener la categoría:', error);
+        throw error;
+    }
+};
