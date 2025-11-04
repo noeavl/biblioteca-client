@@ -5,17 +5,6 @@ import {
     PopoverContent,
 } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-
-import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { getBookById } from '@/library/api/books.api';
 import type { Book } from '@/library/interfaces/book.interface';
@@ -40,9 +29,6 @@ interface SearchResult {
     matchIndex: number;
 }
 
-type FontSize = 'small' | 'medium' | 'large';
-type FontFamily = 'serif' | 'sans-serif' | 'monospace' | 'georgia' | 'palatino';
-
 export const ReaderPage = () => {
     const { bookId } = useParams<{ bookId: string }>();
     const [book, setBook] = useState<Book | null>(null);
@@ -64,9 +50,6 @@ export const ReaderPage = () => {
     const [bookSize, setBookSize] = useState({ width: 550, height: 733 });
 
     // Estados para configuración de lectura
-    const [fontSize, setFontSize] = useState<FontSize>('medium');
-    const [fontFamily, setFontFamily] = useState<FontFamily>('serif');
-    const [scale, setScale] = useState<number>(1.0);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const readerContainerRef = useRef<HTMLDivElement>(null);
 
@@ -172,34 +155,6 @@ export const ReaderPage = () => {
     }, [searchOpen]);
 
     // Actualizar escala según tamaño de letra y mantener la página
-    useEffect(() => {
-        const newScale =
-            fontSize === 'small' ? 0.8 : fontSize === 'large' ? 1.3 : 1.0;
-
-        // Si la escala es diferente, actualizar
-        if (newScale !== scale) {
-            setScale(newScale);
-
-            // Actualizar el flipbook después del cambio
-            if (flipBookRef.current && currentPage > 0) {
-                // Usar un pequeño delay para asegurar que React termine de renderizar
-                setTimeout(() => {
-                    if (flipBookRef.current) {
-                        try {
-                            // Actualizar tamaño del flipbook
-                            flipBookRef.current.pageFlip().updateState();
-                        } catch (error) {
-                            console.warn(
-                                'No se pudo actualizar el estado del flipbook:',
-                                error
-                            );
-                        }
-                    }
-                }, 50);
-            }
-        }
-    }, [fontSize, scale, currentPage]);
-
     // Manejar cambios de pantalla completa
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -414,18 +369,6 @@ export const ReaderPage = () => {
         searchInPDF(searchTerm);
     };
 
-    // Obtener clase de fuente
-    const getFontFamilyClass = () => {
-        const fontMap = {
-            serif: 'font-serif',
-            'sans-serif': 'font-sans',
-            monospace: 'font-mono',
-            georgia: 'font-georgia',
-            palatino: 'font-palatino',
-        };
-        return fontMap[fontFamily];
-    };
-
     // Alternar pantalla completa
     const toggleFullscreen = async () => {
         if (!readerContainerRef.current) return;
@@ -620,119 +563,6 @@ export const ReaderPage = () => {
                             </div>
                         </PopoverContent>
                     </Popover>
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button>
-                                <span className="material-symbols-outlined">
-                                    custom_typography
-                                </span>
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30 w-full sm:w-80">
-                            <div className="space-y-6">
-                                {/* Tamaño de letra */}
-                                <div>
-                                    <h3 className="font-bold mb-3">
-                                        Tamaño de letra
-                                    </h3>
-                                    <div className="flex justify-between gap-2">
-                                        <Button
-                                            className={`flex-1 transition-all ${
-                                                fontSize === 'small'
-                                                    ? 'bg-blue-400 text-white hover:bg-blue-500'
-                                                    : 'bg-blue-50 text-blue-400 hover:bg-blue-100'
-                                            }`}
-                                            onClick={() => setFontSize('small')}
-                                        >
-                                            S
-                                        </Button>
-                                        <Button
-                                            className={`flex-1 transition-all ${
-                                                fontSize === 'medium'
-                                                    ? 'bg-blue-400 text-white hover:bg-blue-500'
-                                                    : 'bg-blue-50 text-blue-400 hover:bg-blue-100'
-                                            }`}
-                                            onClick={() =>
-                                                setFontSize('medium')
-                                            }
-                                        >
-                                            M
-                                        </Button>
-                                        <Button
-                                            className={`flex-1 transition-all ${
-                                                fontSize === 'large'
-                                                    ? 'bg-blue-400 text-white hover:bg-blue-500'
-                                                    : 'bg-blue-50 text-blue-400 hover:bg-blue-100'
-                                            }`}
-                                            onClick={() => setFontSize('large')}
-                                        >
-                                            L
-                                        </Button>
-                                    </div>
-                                </div>
-
-                                <Separator />
-
-                                {/* Familia de fuente */}
-                                <div>
-                                    <h3 className="font-bold mb-3">
-                                        Familia de fuente
-                                    </h3>
-                                    <Select
-                                        value={fontFamily}
-                                        onValueChange={(value) =>
-                                            setFontFamily(value as FontFamily)
-                                        }
-                                    >
-                                        <SelectTrigger className="w-full border-blue-400/30">
-                                            <SelectValue placeholder="Selecciona una fuente" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectLabel>
-                                                    Fuentes
-                                                </SelectLabel>
-                                                <SelectItem
-                                                    value="serif"
-                                                    className="font-serif"
-                                                >
-                                                    Serif (Times)
-                                                </SelectItem>
-                                                <SelectItem
-                                                    value="sans-serif"
-                                                    className="font-sans"
-                                                >
-                                                    Sans Serif (Arial)
-                                                </SelectItem>
-                                                <SelectItem
-                                                    value="monospace"
-                                                    className="font-mono"
-                                                >
-                                                    Monospace (Courier)
-                                                </SelectItem>
-                                                <SelectItem
-                                                    value="georgia"
-                                                    style={{
-                                                        fontFamily: 'Georgia',
-                                                    }}
-                                                >
-                                                    Georgia
-                                                </SelectItem>
-                                                <SelectItem
-                                                    value="palatino"
-                                                    style={{
-                                                        fontFamily: 'Palatino',
-                                                    }}
-                                                >
-                                                    Palatino
-                                                </SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </PopoverContent>
-                    </Popover>
 
                     <Button onClick={() => setIsBookmarked(!isBookmarked)}>
                         <span
@@ -757,7 +587,7 @@ export const ReaderPage = () => {
                     </Button>
                 </div>
             </div>
-            <div className={`relative flex-1 ${isFullscreen ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden'} ${getFontFamilyClass()} bg-background`}>
+            <div className={`relative flex-1 ${isFullscreen ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden'} bg-background`}>
                 <>
                     <style>{`
                         .react-pdf__Page__canvas{width:100% !important;height:100% !important;display:block}
@@ -794,8 +624,8 @@ export const ReaderPage = () => {
                         <div className={`flex justify-center ${isFullscreen ? 'items-start pt-4' : 'items-center'} max-w-screen-2xl mx-auto p-2 sm:p-4 md:p-6 lg:p-8 bg-background min-h-full`}>
                             <HTMLFlipBook
                                 ref={flipBookRef}
-                                width={bookSize.width * scale}
-                                height={bookSize.height * scale}
+                                width={bookSize.width}
+                                height={bookSize.height}
                                 size="stretch"
                                 minWidth={280}
                                 minHeight={0}
