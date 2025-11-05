@@ -8,6 +8,7 @@ import { BooksGrid } from '@/library/components/BooksGrid';
 import { getBooks } from '@/panel/api/books.api';
 import { useAuth } from '@/auth/hooks/useAuth';
 import { addFavorite, removeFavorite, checkIsFavorite } from '@/library/api/favorites.api';
+import { addReadingHistory, removeReadingHistory, getReadingHistory } from '@/library/api/reading-history.api';
 import { toast } from 'sonner';
 import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
 
@@ -22,6 +23,8 @@ export const BookDetailPage = () => {
     const [relatedLoading, setRelatedLoading] = useState<boolean>(true);
     const [isFavorite, setIsFavorite] = useState<boolean>(false);
     const [isAddingFavorite, setIsAddingFavorite] = useState<boolean>(false);
+    const [isRead, setIsRead] = useState<boolean>(false);
+    const [isAddingToRead, setIsAddingToRead] = useState<boolean>(false);
 
     const isReader = user?.role?.name === 'reader';
 
@@ -41,10 +44,14 @@ export const BookDetailPage = () => {
                 setCategoryId(bookData.category._id);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                // Verificar si el libro está en favoritos (solo para readers)
+                // Verificar si el libro está en favoritos y leídos (solo para readers)
                 if (isReader) {
                     const isFav = await checkIsFavorite(bookId);
                     setIsFavorite(isFav);
+
+                    const { readingHistory } = await getReadingHistory({ limit: 1000 }); // Fetch a large number of reading history to ensure the book is found if it's read
+                    const isBookRead = readingHistory.some((item) => item.book._id === bookId);
+                    setIsRead(isBookRead);
                 }
             } catch (err) {
                 setError('Error al cargar el libro');
@@ -114,6 +121,42 @@ export const BookDetailPage = () => {
         }
     };
 
+    const handleToggleRead = async () => {
+        if (!isReader) {
+            toast.error('Solo los lectores pueden marcar libros como leídos');
+            return;
+        }
+
+        const readerId = getReaderIdFromToken();
+        if (!readerId || !bookId) {
+            toast.error('No se pudo gestionar el estado de leído');
+            return;
+        }
+
+        try {
+            setIsAddingToRead(true);
+
+            if (isRead) {
+                await removeReadingHistory({ bookId, readerId });
+                setIsRead(false);
+                toast.success('Libro marcado como no leído');
+            } else {
+                await addReadingHistory({ book: bookId, reader: readerId });
+                setIsRead(true);
+                toast.success('Libro marcado como leído');
+            }
+        } catch (error: any) {
+            console.error('Error al gestionar estado de leído:', error);
+            if (error?.response?.data?.message) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error('Error al gestionar estado de leído');
+            }
+        } finally {
+            setIsAddingToRead(false);
+        }
+    };
+
     const transformedBooks = books
         .filter((b) => b._id != book?._id)
         .map((b) => ({
@@ -174,10 +217,10 @@ export const BookDetailPage = () => {
                         </div>
                     )}
                 </div>
-                <article className="flex-1">
+                <article className="flex-1 min-w-0">
                     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-                        <div>
-                            <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold">
+                        <div className="w-full">
+                            <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold break-words hyphens-auto leading-tight">
                                 {book.title}
                             </h2>
                             <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-400">
@@ -222,6 +265,23 @@ export const BookDetailPage = () => {
                                         : isFavorite
                                           ? 'Remover de favoritos'
                                           : 'Añadir a favoritos'}
+                                </Button>
+                            )}
+
+                            {isReader && (
+                                <Button
+                                    onClick={handleToggleRead}
+                                    disabled={isAddingToRead}
+                                    className="bg-green-50 text-green-400 hover:bg-green-50 font-bold w-full sm:w-auto"
+                                >
+                                    <span className="material-symbols-outlined">
+                                        {isRead ? 'book_2' : 'done'}
+                                    </span>
+                                    {isAddingToRead
+                                        ? 'Procesando...'
+                                        : isRead
+                                          ? 'Marcar como no leído'
+                                          : 'Marcar como leído'}
                                 </Button>
                             )}
                         </div>

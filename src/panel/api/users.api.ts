@@ -61,13 +61,18 @@ export interface CreateUserDto {
     name: string;
     email: string;
     password: string;
-    confirmPassword: string;
+    confirmPassword?: string;
     status: boolean;
 }
 
 export interface CreateUserResponse {
-    message: string;
-    user: User;
+    _id: string;
+    role: string;
+    name: string;
+    email: string;
+    status: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export const createUser = async (

@@ -28,9 +28,6 @@ import { AuthorsPage as PanelAuthorsPage } from '@/panel/pages/authors/AuthorsPa
 import { AuthorsCreatePage } from '@/panel/pages/authors/AuthorsCreatePage';
 import { AuthorsEditPage } from '@/panel/pages/authors/AuthorsEditPage';
 import { AuthorsBooksPage } from './src/library/pages/authors/AuthorsBooksPage';
-import { ReadersListPage } from '@/panel/pages/readers/ReadersListPage';
-import { ReadersCreatePage } from '@/panel/pages/readers/ReadersCreatePage';
-import { ReadersEditPage } from '@/panel/pages/readers/ReadersEditPage';
 import { ProtectedRoute } from '@/auth/components/ProtectedRoute';
 import { ReaderRoute } from '@/auth/components/ReaderRoute';
 import ProfilePage from '@/library/pages/profile/ProfilePage';
@@ -113,7 +110,7 @@ export const appRouter = createBrowserRouter([
                     },
                     { path: 'favoritos', Component: FavoritesPage },
                     { path: 'leidos', Component: ReadPage },
-                    { path: 'colecciones', Component: CollectionsPage },
+                    { path: 'colecciones/:collectionId', Component: CollectionsPage },
                 ],
             },
         ],
@@ -199,23 +196,6 @@ export const appRouter = createBrowserRouter([
                     {
                         path: 'editar/:authorId',
                         Component: AuthorsEditPage,
-                    },
-                ],
-            },
-            {
-                path: 'lectores',
-                children: [
-                    {
-                        index: true,
-                        Component: ReadersListPage,
-                    },
-                    {
-                        path: 'crear',
-                        Component: ReadersCreatePage,
-                    },
-                    {
-                        path: 'editar/:readerId',
-                        Component: ReadersEditPage,
                     },
                 ],
             },

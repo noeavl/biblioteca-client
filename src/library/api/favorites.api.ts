@@ -1,5 +1,6 @@
 import { libraryApi } from './libraryApi.api';
 import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
+import type { SortType } from '@/mocks/filters.mock';
 
 export interface AddFavoriteParams {
     book: string;
@@ -80,6 +81,7 @@ export const removeFavorite = async (params: RemoveFavoriteParams): Promise<void
 export interface GetFavoritesParams {
     limit?: number;
     skip?: number;
+    sort?: SortType;
 }
 
 export const getFavorites = async (params?: GetFavoritesParams): Promise<GetFavoritesResponse> => {
@@ -93,6 +95,7 @@ export const getFavorites = async (params?: GetFavoritesParams): Promise<GetFavo
             params: {
                 limit: params?.limit,
                 skip: params?.skip,
+                sort: params?.sort,
             },
         });
         return data;
@@ -104,7 +107,7 @@ export const getFavorites = async (params?: GetFavoritesParams): Promise<GetFavo
 
 export const checkIsFavorite = async (bookId: string): Promise<boolean> => {
     try {
-        const { favorites } = await getFavorites();
+        const { favorites } = await getFavorites({ limit: 1000 }); // Fetch a large number of favorites to ensure the book is found if it's a favorite
         return favorites.some((fav: FavoriteBook) => fav.book._id === bookId);
     } catch (error) {
         console.error('Error al verificar si el libro está en favoritos:', error);

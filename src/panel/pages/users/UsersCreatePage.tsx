@@ -10,35 +10,47 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, User, BookOpen, UserCog, Shield } from 'lucide-react';
 import { createUser, getRoles } from '@/panel/api/users.api';
+import { createReader } from '@/panel/api/readers.api';
 import type { UserRole } from '@/library/interfaces/user.interface';
 import { toast } from 'sonner';
 
+interface FormData {
+    role: string;
+    name: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    status: boolean;
+    suscription: boolean;
+}
+
 export const UsersCreatePage = () => {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const [roles, setRoles] = useState<UserRole[]>([]);
-    const [loadingData, setLoadingData] = useState(true);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [loadingData, setLoadingData] = useState<boolean>(true);
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         role: '',
         name: '',
         email: '',
         password: '',
         confirmPassword: '',
         status: true,
+        // Campos específicos para reader
+        suscription: false,
     });
+
+    // Obtener el nombre del rol seleccionado
+    const getSelectedRoleName = (): string => {
+        const selectedRole = roles.find(r => r._id === formData.role);
+        return selectedRole?.name || '';
+    };
 
     // Cargar roles desde la API
     useEffect(() => {
@@ -47,7 +59,7 @@ export const UsersCreatePage = () => {
                 setLoadingData(true);
                 const rolesData = await getRoles();
                 setRoles(rolesData);
-            } catch (error) {
+            } catch (error: unknown) {
                 toast.error('Error al cargar los roles');
                 console.error(error);
             } finally {
@@ -60,7 +72,6 @@ export const UsersCreatePage = () => {
 
     // Validar fortaleza de contraseña
     const validatePasswordStrength = (password: string): boolean => {
-        // Al menos una mayúscula, una minúscula, un número
         const hasUpperCase = /[A-Z]/.test(password);
         const hasLowerCase = /[a-z]/.test(password);
         const hasNumber = /[0-9]/.test(password);
@@ -68,10 +79,10 @@ export const UsersCreatePage = () => {
     };
 
     // Manejar submit
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
 
-        // Validaciones
+        // Validaciones base
         if (!formData.role) {
             toast.error('Debe seleccionar un rol');
             return;
@@ -125,15 +136,51 @@ export const UsersCreatePage = () => {
             return;
         }
 
+        // Validaciones específicas por rol
+        const roleName = getSelectedRoleName();
+
         try {
             setLoading(true);
-            await createUser(formData);
+
+            // Construir payload base (sin campos específicos de reader)
+            const userPayload = {
+                role: formData.role,
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                confirmPassword: formData.confirmPassword,
+                status: formData.status,
+            };
+
+            // Crear el usuario
+            const userResponse = await createUser(userPayload);
+
+            // Si es reader, crear el registro de reader
+            if (roleName === 'reader' && userResponse._id) {
+                await createReader({
+                    user: userResponse._id,
+                    suscription: formData.suscription,
+                });
+            }
+
             toast.success('Usuario creado exitosamente');
             navigate('/panel/usuarios');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error al crear usuario:', error);
-            if (error?.response?.data?.message) {
-                const message = error.response.data.message;
+
+            // Type guard para verificar si el error tiene la estructura esperada
+            if (
+                error &&
+                typeof error === 'object' &&
+                'response' in error &&
+                error.response &&
+                typeof error.response === 'object' &&
+                'data' in error.response &&
+                error.response.data &&
+                typeof error.response.data === 'object' &&
+                'message' in error.response.data
+            ) {
+                const message = (error.response.data as { message: string | string[] }).message;
                 if (Array.isArray(message)) {
                     message.forEach((msg: string) => toast.error(msg));
                 } else {
@@ -147,6 +194,38 @@ export const UsersCreatePage = () => {
         }
     };
 
+    // Obtener icono según el rol
+    const getRoleIcon = (roleName: string): React.JSX.Element => {
+        switch (roleName) {
+            case 'admin':
+                return <Shield className="h-5 w-5" />;
+            case 'reader':
+                return <BookOpen className="h-5 w-5" />;
+            case 'librarian':
+                return <UserCog className="h-5 w-5" />;
+            case 'executive':
+                return <User className="h-5 w-5" />;
+            default:
+                return <User className="h-5 w-5" />;
+        }
+    };
+
+    // Obtener label del rol
+    const getRoleLabel = (roleName: string): string => {
+        switch (roleName) {
+            case 'admin':
+                return 'Administador';
+            case 'reader':
+                return 'Lector';
+            case 'librarian':
+                return 'Bibliotecario';
+            case 'executive':
+                return 'Ejecutivo';
+            default:
+                return roleName;
+        }
+    };
+
     if (loadingData) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -154,6 +233,8 @@ export const UsersCreatePage = () => {
             </div>
         );
     }
+
+    const selectedRoleName = getSelectedRoleName();
 
     return (
         <div className="flex flex-col gap-6 p-6 w-full max-w-4xl mx-auto">
@@ -170,17 +251,68 @@ export const UsersCreatePage = () => {
                         Crear Nuevo Usuario
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Completa la información del usuario
+                        Completa la información del usuario según su rol
                     </p>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Sección 1: Selección de Rol */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Información del Usuario</CardTitle>
+                        <CardTitle>Tipo de Usuario</CardTitle>
                         <CardDescription>
-                            Los campos marcados con * son obligatorios
+                            Selecciona el rol que tendrá el usuario en el sistema
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {roles.map((role) => (
+                                <button
+                                    key={role._id}
+                                    type="button"
+                                    onClick={() =>
+                                        setFormData({ ...formData, role: role._id })
+                                    }
+                                    className={`
+                                        p-4 border-2 rounded-lg transition-all duration-200
+                                        hover:shadow-md hover:scale-105
+                                        ${
+                                            formData.role === role._id
+                                                ? 'border-primary bg-primary/5 shadow-md'
+                                                : 'border-border hover:border-primary/50'
+                                        }
+                                    `}
+                                >
+                                    <div className="flex flex-col items-center gap-2 text-center">
+                                        <div
+                                            className={`
+                                                p-2 rounded-full
+                                                ${
+                                                    formData.role === role._id
+                                                        ? 'bg-primary/10 text-primary'
+                                                        : 'bg-muted text-muted-foreground'
+                                                }
+                                            `}
+                                        >
+                                            {getRoleIcon(role.name)}
+                                        </div>
+                                        <span className="font-medium text-sm">
+                                            {getRoleLabel(role.name)}
+                                        </span>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Sección 2: Datos de Acceso (siempre visible) */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Datos de Acceso</CardTitle>
+                        <CardDescription>
+                            Información básica para iniciar sesión
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -228,50 +360,6 @@ export const UsersCreatePage = () => {
                                 }
                                 required
                             />
-                        </div>
-
-                        {/* Rol */}
-                        <div className="space-y-2">
-                            <Label htmlFor="role">
-                                Rol <span className="text-destructive">*</span>
-                            </Label>
-                            <Select
-                                value={formData.role}
-                                onValueChange={(value) =>
-                                    setFormData({ ...formData, role: value })
-                                }
-                                required
-                            >
-                                <SelectTrigger id="role">
-                                    <SelectValue placeholder="Selecciona un rol" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {roles.map((role) => (
-                                        <SelectItem
-                                            key={role._id}
-                                            value={role._id}
-                                        >
-                                            <span className="capitalize">
-                                                {role.name === 'admin' &&
-                                                    'Administrador'}
-                                                {role.name === 'librarian' &&
-                                                    'Bibliotecario'}
-                                                {role.name === 'executive' &&
-                                                    'Ejecutivo'}
-                                                {role.name === 'reader' &&
-                                                    'Lector'}
-                                                {![
-                                                    'admin',
-                                                    'librarian',
-                                                    'executive',
-                                                    'reader',
-                                                ].includes(role.name) &&
-                                                    role.name}
-                                            </span>
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
                         </div>
 
                         {/* Contraseña */}
@@ -387,28 +475,86 @@ export const UsersCreatePage = () => {
                                 }
                             />
                         </div>
-
-                        {/* Botones */}
-                        <div className="flex gap-4 pt-4">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => navigate('/panel/usuarios')}
-                                disabled={loading}
-                                className="flex-1"
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="flex-1"
-                            >
-                                {loading ? 'Creando...' : 'Crear Usuario'}
-                            </Button>
-                        </div>
                     </CardContent>
                 </Card>
+
+                {/* Sección 3: Datos Específicos del LECTOR */}
+                {selectedRoleName === 'reader' && (
+                    <Card className="border-muted animate-in fade-in-50 duration-300">
+                        <CardHeader>
+                            <CardTitle>Datos del Lector</CardTitle>
+                            <CardDescription>
+                                Información específica para el lector
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {/* Suscripción */}
+                            <div className="flex items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                    <Label htmlFor="suscription" className="text-base">
+                                        Suscripción
+                                    </Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        {formData.suscription
+                                            ? 'El lector tiene una suscripción activa'
+                                            : 'El lector no tiene suscripción activa'}
+                                    </p>
+                                </div>
+                                <Switch
+                                    id="suscription"
+                                    checked={formData.suscription}
+                                    onCheckedChange={(checked) =>
+                                        setFormData({
+                                            ...formData,
+                                            suscription: checked,
+                                        })
+                                    }
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Sección 3: Sin datos adicionales para ADMIN, LIBRARIAN o EXECUTIVE */}
+                {(selectedRoleName === 'admin' || selectedRoleName === 'librarian' || selectedRoleName === 'executive') && formData.role && (
+                    <Card className="border-muted animate-in fade-in-50 duration-300">
+                        <CardContent className="pt-6">
+                            <div className="flex items-center gap-3 text-muted-foreground">
+                                <div className="p-2 rounded-full bg-muted">
+                                    {getRoleIcon(selectedRoleName)}
+                                </div>
+                                <p className="text-sm">
+                                    {selectedRoleName === 'admin'
+                                        ? 'Los administradores tienen acceso completo al sistema y solo requieren datos de acceso básicos.'
+                                        : selectedRoleName === 'librarian'
+                                        ? 'Los bibliotecarios pueden gestionar libros, categorías y usuarios. Solo requieren datos de acceso básicos.'
+                                        : 'Los ejecutivos tienen permisos especiales y solo requieren datos de acceso básicos.'
+                                    }
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Botones */}
+                <div className="flex gap-4 pt-4">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => navigate('/panel/usuarios')}
+                        disabled={loading}
+                        className="flex-1"
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        type="submit"
+                        disabled={loading || !formData.role}
+                        className="flex-1"
+                    >
+                        {loading ? 'Creando...' : 'Crear Usuario'}
+                    </Button>
+                </div>
             </form>
         </div>
     );

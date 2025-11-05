@@ -11,4 +11,5 @@ export interface User {
     email: string;
     status: boolean;
     __v: number;
+    readerId?: string; // ID del reader si el usuario es un lector
 }

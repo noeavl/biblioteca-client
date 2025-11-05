@@ -39,13 +39,17 @@ import {
     Pencil,
     Trash2,
     Shield,
-    CheckCircle,
+    BookOpen,
+    UserCog,
+    User as UserIcon,
+    CheckCircle2,
     XCircle,
 } from 'lucide-react';
 import { getUsers, deleteUser } from '@/panel/api/users.api';
 import type { User } from '@/library/interfaces/user.interface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -60,23 +64,30 @@ import { toast } from 'sonner';
 
 const ITEMS_PER_PAGE = 8;
 
-// Mapeo de roles a colores y etiquetas en español
-const roleConfig: Record<string, { label: string; color: string }> = {
+// Mapeo de roles a configuración
+const roleConfig: Record<
+    string,
+    { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any }
+> = {
     admin: {
         label: 'Administrador',
-        color: '',
+        variant: 'destructive',
+        icon: Shield,
     },
     librarian: {
         label: 'Bibliotecario',
-        color: '',
+        variant: 'secondary',
+        icon: UserCog,
     },
     executive: {
         label: 'Ejecutivo',
-        color: '',
+        variant: 'outline',
+        icon: UserIcon,
     },
     reader: {
         label: 'Lector',
-        color: '',
+        variant: 'default',
+        icon: BookOpen,
     },
 };
 
@@ -176,7 +187,8 @@ export const UsersListPage = () => {
         return (
             roleConfig[roleName] || {
                 label: roleName,
-                color: '',
+                variant: 'outline' as const,
+                icon: UserIcon,
             }
         );
     };
@@ -295,24 +307,22 @@ export const UsersListPage = () => {
                                                     {user.email}
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    <span
-                                                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${roleInfo.color}`}
-                                                    >
-                                                        <Shield className="h-3 w-3" />
+                                                    <Badge variant={roleInfo.variant} className="gap-1">
+                                                        <roleInfo.icon className="h-3 w-3" />
                                                         {roleInfo.label}
-                                                    </span>
+                                                    </Badge>
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     {user.status ? (
-                                                        <span className="inline-flex items-center gap-1 rounded-full  px-2.5 py-0.5 text-xs font-medium ">
-                                                            <CheckCircle className="h-3 w-3" />
+                                                        <Badge variant="default" className="gap-1 bg-green-600 hover:bg-green-700">
+                                                            <CheckCircle2 className="h-3 w-3" />
                                                             Activo
-                                                        </span>
+                                                        </Badge>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium">
+                                                        <Badge variant="secondary" className="gap-1">
                                                             <XCircle className="h-3 w-3" />
                                                             Inactivo
-                                                        </span>
+                                                        </Badge>
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="text-right">

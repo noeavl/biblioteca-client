@@ -4,13 +4,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SidebarGroupFilterRadioGroup } from './SidebarGroupFilterRadioGroup';
 import { SidebarGroupItems } from './SidebarGroupItems';
 import { SidebarGroupFilterCheckbox } from './SidebarGroupFilterCheckbox';
+import { NewCollection } from './NewCollection';
 
-type Type = 'radio' | 'checkbox' | 'menu-item' | 'group-items';
+type Type = 'radio' | 'checkbox' | 'menu-item' | 'group-items' | 'new-collection' | 'collection-list' | 'empty-collections';
 
 export interface FilterConfig {
     type: Type;
     label: string;
-    items: Array<{
+    items?: Array<{
         name: string;
         id?: string;
         value?: string;
@@ -19,6 +20,7 @@ export interface FilterConfig {
         icon?: string;
     }>;
     onChange?: (value: string, checked?: boolean) => void;
+    onAddCollection?: (name: string) => Promise<void>;
 }
 
 interface FilterSideBarProps {
@@ -55,7 +57,7 @@ export const FilterSideBar = ({
                             component = (
                                 <SidebarGroupFilterRadioGroup
                                     label={filter.label}
-                                    items={filter.items}
+                                    items={filter.items!}
                                     onChange={(value) =>
                                         filter.onChange?.(value)
                                     }
@@ -66,7 +68,7 @@ export const FilterSideBar = ({
                             component = (
                                 <SidebarGroupFilterCheckbox
                                     label={filter.label}
-                                    items={filter.items}
+                                    items={filter.items!}
                                     onChange={filter.onChange}
                                 />
                             );
@@ -75,8 +77,37 @@ export const FilterSideBar = ({
                             component = (
                                 <SidebarGroupItems
                                     label={filter.label}
-                                    items={filter.items}
+                                    items={filter.items!}
                                 />
+                            );
+                            break;
+                        case 'collection-list':
+                            component = (
+                                <div className="max-h-60 overflow-y-auto">
+                                    <SidebarGroupItems
+                                        label={filter.label}
+                                        items={filter.items!}
+                                    />
+                                </div>
+                            );
+                            break;
+                        case 'new-collection':
+                            component = (
+                                <NewCollection
+                                    onAddCollection={filter.onAddCollection!}
+                                />
+                            );
+                            break;
+                        case 'empty-collections':
+                            component = (
+                                <div className="py-4 text-center">
+                                    <span className="material-symbols-outlined text-muted-foreground mb-2" style={{ fontSize: '2rem' }}>
+                                        collections_bookmark
+                                    </span>
+                                    <p className="text-sm text-muted-foreground">
+                                        {filter.label}
+                                    </p>
+                                </div>
                             );
                             break;
                         default:

@@ -14,12 +14,15 @@ import { getAuthors } from '@/library/api/authors.api';
 import type { Book, BookCategory } from '@/library/interfaces/book.interface';
 import type { Author } from '@/library/interfaces/author.interface';
 import { orderByItems, type SortType } from '@/mocks/filters.mock';
-import { addFavorite, removeFavorite, getFavorites } from '@/library/api/favorites.api';
+import { getFavorites } from '@/library/api/favorites.api';
+import { getReadingHistory } from '@/library/api/reading-history.api';
 import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
 import { useAuth } from '@/auth/hooks/useAuth';
 import { toast } from 'sonner';
+import { AddToCollectionDialog } from '@/library/components/AddToCollectionDialog';
+import { useBookActions } from '@/library/hooks/useBookActions';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 12;
 
 export const BooksPage = () => {
     const { user } = useAuth();
@@ -35,11 +38,22 @@ export const BooksPage = () => {
     const [selectedSort, setSelectedSort] = useState<SortType>('recent');
     const [books, setBooks] = useState<Book[]>([]);
     const [totalPages, setTotalPages] = useState(1);
-    const [favoriteBookIds, setFavoriteBookIds] = useState<Set<string>>(new Set());
+    const [collectionDialogOpen, setCollectionDialogOpen] = useState<boolean>(false);
+    const [selectedBookForCollection, setSelectedBookForCollection] = useState<{ id: string; title: string } | null>(null);
 
     // Obtener página actual de los query params
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
     const isReader = user?.role?.name === 'reader';
+
+    // Hook optimizado para manejar favoritos y leídos
+    const {
+        favoriteBookIds,
+        readBookIds,
+        toggleFavorite,
+        toggleRead,
+        setFavoriteBookIds,
+        setReadBookIds,
+    } = useBookActions();
 
     // Cargar libros desde la API con filtros del lado del servidor
     useEffect(() => {
@@ -104,21 +118,28 @@ export const BooksPage = () => {
         fetchFilters();
     }, []);
 
-    // Cargar favoritos del usuario (solo para readers)
+    // Cargar favoritos y leídos del usuario (solo para readers)
     useEffect(() => {
-        const loadFavorites = async () => {
+        const loadUserBookStates = async () => {
             if (!isReader) return;
 
             try {
-                const { favorites } = await getFavorites();
-                const favoriteIds = new Set(favorites.map((fav) => fav.book._id));
+                const [favoritesResponse, readingHistoryResponse] = await Promise.all([
+                    getFavorites(),
+                    getReadingHistory(),
+                ]);
+
+                const favoriteIds = new Set(favoritesResponse.favorites.map((fav) => fav.book._id));
                 setFavoriteBookIds(favoriteIds);
+
+                const readIds = new Set(readingHistoryResponse.readingHistory.map((item) => item.book._id));
+                setReadBookIds(readIds);
             } catch (error) {
-                console.error('Error al cargar favoritos:', error);
+                console.error('Error al cargar estados de libros del usuario:', error);
             }
         };
 
-        loadFavorites();
+        loadUserBookStates();
     }, [isReader]);
 
     // Función para cambiar de página
@@ -131,49 +152,31 @@ export const BooksPage = () => {
             toast.error('Solo los lectores pueden agregar libros a favoritos');
             return;
         }
+        await toggleFavorite(bookId);
+    };
 
-        const readerId = getReaderIdFromToken();
-        if (!readerId) {
-            toast.error('No se pudo obtener el ID del lector');
+    const handleToggleRead = async (bookId: string) => {
+        if (!isReader) {
+            toast.error('Solo los lectores pueden marcar libros como leídos');
+            return;
+        }
+        await toggleRead(bookId);
+    };
+
+    const handleAddToCollection = (bookId: string) => {
+        if (!isReader) {
+            toast.error('Solo los lectores pueden agregar libros a colecciones');
             return;
         }
 
-        try {
-            const isFavorite = favoriteBookIds.has(bookId);
+        const book = books.find((b) => b._id === bookId);
+        if (!book) return;
 
-            if (isFavorite) {
-                // Remover de favoritos
-                await removeFavorite({ book: bookId, reader: readerId });
-                setFavoriteBookIds((prev) => {
-                    const newSet = new Set(prev);
-                    newSet.delete(bookId);
-                    return newSet;
-                });
-                toast.success('Libro removido de favoritos');
-            } else {
-                // Agregar a favoritos
-                await addFavorite({ book: bookId, reader: readerId });
-                setFavoriteBookIds((prev) => new Set(prev).add(bookId));
-                toast.success('Libro agregado a favoritos');
-            }
-        } catch (error: any) {
-            console.error('Error al gestionar favoritos:', error);
-            if (error?.response?.data?.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error('Error al gestionar favoritos');
-            }
-        }
-    };
-
-    const handleToggleRead = (id: string) => {
-        console.log('Toggle read:', id);
-        // TODO: Implementar lógica para marcar como leído/no leído
-    };
-
-    const handleAddToCollection = (id: string) => {
-        console.log('Add to collection:', id);
-        // TODO: Implementar lógica para añadir a colección
+        setSelectedBookForCollection({
+            id: book._id,
+            title: book.title,
+        });
+        setCollectionDialogOpen(true);
     };
 
     // Handlers para los filtros - ahora usan IDs
@@ -247,7 +250,7 @@ export const BooksPage = () => {
             ? `${import.meta.env.VITE_API_URL}/files/cover/${book.coverImage}`
             : null,
         isFavorite: favoriteBookIds.has(book._id),
-        isRead: false, // TODO: Implementar lógica de leído
+        isRead: readBookIds.has(book._id),
     }));
 
     return (
@@ -292,6 +295,15 @@ export const BooksPage = () => {
                     </>
                 )}
             </div>
+
+            {selectedBookForCollection && (
+                <AddToCollectionDialog
+                    open={collectionDialogOpen}
+                    onOpenChange={setCollectionDialogOpen}
+                    bookId={selectedBookForCollection.id}
+                    bookTitle={selectedBookForCollection.title}
+                />
+            )}
         </MainLayout>
     );
 };

@@ -10,16 +10,11 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Eye, EyeOff, User, BookOpen, UserCog, Shield } from 'lucide-react';
 import { getUserById, updateUser, getRoles } from '@/panel/api/users.api';
+import { updateReader, getReaderByUserId } from '@/panel/api/readers.api';
 import type { UserRole } from '@/library/interfaces/user.interface';
 import { toast } from 'sonner';
 
@@ -31,6 +26,7 @@ export const UsersEditPage = () => {
     const [loadingData, setLoadingData] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [readerId, setReaderId] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         role: '',
@@ -39,7 +35,15 @@ export const UsersEditPage = () => {
         password: '',
         confirmPassword: '',
         status: true,
+        // Campos específicos para reader
+        suscription: false,
     });
+
+    // Obtener el nombre del rol seleccionado
+    const getSelectedRoleName = (): string => {
+        const selectedRole = roles.find(r => r._id === formData.role);
+        return selectedRole?.name || '';
+    };
 
     // Cargar usuario y roles
     useEffect(() => {
@@ -57,6 +61,17 @@ export const UsersEditPage = () => {
                     getRoles(),
                 ]);
 
+                // Si el usuario es un lector, cargar sus datos específicos
+                let readerData = null;
+                if (userData.role.name === 'reader') {
+                    try {
+                        readerData = await getReaderByUserId(userId);
+                        setReaderId(readerData._id);
+                    } catch (error) {
+                        console.error('Error al cargar datos del reader:', error);
+                    }
+                }
+
                 setFormData({
                     role: userData.role._id,
                     name: userData.name,
@@ -64,6 +79,8 @@ export const UsersEditPage = () => {
                     password: '',
                     confirmPassword: '',
                     status: userData.status,
+                    // Cargar campos específicos del reader si existen
+                    suscription: readerData?.suscription || false,
                 });
                 setRoles(rolesData);
             } catch (error) {
@@ -80,7 +97,6 @@ export const UsersEditPage = () => {
 
     // Validar fortaleza de contraseña
     const validatePasswordStrength = (password: string): boolean => {
-        // Al menos una mayúscula, una minúscula, un número
         const hasUpperCase = /[A-Z]/.test(password);
         const hasLowerCase = /[a-z]/.test(password);
         const hasNumber = /[0-9]/.test(password);
@@ -137,7 +153,27 @@ export const UsersEditPage = () => {
 
         try {
             setLoading(true);
-            await updateUser(userId, formData);
+
+            const roleName = getSelectedRoleName();
+
+            // Construir payload del usuario (sin campos específicos de reader)
+            const userPayload = {
+                name: formData.name,
+                email: formData.email,
+                status: formData.status,
+                ...(formData.password && { password: formData.password }),
+            };
+
+            // Actualizar el usuario
+            await updateUser(userId, userPayload);
+
+            // Si es reader y tenemos el readerId, actualizar los datos específicos del reader
+            if (roleName === 'reader' && readerId) {
+                await updateReader(readerId, {
+                    suscription: formData.suscription,
+                });
+            }
+
             toast.success('Usuario actualizado exitosamente');
             navigate('/panel/usuarios');
         } catch (error: any) {
@@ -157,6 +193,54 @@ export const UsersEditPage = () => {
         }
     };
 
+    // Obtener icono según el rol
+    const getRoleIcon = (roleName: string) => {
+        switch (roleName) {
+            case 'admin':
+                return <Shield className="h-4 w-4" />;
+            case 'reader':
+                return <BookOpen className="h-4 w-4" />;
+            case 'librarian':
+                return <UserCog className="h-4 w-4" />;
+            case 'executive':
+                return <User className="h-4 w-4" />;
+            default:
+                return <User className="h-4 w-4" />;
+        }
+    };
+
+    // Obtener label del rol
+    const getRoleLabel = (roleName: string) => {
+        switch (roleName) {
+            case 'admin':
+                return 'Administrador';
+            case 'reader':
+                return 'Lector';
+            case 'librarian':
+                return 'Bibliotecario';
+            case 'executive':
+                return 'Ejecutivo';
+            default:
+                return roleName;
+        }
+    };
+
+    // Obtener color del badge según el rol
+    const getRoleBadgeVariant = (roleName: string) => {
+        switch (roleName) {
+            case 'admin':
+                return 'destructive';
+            case 'reader':
+                return 'default';
+            case 'librarian':
+                return 'secondary';
+            case 'executive':
+                return 'outline';
+            default:
+                return 'outline';
+        }
+    };
+
     if (loadingData) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -164,6 +248,8 @@ export const UsersEditPage = () => {
             </div>
         );
     }
+
+    const selectedRoleName = getSelectedRoleName();
 
     return (
         <div className="flex flex-col gap-6 p-6 w-full max-w-4xl mx-auto">
@@ -185,12 +271,39 @@ export const UsersEditPage = () => {
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Sección 1: Tipo de Usuario (NO EDITABLE) */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Información del Usuario</CardTitle>
+                        <CardTitle>Tipo de Usuario</CardTitle>
                         <CardDescription>
-                            Todos los campos son opcionales. Solo se actualizarán los campos modificados
+                            El rol del usuario no puede ser modificado
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+                            <div className="p-3 rounded-full bg-background">
+                                {getRoleIcon(selectedRoleName)}
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-medium">{getRoleLabel(selectedRoleName)}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    Rol asignado al usuario
+                                </p>
+                            </div>
+                            <Badge variant={getRoleBadgeVariant(selectedRoleName)}>
+                                {getRoleLabel(selectedRoleName)}
+                            </Badge>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Sección 2: Datos de Acceso */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Datos de Acceso</CardTitle>
+                        <CardDescription>
+                            Información básica para iniciar sesión
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -233,39 +346,6 @@ export const UsersEditPage = () => {
                                     })
                                 }
                             />
-                        </div>
-
-                        {/* Rol */}
-                        <div className="space-y-2">
-                            <Label htmlFor="role">
-                                Rol
-                            </Label>
-                            <Select
-                                value={formData.role || undefined}
-                                onValueChange={(value) =>
-                                    setFormData({ ...formData, role: value })
-                                }
-                            >
-                                <SelectTrigger id="role">
-                                    <SelectValue placeholder="Selecciona un rol" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {roles.map((role) => (
-                                        <SelectItem
-                                            key={role._id}
-                                            value={role._id}
-                                        >
-                                            <span className="capitalize">
-                                                {role.name === 'admin' && 'Administrador'}
-                                                {role.name === 'librarian' && 'Bibliotecario'}
-                                                {role.name === 'executive' && 'Ejecutivo'}
-                                                {role.name === 'reader' && 'Lector'}
-                                                {!['admin', 'librarian', 'executive', 'reader'].includes(role.name) && role.name}
-                                            </span>
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
                         </div>
 
                         {/* Contraseña */}
@@ -368,28 +448,86 @@ export const UsersEditPage = () => {
                                 }
                             />
                         </div>
-
-                        {/* Botones */}
-                        <div className="flex gap-4 pt-4">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => navigate('/panel/usuarios')}
-                                disabled={loading}
-                                className="flex-1"
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="flex-1"
-                            >
-                                {loading ? 'Actualizando...' : 'Actualizar Usuario'}
-                            </Button>
-                        </div>
                     </CardContent>
                 </Card>
+
+                {/* Sección 3: Datos Específicos del LECTOR */}
+                {selectedRoleName === 'reader' && (
+                    <Card className="border-muted animate-in fade-in-50 duration-300">
+                        <CardHeader>
+                            <CardTitle>Datos del Lector</CardTitle>
+                            <CardDescription>
+                                Información específica para el lector
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {/* Suscripción */}
+                            <div className="flex items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                    <Label htmlFor="suscription" className="text-base">
+                                        Suscripción
+                                    </Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        {formData.suscription
+                                            ? 'El lector tiene una suscripción activa'
+                                            : 'El lector no tiene suscripción activa'}
+                                    </p>
+                                </div>
+                                <Switch
+                                    id="suscription"
+                                    checked={formData.suscription}
+                                    onCheckedChange={(checked) =>
+                                        setFormData({
+                                            ...formData,
+                                            suscription: checked,
+                                        })
+                                    }
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Sección 3: Sin datos adicionales para ADMIN, LIBRARIAN o EXECUTIVE */}
+                {(selectedRoleName === 'admin' || selectedRoleName === 'librarian' || selectedRoleName === 'executive') && (
+                    <Card className="border-muted animate-in fade-in-50 duration-300">
+                        <CardContent className="pt-6">
+                            <div className="flex items-center gap-3 text-muted-foreground">
+                                <div className="p-2 rounded-full bg-muted">
+                                    {getRoleIcon(selectedRoleName)}
+                                </div>
+                                <p className="text-sm">
+                                    {selectedRoleName === 'admin'
+                                        ? 'Los administradores tienen acceso completo al sistema y solo requieren datos de acceso básicos.'
+                                        : selectedRoleName === 'librarian'
+                                        ? 'Los bibliotecarios pueden gestionar libros, categorías y usuarios. Solo requieren datos de acceso básicos.'
+                                        : 'Los ejecutivos tienen permisos especiales y solo requieren datos de acceso básicos.'
+                                    }
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Botones */}
+                <div className="flex gap-4 pt-4">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => navigate('/panel/usuarios')}
+                        disabled={loading}
+                        className="flex-1"
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        type="submit"
+                        disabled={loading}
+                        className="flex-1"
+                    >
+                        {loading ? 'Actualizando...' : 'Actualizar Usuario'}
+                    </Button>
+                </div>
             </form>
         </div>
     );

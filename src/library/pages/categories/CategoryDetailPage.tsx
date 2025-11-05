@@ -10,6 +10,7 @@ import { addFavorite, removeFavorite, getFavorites } from '@/library/api/favorit
 import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
 import { useAuth } from '@/auth/hooks/useAuth';
 import { toast } from 'sonner';
+import { AddToCollectionDialog } from '@/library/components/AddToCollectionDialog';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -22,6 +23,8 @@ export const CategoryDetailPage = () => {
     const [booksLoading, setBooksLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [favoriteBookIds, setFavoriteBookIds] = useState<Set<string>>(new Set());
+    const [collectionDialogOpen, setCollectionDialogOpen] = useState<boolean>(false);
+    const [selectedBookForCollection, setSelectedBookForCollection] = useState<{ id: string; title: string } | null>(null);
 
     const isReader = user?.role?.name === 'reader';
 
@@ -135,9 +138,20 @@ export const CategoryDetailPage = () => {
         toast.info('Funcionalidad de "Leídos" próximamente');
     };
 
-    const handleAddToCollection = (id: string) => {
-        console.log('Add to collection:', id);
-        toast.info('Funcionalidad de "Colecciones" próximamente');
+    const handleAddToCollection = (bookId: string) => {
+        if (!isReader) {
+            toast.error('Solo los lectores pueden agregar libros a colecciones');
+            return;
+        }
+
+        const book = books.find((b) => b._id === bookId);
+        if (!book) return;
+
+        setSelectedBookForCollection({
+            id: book._id,
+            title: book.title,
+        });
+        setCollectionDialogOpen(true);
     };
 
     // Estados de carga y error
@@ -243,6 +257,15 @@ export const CategoryDetailPage = () => {
                     />
                 )}
             </section>
+
+            {selectedBookForCollection && (
+                <AddToCollectionDialog
+                    open={collectionDialogOpen}
+                    onOpenChange={setCollectionDialogOpen}
+                    bookId={selectedBookForCollection.id}
+                    bookTitle={selectedBookForCollection.title}
+                />
+            )}
         </MainContainer>
     );
 };
