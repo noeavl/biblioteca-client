@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { CustomLogo } from '../../components/custom/CustomLogo';
 import { Button } from '@/components/ui/button';
@@ -34,12 +35,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useTheme } from 'next-themes';
+import { SearchDialog } from './SearchDialog';
 
 export const CustomHeader = () => {
     const { user, isAuthenticated, logout } = useAuth();
     const { theme, setTheme } = useTheme();
     const canAccessPanel = user?.role?.name === 'admin' || user?.role?.name === 'librarian';
     const isReader = user?.role?.name === 'reader';
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     const handleLogout = () => {
         logout();
@@ -66,9 +69,11 @@ export const CustomHeader = () => {
                     <Input
                         type="search"
                         placeholder="Buscar libros, autores o categorias..."
-                        className={`w-full pl-9 `}
+                        className={`w-full pl-9 cursor-pointer`}
+                        onClick={() => setIsSearchOpen(true)}
+                        readOnly
                     />
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 " />
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 pointer-events-none" />
                 </div>
                 <div className="flex-none items-center space-x-2">
                     <div className="sm:hidden flex items-center gap-2">
@@ -112,9 +117,11 @@ export const CustomHeader = () => {
                                             <Input
                                                 type="search"
                                                 placeholder="Buscar libros, autores o categorias..."
-                                                className="w-full pl-9"
+                                                className="w-full pl-9 cursor-pointer"
+                                                onClick={() => setIsSearchOpen(true)}
+                                                readOnly
                                             />
-                                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                                         </div>
 
                                         <nav className="space-y-2">
@@ -298,6 +305,9 @@ export const CustomHeader = () => {
                     {isReader && <Link to={'/mi-biblioteca'}>Mi biblioteca</Link>}
                 </nav>
             </div>
+
+            {/* Diálogo de búsqueda */}
+            <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
         </header>
     );
 };

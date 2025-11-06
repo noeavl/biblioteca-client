@@ -16,7 +16,6 @@ import type { Author } from '@/library/interfaces/author.interface';
 import { orderByItems, type SortType } from '@/mocks/filters.mock';
 import { getFavorites } from '@/library/api/favorites.api';
 import { getReadingHistory } from '@/library/api/reading-history.api';
-import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
 import { useAuth } from '@/auth/hooks/useAuth';
 import { toast } from 'sonner';
 import { AddToCollectionDialog } from '@/library/components/AddToCollectionDialog';

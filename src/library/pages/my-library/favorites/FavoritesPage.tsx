@@ -4,7 +4,7 @@ import { BookCardWithMenu } from '@/library/components/BookCardWithMenu';
 import { BooksGridSkeleton } from '@/library/components/BooksGridSkeleton';
 import { CustomPagination } from '@/library/components/CustomPagination';
 import { getFavorites, removeFavorite, type FavoriteBook } from '@/library/api/favorites.api';
-import { getReadingHistory } from '@/library/api/reading-history.api';
+import { getReadingHistory, addReadingHistory, removeReadingHistory } from '@/library/api/reading-history.api';
 import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
 import { toast } from 'sonner';
 import { type SortType } from '@/mocks/filters.mock';
@@ -30,8 +30,6 @@ export const FavoritesPage = () => {
     // Hook optimizado para manejar favoritos y leídos
     const {
         readBookIds,
-        toggleFavorite,
-        toggleRead,
         setReadBookIds,
     } = useBookActions();
 
