@@ -11,7 +11,7 @@ import {
 } from '@/mocks/filters.mock';
 import { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
-import { getCollectionsByReader, createCollection } from '@/library/api/collections.api';
+import { getCollectionsByReader, createCollection, deleteCollection } from '@/library/api/collections.api';
 import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
 import { useAuth } from '@/auth/hooks/useAuth';
 import { toast } from 'sonner';
@@ -114,10 +114,41 @@ export const MyLibraryPage = () => {
         }
     };
 
+    const handleDeleteCollection = async (collectionId: string): Promise<void> => {
+        if (!isReader) {
+            toast.error('Solo los lectores pueden eliminar colecciones');
+            return;
+        }
+
+        try {
+            await deleteCollection(collectionId);
+
+            // Remove from local state
+            setCollectionsItems((prev) =>
+                prev.filter((collection) => collection.id !== collectionId)
+            );
+
+            toast.success('Colección eliminada correctamente');
+        } catch (error: unknown) {
+            console.error('Error al eliminar colección:', error);
+
+            if (error && typeof error === 'object' && 'response' in error) {
+                const apiError = error as { response?: { data?: { message?: string } } };
+                if (apiError.response?.data?.message) {
+                    toast.error(apiError.response.data.message);
+                } else {
+                    toast.error('Error al eliminar la colección');
+                }
+            } else {
+                toast.error('Error al eliminar la colección');
+            }
+        }
+    };
+
     const categoriesFilters: FilterConfig[] = [
         { type: 'menu-item', label: 'Mi Biblioteca', items: menuItems },
         ...(collectionsItems.length > 0
-            ? [{ type: 'collection-list' as const, label: 'Colecciones', items: collectionsItems }]
+            ? [{ type: 'collection-list' as const, label: 'Colecciones', items: collectionsItems, onDeleteCollection: handleDeleteCollection }]
             : [{ type: 'empty-collections' as const, label: 'No tienes colecciones aún' }]),
         { type: 'new-collection', label: 'Nueva Colección', onAddCollection: handleAddCollection },
         {

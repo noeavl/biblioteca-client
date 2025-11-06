@@ -21,6 +21,7 @@ export interface FilterConfig {
     }>;
     onChange?: (value: string, checked?: boolean) => void;
     onAddCollection?: (name: string) => Promise<void>;
+    onDeleteCollection?: (collectionId: string) => Promise<void>;
 }
 
 interface FilterSideBarProps {
@@ -87,6 +88,7 @@ export const FilterSideBar = ({
                                     <SidebarGroupItems
                                         label={filter.label}
                                         items={filter.items!}
+                                        onDeleteCollection={filter.onDeleteCollection}
                                     />
                                 </div>
                             );

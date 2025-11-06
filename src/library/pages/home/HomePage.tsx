@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { CategoriesGrid } from '@/library/components/CategoriesGrid';
 import { AuthorsGrid } from '@/library/components/AuthorsGrid';
 import { InteractiveBook } from '@/library/components/InteractiveBook';
+import { EditablePostit } from '@/library/components/EditablePostit';
 import { getBooks } from '@/library/api/books.api';
 import { getAuthors } from '@/library/api/authors.api';
 import { getCategories } from '@/library/api/categories.api';
@@ -362,18 +363,14 @@ export const HomePage = () => {
                                         }}
                                     ></div>
                                     {/* Postit - Call to Action 1 */}
-                                    <div
-                                        className="hidden md:block absolute bottom-0 left-[10%] shadow-xl px-6 py-3 rounded-sm transform -rotate-2 z-10"
-                                        style={{
-                                            backgroundColor: '#fde047',
-                                            boxShadow:
-                                                '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)',
-                                        }}
-                                    >
-                                        <span className="text-xl text-gray-800 font-semibold">
-                                            Nuevos libros
-                                        </span>
-                                    </div>
+                                    <EditablePostit
+                                        id="postit-1"
+                                        defaultText="Nuevos libros"
+                                        backgroundColor="#fde047"
+                                        textColor="text-gray-800"
+                                        rotation="-rotate-2"
+                                        position="left"
+                                    />
                                 </div>
                             )}
 
@@ -418,18 +415,14 @@ export const HomePage = () => {
                                         }}
                                     ></div>
                                     {/* Postit - Call to Action 2 */}
-                                    <div
-                                        className="hidden md:block absolute bottom-0 right-[8%] shadow-xl px-6 py-3 rounded-sm transform -rotate-1 z-10"
-                                        style={{
-                                            backgroundColor: '#5eead4',
-                                            boxShadow:
-                                                '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)',
-                                        }}
-                                    >
-                                        <span className="text-xl text-gray-800 font-semibold">
-                                            Descúbrelo
-                                        </span>
-                                    </div>
+                                    <EditablePostit
+                                        id="postit-2"
+                                        defaultText="Descúbrelo"
+                                        backgroundColor="#5eead4"
+                                        textColor="text-gray-800"
+                                        rotation="-rotate-1"
+                                        position="right"
+                                    />
                                 </div>
                             )}
 
@@ -474,18 +467,14 @@ export const HomePage = () => {
                                         }}
                                     ></div>
                                     {/* Postit - Call to Action 3 */}
-                                    <div
-                                        className="hidden md:block absolute bottom-0 left-[8%] shadow-xl px-6 py-3 rounded-sm transform -rotate-1 z-10"
-                                        style={{
-                                            backgroundColor: '#fb7185',
-                                            boxShadow:
-                                                '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)',
-                                        }}
-                                    >
-                                        <span className="text-xl text-white font-semibold">
-                                            ¡Empieza ya!
-                                        </span>
-                                    </div>
+                                    <EditablePostit
+                                        id="postit-3"
+                                        defaultText="¡Empieza ya!"
+                                        backgroundColor="#fb7185"
+                                        textColor="text-white"
+                                        rotation="-rotate-1"
+                                        position="left"
+                                    />
                                 </div>
                             )}
                         </div>

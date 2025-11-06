@@ -176,3 +176,17 @@ export const removeBookFromCollection = async (
         throw error;
     }
 };
+
+export const deleteCollection = async (
+    collectionId: string
+): Promise<{ message: string }> => {
+    try {
+        const { data } = await libraryApi.delete<{ message: string }>(
+            `/collections/${collectionId}`
+        );
+        return data;
+    } catch (error) {
+        console.error('Error al eliminar colección:', error);
+        throw error;
+    }
+};

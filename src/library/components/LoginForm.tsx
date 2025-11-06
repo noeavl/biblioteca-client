@@ -3,7 +3,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router';
 import { useState, type FormEvent } from 'react';
 import { loginAction } from '../actions/login.action';
 import { useAuth } from '@/auth/hooks/useAuth';
@@ -82,17 +81,9 @@ export const LoginForm = () => {
                                 />
                             </Field>
                             <Field>
-                                <div className="flex items-center">
-                                    <FieldLabel htmlFor="password">
-                                        Contraseña
-                                    </FieldLabel>
-                                    <Link
-                                        to={'/'}
-                                        className="ml-auto text-sm font-thin text-primary underline-offset-4 hover:underline"
-                                    >
-                                        ¿Olvidé mi contraseña?
-                                    </Link>
-                                </div>
+                                <FieldLabel htmlFor="password">
+                                    Contraseña
+                                </FieldLabel>
                                 <Input
                                     id="password"
                                     type="password"
@@ -104,6 +95,9 @@ export const LoginForm = () => {
                                     required
                                     disabled={isLoading}
                                 />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    ¿Olvidaste tu contraseña? Contacta con el administrador para restablecerla.
+                                </p>
                             </Field>
                             <Field>
                                 <Button type="submit" disabled={isLoading}>

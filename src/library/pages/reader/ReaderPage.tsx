@@ -8,12 +8,13 @@ import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { getBookById } from '@/library/api/books.api';
 import type { Book } from '@/library/interfaces/book.interface';
-import { useParams } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { pdfjs, Document, Page } from 'react-pdf';
 import { Spinner } from '@/components/ui/spinner';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import HTMLFlipBook from 'react-pageflip';
+import { BookOpen, ArrowLeft, FileX } from 'lucide-react';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 
@@ -31,6 +32,7 @@ interface SearchResult {
 
 export const ReaderPage = () => {
     const { bookId } = useParams<{ bookId: string }>();
+    const navigate = useNavigate();
     const [book, setBook] = useState<Book | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -419,7 +421,75 @@ export const ReaderPage = () => {
         : null;
 
     if (!pdfUrl) {
-        return <div>PDF no encontrado para este libro</div>;
+        return (
+            <div className="flex flex-col min-h-screen bg-background">
+                {/* Header con información del libro */}
+                <div className="flex-none p-4 sm:p-6 md:p-8 border-b border-border">
+                    <div className="max-w-2xl mx-auto">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(-1)}
+                            className="mb-4"
+                        >
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Volver
+                        </Button>
+                        <div className="text-center space-y-2">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
+                                {book.title}
+                            </h1>
+                            <p className="text-base sm:text-lg text-muted-foreground">
+                                {book.author.person.firstName} {book.author.person.lastName} • {book.publicationYear}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Contenido principal - Estado vacío */}
+                <div className="flex-1 flex items-center justify-center p-4">
+                    <div className="max-w-md w-full text-center space-y-6">
+                        {/* Icono */}
+                        <div className="flex justify-center">
+                            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-muted flex items-center justify-center">
+                                <FileX className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground" />
+                            </div>
+                        </div>
+
+                        {/* Mensaje */}
+                        <div className="space-y-3">
+                            <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
+                                PDF no disponible
+                            </h2>
+                            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                                Este libro no tiene un archivo PDF asociado en este momento.
+                                Por favor, contacta al administrador o intenta con otro libro.
+                            </p>
+                        </div>
+
+                        {/* Acciones */}
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+                            <Button
+                                variant="default"
+                                size="lg"
+                                onClick={() => navigate(`/libros/detalle/${book._id}`)}
+                                className="gap-2"
+                            >
+                                <BookOpen className="h-4 w-4" />
+                                Ver detalles del libro
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                onClick={() => navigate('/libros')}
+                            >
+                                Explorar libros
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -454,8 +524,7 @@ export const ReaderPage = () => {
                         {book.title}
                     </h2>
                     <span className={`hidden sm:block font-thin ${isFullscreen ? 'text-xs sm:text-sm' : 'text-sm sm:text-base md:text-lg'} text-muted-foreground`}>
-                        {book.author.person.firstName}
-                        {book.author.person.lastName} - {book.publicationYear}
+                        {book.author.person.firstName} {book.author.person.lastName} - {book.publicationYear}
                     </span>
                 </div>
                 <div className="space-x-3">

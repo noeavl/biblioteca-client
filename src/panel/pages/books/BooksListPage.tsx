@@ -130,6 +130,9 @@ export const BooksListPage = () => {
                                     <TableHead>Autor</TableHead>
                                     <TableHead>Categoría</TableHead>
                                     <TableHead className="text-center">
+                                        Año
+                                    </TableHead>
+                                    <TableHead className="text-center">
                                         Estado
                                     </TableHead>
                                     <TableHead className="w-[80px] text-right">
@@ -155,6 +158,9 @@ export const BooksListPage = () => {
                                                 <Skeleton className="h-4 w-24" />
                                             </TableCell>
                                             <TableCell className="text-center">
+                                                <Skeleton className="h-4 w-12 mx-auto" />
+                                            </TableCell>
+                                            <TableCell className="text-center">
                                                 <Skeleton className="h-6 w-16 mx-auto rounded-full" />
                                             </TableCell>
                                             <TableCell className="text-right">
@@ -166,7 +172,7 @@ export const BooksListPage = () => {
                                     // Estado de error
                                     <TableRow>
                                         <TableCell
-                                            colSpan={6}
+                                            colSpan={7}
                                             className="text-center h-24 text-destructive"
                                         >
                                             {error}
@@ -176,7 +182,7 @@ export const BooksListPage = () => {
                                     // Sin resultados
                                     <TableRow>
                                         <TableCell
-                                            colSpan={6}
+                                            colSpan={7}
                                             className="text-center h-24 text-muted-foreground"
                                         >
                                             No se encontraron libros
@@ -215,6 +221,9 @@ export const BooksListPage = () => {
                                             </TableCell>
                                             <TableCell className="capitalize">
                                                 {book.category.name}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {book.publicationYear}
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 {book.status ? (
