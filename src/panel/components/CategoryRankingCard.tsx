@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { CategoryRankingItem } from '@/panel/interfaces/stats.interface';
-import { Eye, Heart, BookOpen, ArrowRight } from 'lucide-react';
+import { Eye, Heart, BookOpen, ArrowRight, Library } from 'lucide-react';
 import { Link } from 'react-router';
 import { useAuth } from '@/auth/hooks/useAuth';
 
@@ -25,14 +25,20 @@ export function CategoryRankingCard({
     return (
         <Card className="overflow-hidden hover:shadow-md transition-shadow">
             <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                    {/* Badge de ranking */}
-                    <Badge
-                        variant="secondary"
-                        className="h-8 w-8 rounded-full flex items-center justify-center p-0 flex-shrink-0"
-                    >
-                        {rank}
-                    </Badge>
+                <div className="flex gap-4">
+                    {/* Icono de categoría */}
+                    <div className="relative flex-shrink-0">
+                        <div className="w-16 h-16 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+                            <Library className="text-blue-500 size-8" />
+                        </div>
+                        {/* Badge de ranking */}
+                        <Badge
+                            variant="secondary"
+                            className="absolute -top-2 -left-2 h-6 w-6 rounded-full flex items-center justify-center p-0"
+                        >
+                            {rank}
+                        </Badge>
+                    </div>
 
                     {/* Información de la categoría */}
                     <div className="flex-1 min-w-0">

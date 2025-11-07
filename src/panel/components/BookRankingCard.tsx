@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { BookRankingItem } from '@/panel/interfaces/stats.interface';
-import { Eye, Heart, ArrowRight } from 'lucide-react';
+import { Eye, Heart, ArrowRight, BookOpen } from 'lucide-react';
 import { Link } from 'react-router';
 import { useAuth } from '@/auth/hooks/useAuth';
 
@@ -32,8 +32,8 @@ export function BookRankingCard({ book, type, rank }: BookRankingCardProps) {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                    <span className="text-xs">Sin portada</span>
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <BookOpen className="text-blue-500 size-8" />
                                 </div>
                             )}
                         </div>

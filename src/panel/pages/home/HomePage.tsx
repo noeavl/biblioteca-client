@@ -20,7 +20,7 @@ const transformAnalyticsToStats = (analytics: DashboardAnalytics): DashboardStat
     author: book.author.person.lastName,
     category: book.category.name,
     coverImage: book.coverImage
-      ? `${import.meta.env.VITE_API_URL}/uploads/books/${book.coverImage}`
+      ? `${import.meta.env.VITE_API_URL}/files/cover/${book.coverImage}`
       : undefined,
     count: book.readCount,
   }));
@@ -32,7 +32,7 @@ const transformAnalyticsToStats = (analytics: DashboardAnalytics): DashboardStat
     author: book.author.person.lastName,
     category: book.category.name,
     coverImage: book.coverImage
-      ? `${import.meta.env.VITE_API_URL}/uploads/books/${book.coverImage}`
+      ? `${import.meta.env.VITE_API_URL}/files/cover/${book.coverImage}`
       : undefined,
     count: book.favoriteCount,
   }));
