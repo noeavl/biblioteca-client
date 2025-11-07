@@ -5,22 +5,126 @@ import { StatsCard } from '@/panel/components/StatsCard';
 import { BookRankingCard } from '@/panel/components/BookRankingCard';
 import { CategoryRankingCard } from '@/panel/components/CategoryRankingCard';
 import { AuthorRankingCard } from '@/panel/components/AuthorRankingCard';
-import type { DashboardStats } from '@/panel/interfaces/stats.interface';
-import { mockDashboardStats } from '@/mocks/dashboard-stats';
-import { Users, UserCog, BookOpen, FolderOpen, UserRound } from 'lucide-react';
+import type { DashboardStats, BookRankingItem, CategoryRankingItem, AuthorRankingItem } from '@/panel/interfaces/stats.interface';
+import type { DashboardAnalytics, TopFavoriteBook, TopReadBook, TopFavoriteAuthor, TopReadAuthor, TopFavoriteCategory, TopReadCategory } from '@/panel/interfaces/analytics.interface';
+import { getDashboardAnalytics } from '@/panel/api/analytics.api';
+import { BookOpen, FolderOpen, UserRound, Heart, BookMarked } from 'lucide-react';
+import { toast } from 'sonner';
+
+// Función auxiliar para transformar los datos de la API al formato esperado por los componentes
+const transformAnalyticsToStats = (analytics: DashboardAnalytics): DashboardStats => {
+  // Transformar libros más leídos
+  const mostReadBooks: BookRankingItem[] = analytics.books.topReadBooks.map((book: TopReadBook) => ({
+    _id: book._id,
+    title: book.title,
+    author: book.author.person.lastName,
+    category: book.category.name,
+    coverImage: book.coverImage
+      ? `${import.meta.env.VITE_API_URL}/uploads/books/${book.coverImage}`
+      : undefined,
+    count: book.readCount,
+  }));
+
+  // Transformar libros más favoritos
+  const mostFavoritedBooks: BookRankingItem[] = analytics.books.topFavoriteBooks.map((book: TopFavoriteBook) => ({
+    _id: book._id,
+    title: book.title,
+    author: book.author.person.lastName,
+    category: book.category.name,
+    coverImage: book.coverImage
+      ? `${import.meta.env.VITE_API_URL}/uploads/books/${book.coverImage}`
+      : undefined,
+    count: book.favoriteCount,
+  }));
+
+  // Transformar categorías más leídas
+  const mostReadCategories: CategoryRankingItem[] = analytics.categories.topReadCategories.map((category: TopReadCategory) => ({
+    _id: category._id,
+    name: category.name,
+    totalBooks: 0, // La API no devuelve este dato en el ranking
+    count: category.readCount,
+  }));
+
+  // Transformar categorías más favoritas
+  const mostFavoritedCategories: CategoryRankingItem[] = analytics.categories.topFavoriteCategories.map((category: TopFavoriteCategory) => ({
+    _id: category._id,
+    name: category.name,
+    totalBooks: 0, // La API no devuelve este dato en el ranking
+    count: category.favoriteCount,
+  }));
+
+  // Transformar autores más leídos
+  const mostReadAuthors: AuthorRankingItem[] = analytics.authors.topReadAuthors.map((author: TopReadAuthor) => ({
+    _id: author._id,
+    firstName: author.person.firstName,
+    lastName: author.person.lastName,
+    avatar: undefined, // La API no devuelve avatar
+    totalBooks: 0, // La API no devuelve este dato en el ranking
+    count: author.readCount,
+  }));
+
+  // Transformar autores más favoritos
+  const mostFavoritedAuthors: AuthorRankingItem[] = analytics.authors.topFavoriteAuthors.map((author: TopFavoriteAuthor) => ({
+    _id: author._id,
+    firstName: author.person.firstName,
+    lastName: author.person.lastName,
+    avatar: undefined, // La API no devuelve avatar
+    totalBooks: 0, // La API no devuelve este dato en el ranking
+    count: author.favoriteCount,
+  }));
+
+  return {
+    users: {
+      totalReaders: 0, // La API actual no proporciona estos datos
+      totalLibrarians: 0,
+    },
+    books: {
+      totalBooks: analytics.books.total,
+    },
+    categories: {
+      totalCategories: analytics.categories.total,
+    },
+    authors: {
+      totalAuthors: analytics.authors.total,
+    },
+    bookRankings: {
+      mostRead: mostReadBooks,
+      mostFavorited: mostFavoritedBooks,
+    },
+    categoryRankings: {
+      mostRead: mostReadCategories,
+      mostFavorited: mostFavoritedCategories,
+    },
+    authorRankings: {
+      mostRead: mostReadAuthors,
+      mostFavorited: mostFavoritedAuthors,
+    },
+    favorites: {
+      total: analytics.favorites.total,
+    },
+    readingHistory: {
+      total: analytics.readingHistory.total,
+    },
+  };
+};
 
 export const HomePage = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simular carga de datos
     const loadStats = async () => {
       setLoading(true);
-      // Simular delay de API
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setStats(mockDashboardStats);
-      setLoading(false);
+      try {
+        const analytics = await getDashboardAnalytics();
+        const transformedStats = transformAnalyticsToStats(analytics);
+        setStats(transformedStats);
+      } catch (error) {
+        console.error('Error al cargar las estadísticas:', error);
+        toast.error('Error al cargar las estadísticas del dashboard');
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadStats();
@@ -45,30 +149,10 @@ export const HomePage = () => {
         </p>
       </div>
 
-      {/* Estadísticas de Usuarios */}
-      <section>
-        <h2 className="text-xl font-semibold mb-4">Usuarios</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-          <StatsCard
-            title="Total de Lectores"
-            value={stats.users.totalReaders}
-            icon={Users}
-            iconColor="text-blue-600"
-            description="Usuarios con rol de lector"
-          />
-          <StatsCard
-            title="Total de Bibliotecarios"
-            value={stats.users.totalLibrarians}
-            icon={UserCog}
-            iconColor="text-purple-600"
-            description="Personal de la biblioteca"
-          />
-        </div>
-      </section>
-
       {/* Estadísticas Generales */}
       <section>
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-3">
+        <h2 className="text-xl font-semibold mb-4">Estadísticas de la Biblioteca</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <StatsCard
             title="Total de Libros"
             value={stats.books.totalBooks}
@@ -89,6 +173,20 @@ export const HomePage = () => {
             icon={UserRound}
             iconColor="text-pink-600"
             description="Autores en catálogo"
+          />
+          <StatsCard
+            title="Total de Favoritos"
+            value={stats.favorites?.total || 0}
+            icon={Heart}
+            iconColor="text-red-600"
+            description="Libros marcados como favoritos"
+          />
+          <StatsCard
+            title="Total de Lecturas"
+            value={stats.readingHistory?.total || 0}
+            icon={BookMarked}
+            iconColor="text-blue-600"
+            description="Historial de lecturas"
           />
         </div>
       </section>

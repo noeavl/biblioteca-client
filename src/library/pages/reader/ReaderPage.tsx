@@ -13,7 +13,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { pdfjs, Document, Page } from 'react-pdf';
 import { Spinner } from '@/components/ui/spinner';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
-import HTMLFlipBook from 'react-pageflip';
 import { BookOpen, ArrowLeft, FileX } from 'lucide-react';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -22,6 +21,17 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
     import.meta.url
 ).toString();
+
+// Configuración de PDF options fuera del componente (best practice)
+const pdfOptions = {
+    cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+    cMapPacked: true,
+    // Habilitar soporte para JPEG 2000 (imágenes JPX en PDFs escaneados)
+    standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+    // Deshabilitar verificación estricta para PDFs escaneados problemáticos
+    disableFontFace: false,
+    disableAutoFetch: false,
+};
 
 // Tipos para búsqueda
 interface SearchResult {
@@ -48,56 +58,63 @@ export const ReaderPage = () => {
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchAbortControllerRef = useRef<AbortController | null>(null);
     const pdfDocumentRef = useRef<PDFDocumentProxy | null>(null);
-    const flipBookRef = useRef<typeof HTMLFlipBook.prototype | null>(null);
-    const [bookSize, setBookSize] = useState({ width: 550, height: 733 });
+    const pageContainerRef = useRef<HTMLDivElement>(null);
 
     // Estados para configuración de lectura
     const [isFullscreen, setIsFullscreen] = useState(false);
     const readerContainerRef = useRef<HTMLDivElement>(null);
+    const isMountedRef = useRef<boolean>(true);
 
-    // Tamaños responsivos para diferentes breakpoints
+    // Tamaño estándar A4 en píxeles (210mm x 297mm a 72 DPI)
+    const A4_WIDTH = 595; // puntos
+    const A4_HEIGHT = 842; // puntos
+
+    // Calcular escala dinámica basada en viewport
+    const [pageWidth, setPageWidth] = useState(A4_WIDTH);
+    const [pageHeight, setPageHeight] = useState(A4_HEIGHT);
+
+    // Optimización: Render solo páginas visibles + buffer (2 antes y 2 después)
+    const [visiblePages, setVisiblePages] = useState<Set<number>>(
+        new Set([1, 2, 3])
+    );
+
+    // Calcular tamaño óptimo de páginas según viewport
     useEffect(() => {
-        const updateBookSize = () => {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
+        const calculatePageSize = () => {
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
 
-            // Si está en fullscreen, optimizar para aprovechar toda la pantalla
-            if (isFullscreen) {
-                // Calcular tamaño óptimo basado en el viewport disponible
-                // Dejando espacio para header (~80px) y footer (~120px)
-                const availableHeight = height - 200;
-                const availableWidth = width - 100;
+            // Espacio disponible (restando header ~80px, footer ~120px, padding)
+            const availableHeight = viewportHeight - 250;
 
-                // Relación de aspecto típica de un libro (3:4)
-                const bookWidth = Math.min(availableWidth * 0.45, 600);
-                const bookHeight = Math.min(availableHeight, bookWidth * 1.4);
+            // Para 2 páginas lado a lado, dividir ancho disponible entre 2 + gaps
+            const availableWidthPerPage = (viewportWidth - 200) / 2;
 
-                setBookSize({ width: bookWidth, height: bookHeight });
-            } else {
-                // Tamaños normales para modo no-fullscreen
-                if (width < 640) {
-                    // sm
-                    setBookSize({ width: 300, height: 450 });
-                } else if (width < 768) {
-                    // md
-                    setBookSize({ width: 400, height: 600 });
-                } else if (width < 1024) {
-                    // lg
-                    setBookSize({ width: 450, height: 675 });
-                } else if (width < 1280) {
-                    // xl
-                    setBookSize({ width: 500, height: 750 });
-                } else {
-                    // 2xl
-                    setBookSize({ width: 550, height: 825 });
-                }
+            // Mantener proporción A4 (1:1.414)
+            const A4_RATIO = A4_HEIGHT / A4_WIDTH;
+
+            // Calcular tamaño óptimo manteniendo proporción
+            let width = availableWidthPerPage;
+            let height = width * A4_RATIO;
+
+            // Si la altura excede el espacio disponible, ajustar por altura
+            if (height > availableHeight) {
+                height = availableHeight;
+                width = height / A4_RATIO;
             }
+
+            // Aplicar límites mínimos y máximos para legibilidad
+            width = Math.max(300, Math.min(width, 600));
+            height = width * A4_RATIO;
+
+            setPageWidth(width);
+            setPageHeight(height);
         };
 
-        updateBookSize();
-        window.addEventListener('resize', updateBookSize);
-        return () => window.removeEventListener('resize', updateBookSize);
-    }, [isFullscreen]);
+        calculatePageSize();
+        window.addEventListener('resize', calculatePageSize);
+        return () => window.removeEventListener('resize', calculatePageSize);
+    }, [A4_WIDTH, A4_HEIGHT, isFullscreen]);
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -124,28 +141,73 @@ export const ReaderPage = () => {
         fetchBook();
     }, [bookId]);
 
+    // Cleanup: Marcar componente como desmontado y cancelar operaciones pendientes
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+            // Cancelar búsquedas pendientes
+            if (searchAbortControllerRef.current) {
+                searchAbortControllerRef.current.abort();
+            }
+            // Limpiar referencia sin destruir (Document lo maneja internamente)
+            pdfDocumentRef.current = null;
+        };
+    }, []);
+
     // Función para cuando el documento PDF se carga exitosamente
     const onDocumentLoadSuccess = useCallback(
         ({ numPages }: { numPages: number }) => {
             setNumPages(numPages);
+
+            // Inicializar páginas visibles
+            const initialVisiblePages = new Set<number>();
+            for (let i = 1; i <= Math.min(3, numPages); i++) {
+                initialVisiblePages.add(i);
+            }
+            setVisiblePages(initialVisiblePages);
         },
         []
     );
 
-    // Funciones de navegación con flipbook (optimizadas)
+    // Actualizar páginas visibles cuando cambia la página actual
+    useEffect(() => {
+        const newVisiblePages = new Set<number>();
+
+        // Página actual
+        newVisiblePages.add(currentPage);
+
+        // 2 páginas antes
+        if (currentPage - 1 >= 1) newVisiblePages.add(currentPage - 1);
+        if (currentPage - 2 >= 1) newVisiblePages.add(currentPage - 2);
+
+        // 2 páginas después
+        if (currentPage + 1 <= numPages) newVisiblePages.add(currentPage + 1);
+        if (currentPage + 2 <= numPages) newVisiblePages.add(currentPage + 2);
+
+        setVisiblePages(newVisiblePages);
+    }, [currentPage, numPages]);
+
+    // Funciones de navegación simplificadas (avanza de 2 en 2)
     const nextPage = useCallback(() => {
-        if (flipBookRef.current && currentPage < numPages - 1) {
-            requestAnimationFrame(() => {
-                flipBookRef.current?.pageFlip().flipNext();
-            });
+        if (currentPage + 2 <= numPages) {
+            setCurrentPage((prev) => prev + 2);
+            setSliderValue((prev) => prev + 2);
+        } else if (currentPage + 1 <= numPages) {
+            // Si solo queda una página, avanzar solo 1
+            setCurrentPage((prev) => prev + 1);
+            setSliderValue((prev) => prev + 1);
         }
     }, [currentPage, numPages]);
 
     const prevPage = useCallback(() => {
-        if (flipBookRef.current && currentPage > 1) {
-            requestAnimationFrame(() => {
-                flipBookRef.current?.pageFlip().flipPrev();
-            });
+        if (currentPage > 2) {
+            setCurrentPage((prev) => prev - 2);
+            setSliderValue((prev) => prev - 2);
+        } else if (currentPage > 1) {
+            // Si estamos en página 2, retroceder a la 1
+            setCurrentPage(1);
+            setSliderValue(1);
         }
     }, [currentPage]);
 
@@ -202,6 +264,17 @@ export const ReaderPage = () => {
         };
     }, [nextPage, prevPage]);
 
+    // Función para cambiar de página programáticamente (búsqueda, slider)
+    const goToPage = useCallback(
+        (page: number) => {
+            if (page >= 1 && page <= numPages) {
+                setCurrentPage(page);
+                setSliderValue(page);
+            }
+        },
+        [numPages]
+    );
+
     // Función para buscar en el PDF (optimizada con procesamiento asíncrono no bloqueante)
     const searchInPDF = async (query: string) => {
         // Cancelar búsqueda anterior si existe
@@ -237,14 +310,26 @@ export const ReaderPage = () => {
                     // Usar setTimeout para permitir que el navegador respire entre páginas
                     setTimeout(async () => {
                         try {
-                            if (abortController.signal.aborted) {
+                            // Verificar si el componente sigue montado y el documento existe
+                            if (
+                                abortController.signal.aborted ||
+                                !isMountedRef.current ||
+                                !pdfDocumentRef.current
+                            ) {
                                 resolve(null);
                                 return;
                             }
 
-                            const page = await pdfDocumentRef.current!.getPage(
+                            const page = await pdfDocumentRef.current.getPage(
                                 pageNum
                             );
+
+                            // Verificar de nuevo después de la operación async
+                            if (!isMountedRef.current) {
+                                resolve(null);
+                                return;
+                            }
+
                             const textContent = await page.getTextContent();
 
                             // Optimización: Buscar directamente en los items sin crear string largo
@@ -269,6 +354,11 @@ export const ReaderPage = () => {
                                 resolve(null);
                             }
                         } catch (error) {
+                            // Silenciar errores si el componente está desmontado
+                            if (!isMountedRef.current) {
+                                resolve(null);
+                                return;
+                            }
                             console.error(
                                 `Error procesando página ${pageNum}:`,
                                 error
@@ -342,12 +432,10 @@ export const ReaderPage = () => {
         const nextIndex = (currentSearchIndex + 1) % searchResults.length;
         setCurrentSearchIndex(nextIndex);
         const result = searchResults[nextIndex];
-        if (result && flipBookRef.current) {
-            setCurrentPage(result.pageNumber);
-            setSliderValue(result.pageNumber);
-            flipBookRef.current.pageFlip().turnToPage(result.pageNumber - 1);
+        if (result) {
+            goToPage(result.pageNumber);
         }
-    }, [searchResults, currentSearchIndex]);
+    }, [searchResults, currentSearchIndex, goToPage]);
 
     // Navegar al resultado anterior de búsqueda
     const prevSearchResult = useCallback(() => {
@@ -358,12 +446,10 @@ export const ReaderPage = () => {
                 : currentSearchIndex - 1;
         setCurrentSearchIndex(prevIndex);
         const result = searchResults[prevIndex];
-        if (result && flipBookRef.current) {
-            setCurrentPage(result.pageNumber);
-            setSliderValue(result.pageNumber);
-            flipBookRef.current.pageFlip().turnToPage(result.pageNumber - 1);
+        if (result) {
+            goToPage(result.pageNumber);
         }
-    }, [searchResults, currentSearchIndex]);
+    }, [searchResults, currentSearchIndex, goToPage]);
 
     // Manejar el submit de búsqueda
     const handleSearch = (e: React.FormEvent) => {
@@ -385,27 +471,6 @@ export const ReaderPage = () => {
             console.error('Error al alternar pantalla completa:', error);
         }
     };
-
-    // No scroll/transition helpers — keep behavior simple
-
-    // Función para cuando el flipbook cambia de página (onFlip event)
-    const handleFlipPageChange = useCallback((page: number) => {
-        setCurrentPage(page);
-        setSliderValue(page);
-    }, []);
-
-    // Función para cambiar de página programáticamente (búsqueda, clics) - optimizada
-    const goToPage = useCallback(
-        (page: number) => {
-            if (flipBookRef.current && page >= 1 && page <= numPages) {
-                // Usar requestAnimationFrame para evitar bloqueos
-                requestAnimationFrame(() => {
-                    flipBookRef.current?.pageFlip().turnToPage(page - 1);
-                });
-            }
-        },
-        [numPages]
-    );
 
     // Validación del libro después de todos los hooks
     if (loading) {
@@ -440,7 +505,9 @@ export const ReaderPage = () => {
                                 {book.title}
                             </h1>
                             <p className="text-base sm:text-lg text-muted-foreground">
-                                {book.author.person.firstName} {book.author.person.lastName} • {book.publicationYear}
+                                {book.author.person.firstName}{' '}
+                                {book.author.person.lastName} •{' '}
+                                {book.publicationYear}
                             </p>
                         </div>
                     </div>
@@ -462,8 +529,9 @@ export const ReaderPage = () => {
                                 PDF no disponible
                             </h2>
                             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                                Este libro no tiene un archivo PDF asociado en este momento.
-                                Por favor, contacta al administrador o intenta con otro libro.
+                                Este libro no tiene un archivo PDF asociado en
+                                este momento. Por favor, contacta al
+                                administrador o intenta con otro libro.
                             </p>
                         </div>
 
@@ -472,7 +540,9 @@ export const ReaderPage = () => {
                             <Button
                                 variant="default"
                                 size="lg"
-                                onClick={() => navigate(`/libros/detalle/${book._id}`)}
+                                onClick={() =>
+                                    navigate(`/libros/detalle/${book._id}`)
+                                }
                                 className="gap-2"
                             >
                                 <BookOpen className="h-4 w-4" />
@@ -493,9 +563,14 @@ export const ReaderPage = () => {
     }
 
     return (
-        <div ref={readerContainerRef} className="flex flex-col min-h-screen bg-background text-foreground">
+        <div
+            ref={readerContainerRef}
+            className="flex flex-col min-h-screen bg-background text-foreground"
+        >
             <div
-                className={`flex flex-none justify-between items-center ${isFullscreen ? 'p-2 sm:p-3' : 'p-3 sm:p-4 md:p-6 lg:p-8'} border-b border-foreground/20`}
+                className={`flex flex-none justify-between items-center ${
+                    isFullscreen ? 'p-2 sm:p-3' : 'p-3 sm:p-4 md:p-6 lg:p-8'
+                } border-b border-foreground/20`}
             >
                 <div className="hidden sm:flex gap-3">
                     <Popover>
@@ -520,11 +595,24 @@ export const ReaderPage = () => {
                     </Popover>
                 </div>
                 <div className="text-center space-y-1 sm:space-y-2">
-                    <h2 className={`${isFullscreen ? 'text-base sm:text-lg' : 'text-lg sm:text-xl md:text-2xl lg:text-3xl'} font-bold truncate max-w-[200px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-none text-foreground`}>
+                    <h2
+                        className={`${
+                            isFullscreen
+                                ? 'text-base sm:text-lg'
+                                : 'text-lg sm:text-xl md:text-2xl lg:text-3xl'
+                        } font-bold truncate max-w-[200px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-none text-foreground`}
+                    >
                         {book.title}
                     </h2>
-                    <span className={`hidden sm:block font-thin ${isFullscreen ? 'text-xs sm:text-sm' : 'text-sm sm:text-base md:text-lg'} text-muted-foreground`}>
-                        {book.author.person.firstName} {book.author.person.lastName} - {book.publicationYear}
+                    <span
+                        className={`hidden sm:block font-thin ${
+                            isFullscreen
+                                ? 'text-xs sm:text-sm'
+                                : 'text-sm sm:text-base md:text-lg'
+                        } text-muted-foreground`}
+                    >
+                        {book.author.person.firstName}{' '}
+                        {book.author.person.lastName} - {book.publicationYear}
                     </span>
                 </div>
                 <div className="space-x-3">
@@ -656,13 +744,21 @@ export const ReaderPage = () => {
                     </Button>
                 </div>
             </div>
-            <div className={`relative flex-1 ${isFullscreen ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden'} bg-background`}>
+            <div
+                className={`relative flex-1 ${
+                    isFullscreen
+                        ? 'overflow-y-auto overflow-x-hidden'
+                        : 'overflow-hidden'
+                } bg-background`}
+            >
                 <>
                     <style>{`
                         .react-pdf__Page__canvas{width:100% !important;height:100% !important;display:block}
                         .react-pdf__Page__svg{width:100% !important;height:100% !important;display:block}
                         /* Smooth scrolling en fullscreen */
-                        ${isFullscreen ? `
+                        ${
+                            isFullscreen
+                                ? `
                             ::-webkit-scrollbar {
                                 width: 10px;
                             }
@@ -676,70 +772,152 @@ export const ReaderPage = () => {
                             ::-webkit-scrollbar-thumb:hover {
                                 background: rgba(100, 100, 100, 0.5);
                             }
-                        ` : ''}
+                        `
+                                : ''
+                        }
                     `}</style>
                     <Document
+                        key={pdfUrl}
                         file={pdfUrl}
                         loading={
-                            <div className="flex justify-center items-center">
+                            <div className="flex justify-center items-center h-full">
                                 <Spinner />
                             </div>
                         }
-                        onLoadSuccess={(pdf) => {
+                        error={
+                            <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+                                <FileX className="h-16 w-16 text-destructive mb-4" />
+                                <h3 className="text-lg font-semibold mb-2">
+                                    Error al cargar el PDF
+                                </h3>
+                                <p className="text-sm text-muted-foreground mb-4">
+                                    No se pudo cargar el documento. Por favor,
+                                    intenta nuevamente.
+                                </p>
+                                <Button
+                                    onClick={() => window.location.reload()}
+                                >
+                                    Recargar página
+                                </Button>
+                            </div>
+                        }
+                        options={pdfOptions}
+                        onLoadSuccess={async (pdf) => {
                             onDocumentLoadSuccess(pdf);
                             pdfDocumentRef.current = pdf;
+
+                            // DEBUG: Ver información del PDF
+                            console.log('📄 PDF Info:', {
+                                numPages: pdf.numPages,
+                                fingerprints: pdf.fingerprints,
+                                pdfInfo: await pdf.getMetadata(),
+                            });
+
+                            // DEBUG: Ver info de la primera página
+                            const page = await pdf.getPage(1);
+                            console.log('📋 Page 1 Info:', {
+                                width: page.view[2],
+                                height: page.view[3],
+                                rotate: page.rotate,
+                            });
+                        }}
+                        onLoadError={(error) => {
+                            console.error('Error loading PDF:', error);
+                            setError('Error al cargar el documento PDF');
                         }}
                     >
-                        <div className={`flex justify-center ${isFullscreen ? 'items-start pt-4' : 'items-center'} max-w-screen-2xl mx-auto p-2 sm:p-4 md:p-6 lg:p-8 bg-background min-h-full`}>
-                            <HTMLFlipBook
-                                ref={flipBookRef}
-                                width={bookSize.width}
-                                height={bookSize.height}
-                                size="stretch"
-                                minWidth={280}
-                                minHeight={0}
-                                maxWidth={1200}
-                                maxHeight={1600}
-                                maxShadowOpacity={0.2}
-                                showCover={true}
-                                mobileScrollSupport={true}
-                                onFlip={(e: { data: number }) => {
-                                    handleFlipPageChange(e.data);
-                                }}
-                                className=""
-                                style={{}}
-                                startPage={0}
-                                drawShadow={false}
-                                flippingTime={600}
-                                usePortrait={true}
-                                startZIndex={0}
-                                autoSize={true}
-                                clickEventForward={true}
-                                useMouseEvents={true}
-                                swipeDistance={0}
-                                showPageCorners={true}
-                                disableFlipByClick={false}
-                            >
-                                {Array.from(
-                                    { length: numPages },
-                                    (_, i) => i + 1
-                                ).map((pageNum) => (
-                                    <div key={pageNum} className="bg-blue-400">
+                        <div
+                            ref={pageContainerRef}
+                            className={`flex justify-center items-start gap-4 ${
+                                isFullscreen ? 'pt-4' : ''
+                            } mx-auto p-2 sm:p-4 md:p-6 lg:p-8 bg-background min-h-full transition-opacity duration-200`}
+                        >
+                            {/* Página izquierda */}
+                            {visiblePages.has(currentPage) ? (
+                                <div
+                                    className="shadow-2xl bg-white flex justify-center items-center flex-shrink-0 overflow-hidden"
+                                    style={{
+                                        width: `${pageWidth}px`,
+                                        height: `${pageHeight}px`,
+                                        maxWidth: `${pageWidth}px`,
+                                        maxHeight: `${pageHeight}px`,
+                                    }}
+                                >
+                                    <Page
+                                        pageNumber={currentPage}
+                                        renderAnnotationLayer={false}
+                                        renderTextLayer={false}
+                                        renderMode="canvas"
+                                        width={pageWidth}
+                                        height={pageHeight}
+                                        loading={
+                                            <div
+                                                className="flex justify-center items-center bg-gray-100"
+                                                style={{
+                                                    width: `${pageWidth}px`,
+                                                    height: `${pageHeight}px`,
+                                                }}
+                                            >
+                                                <Spinner />
+                                            </div>
+                                        }
+                                    />
+                                </div>
+                            ) : (
+                                <div
+                                    className="flex justify-center items-center bg-gray-100 shadow-2xl flex-shrink-0"
+                                    style={{
+                                        width: `${pageWidth}px`,
+                                        height: `${pageHeight}px`,
+                                    }}
+                                >
+                                    <Spinner />
+                                </div>
+                            )}
+
+                            {/* Página derecha (siguiente página) */}
+                            {currentPage + 1 <= numPages &&
+                                (visiblePages.has(currentPage + 1) ? (
+                                    <div
+                                        className="shadow-2xl flex items-center justify-center bg-white flex-shrink-0 overflow-hidden"
+                                        style={{
+                                            width: `${pageWidth}px`,
+                                            height: `${pageHeight}px`,
+                                            maxWidth: `${pageWidth}px`,
+                                            maxHeight: `${pageHeight}px`,
+                                        }}
+                                    >
                                         <Page
-                                            pageNumber={pageNum}
+                                            pageNumber={currentPage + 1}
                                             renderAnnotationLayer={false}
                                             renderTextLayer={true}
                                             renderMode="canvas"
-                                            className={'w-full h-full'}
+                                            width={pageWidth}
+                                            height={pageHeight}
                                             loading={
-                                                <div className="flex justify-center items-center w-full h-full">
+                                                <div
+                                                    className="flex justify-center items-center bg-gray-100"
+                                                    style={{
+                                                        width: `${pageWidth}px`,
+                                                        height: `${pageHeight}px`,
+                                                    }}
+                                                >
                                                     <Spinner />
                                                 </div>
                                             }
                                         />
                                     </div>
+                                ) : (
+                                    <div
+                                        className="flex justify-center items-center bg-gray-100 shadow-2xl flex-shrink-0"
+                                        style={{
+                                            width: `${pageWidth}px`,
+                                            height: `${pageHeight}px`,
+                                        }}
+                                    >
+                                        <Spinner />
+                                    </div>
                                 ))}
-                            </HTMLFlipBook>
                         </div>
                     </Document>
                 </>
@@ -760,7 +938,7 @@ export const ReaderPage = () => {
                 <Button
                     className="fixed right-1 sm:right-2 md:right-4 lg:right-6 xl:right-8 top-1/2 -translate-y-1/2 rounded-full shadow-lg w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 z-50 disabled:opacity-50"
                     onClick={nextPage}
-                    disabled={currentPage + 2 > numPages}
+                    disabled={currentPage + 1 > numPages}
                     title="Página siguiente (Flecha derecha)"
                 >
                     <span className="material-symbols-outlined text-2xl sm:text-3xl">
@@ -768,7 +946,11 @@ export const ReaderPage = () => {
                     </span>
                 </Button>
             </div>
-            <div className={`flex-none ${isFullscreen ? 'p-2 sm:p-3' : 'p-3 sm:p-4 md:p-6 lg:p-8'} bg-background border-t border-foreground/20`}>
+            <div
+                className={`flex-none ${
+                    isFullscreen ? 'p-2 sm:p-3' : 'p-3 sm:p-4 md:p-6 lg:p-8'
+                } bg-background border-t border-foreground/20`}
+            >
                 <div className="mb-2 sm:mb-3 flex justify-center">
                     <span className="text-sm sm:text-base md:text-lg font-normal text-foreground">
                         Page{' '}
@@ -788,16 +970,7 @@ export const ReaderPage = () => {
                     step={1}
                     onValueChange={(value) => {
                         const page = value[0];
-                        setSliderValue(page);
-                        setCurrentPage(page);
-                        // Navegar el flipbook a la página correspondiente
-                        if (flipBookRef.current) {
-                            requestAnimationFrame(() => {
-                                flipBookRef.current
-                                    ?.pageFlip()
-                                    .turnToPage(page - 1);
-                            });
-                        }
+                        goToPage(page);
                     }}
                 />
             </div>

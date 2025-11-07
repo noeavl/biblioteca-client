@@ -56,7 +56,7 @@ export const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col p-0">
+      <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle>Buscar en la biblioteca</DialogTitle>
         </DialogHeader>
@@ -88,10 +88,10 @@ export const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
         <Separator />
 
         {/* Resultados */}
-        <div className="flex-1 overflow-y-auto px-2 pb-6">
+        <div className="flex-1 overflow-y-auto px-2 pb-6 min-h-0">
           {/* Estado de carga */}
           {isLoading && (
-            <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center h-full">
               <div className="flex flex-col items-center gap-2">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground">Buscando...</p>
@@ -113,7 +113,7 @@ export const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
 
           {/* Sin resultados */}
           {noResults && (
-            <div className="flex flex-col items-center justify-center py-12 px-4">
+            <div className="flex flex-col items-center justify-center h-full px-4">
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <Search className="h-8 w-8 text-muted-foreground" />
               </div>
@@ -126,7 +126,7 @@ export const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
 
           {/* Mensaje inicial */}
           {!hasSearched && !isLoading && (
-            <div className="flex flex-col items-center justify-center py-12 px-4">
+            <div className="flex flex-col items-center justify-center h-full px-4">
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <Search className="h-8 w-8 text-muted-foreground" />
               </div>

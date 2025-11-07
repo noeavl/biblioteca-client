@@ -40,7 +40,7 @@ import { SearchDialog } from './SearchDialog';
 export const CustomHeader = () => {
     const { user, isAuthenticated, logout } = useAuth();
     const { theme, setTheme } = useTheme();
-    const canAccessPanel = user?.role?.name === 'admin' || user?.role?.name === 'librarian';
+    const canAccessPanel = user?.role?.name === 'admin' || user?.role?.name === 'librarian' || user?.role?.name === 'executive';
     const isReader = user?.role?.name === 'reader';
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 

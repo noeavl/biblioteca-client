@@ -225,15 +225,21 @@ export const BookDetailPage = () => {
                             </h2>
                             <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-400">
                                 por{' '}
-                                <span className="text-blue-400">
+                                <Link
+                                    to={`/autores/detalle/${book.author._id}`}
+                                    className="text-blue-400 hover:text-blue-500 hover:underline transition-colors cursor-pointer"
+                                >
                                     {authorName}
-                                </span>
+                                </Link>
                             </h3>
                         </div>
                         <div className="flex flex-wrap justify-start items-center gap-2 sm:gap-3">
-                            <span className="text-sm sm:text-base text-blue-400 bg-blue-100 px-3 py-2 rounded-full">
+                            <Link
+                                to={`/categorias/detalle/${book.category._id}`}
+                                className="text-sm sm:text-base text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-3 py-2 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors cursor-pointer"
+                            >
                                 {book.category.name}
-                            </span>
+                            </Link>
                             <span className="text-sm sm:text-base text-gray-400">
                                 Publicado en {book.publicationYear}
                             </span>

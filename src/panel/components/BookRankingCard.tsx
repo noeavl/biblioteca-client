@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import type { BookRankingItem } from '@/panel/interfaces/stats.interface';
 import { Eye, Heart, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
+import { useAuth } from '@/auth/hooks/useAuth';
 
 interface BookRankingCardProps {
     book: BookRankingItem;
@@ -12,6 +13,8 @@ interface BookRankingCardProps {
 }
 
 export function BookRankingCard({ book, type, rank }: BookRankingCardProps) {
+    const { user } = useAuth();
+    const isExecutive = user?.role?.name === 'executive';
     const icon = type === 'read' ? Eye : Heart;
     const IconComponent = icon;
 
@@ -65,17 +68,19 @@ export function BookRankingCard({ book, type, rank }: BookRankingCardProps) {
                         </div>
 
                         {/* Botón Ver Detalle */}
-                        <Button
-                            asChild
-                            variant="outline"
-                            size="sm"
-                            className="w-full h-7 text-xs"
-                        >
-                            <Link to={`/panel/libros/editar/${book._id}`}>
-                                Ver detalle
-                                <ArrowRight className="ml-1 h-3 w-3" />
-                            </Link>
-                        </Button>
+                        {!isExecutive && (
+                            <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="w-full h-7 text-xs"
+                            >
+                                <Link to={`/panel/libros/editar/${book._id}`}>
+                                    Ver detalle
+                                    <ArrowRight className="ml-1 h-3 w-3" />
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
             </CardContent>

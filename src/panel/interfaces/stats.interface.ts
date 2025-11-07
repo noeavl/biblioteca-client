@@ -59,6 +59,14 @@ export interface AuthorRanking {
   mostFavorited: AuthorRankingItem[];
 }
 
+export interface FavoritesStats {
+  total: number;
+}
+
+export interface ReadingHistoryStats {
+  total: number;
+}
+
 export interface DashboardStats {
   users: UserStats;
   books: BookStats;
@@ -67,4 +75,6 @@ export interface DashboardStats {
   bookRankings: BookRanking;
   categoryRankings: CategoryRanking;
   authorRankings: AuthorRanking;
+  favorites?: FavoritesStats;
+  readingHistory?: ReadingHistoryStats;
 }

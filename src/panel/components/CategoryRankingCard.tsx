@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import type { CategoryRankingItem } from '@/panel/interfaces/stats.interface';
 import { Eye, Heart, BookOpen, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
+import { useAuth } from '@/auth/hooks/useAuth';
 
 interface CategoryRankingCardProps {
     category: CategoryRankingItem;
@@ -16,6 +17,8 @@ export function CategoryRankingCard({
     type,
     rank,
 }: CategoryRankingCardProps) {
+    const { user } = useAuth();
+    const isExecutive = user?.role?.name === 'executive';
     const icon = type === 'read' ? Eye : Heart;
     const IconComponent = icon;
 
@@ -53,19 +56,21 @@ export function CategoryRankingCard({
                         </div>
 
                         {/* Botón Ver Detalle */}
-                        <Button
-                            asChild
-                            variant="outline"
-                            size="sm"
-                            className="w-full h-7 text-xs"
-                        >
-                            <Link
-                                to={`/panel/categorias/editar/${category._id}`}
+                        {!isExecutive && (
+                            <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="w-full h-7 text-xs"
                             >
-                                Ver detalle
-                                <ArrowRight className="ml-1 h-3 w-3" />
-                            </Link>
-                        </Button>
+                                <Link
+                                    to={`/panel/categorias/editar/${category._id}`}
+                                >
+                                    Ver detalle
+                                    <ArrowRight className="ml-1 h-3 w-3" />
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
             </CardContent>

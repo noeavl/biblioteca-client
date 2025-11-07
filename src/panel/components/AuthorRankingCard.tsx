@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { AuthorRankingItem } from '@/panel/interfaces/stats.interface';
 import { Eye, Heart, BookOpen, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
+import { useAuth } from '@/auth/hooks/useAuth';
 
 interface AuthorRankingCardProps {
     author: AuthorRankingItem;
@@ -21,6 +22,8 @@ export function AuthorRankingCard({
     type,
     rank,
 }: AuthorRankingCardProps) {
+    const { user } = useAuth();
+    const isExecutive = user?.role?.name === 'executive';
     const icon = type === 'read' ? Eye : Heart;
     const IconComponent = icon;
 
@@ -75,17 +78,19 @@ export function AuthorRankingCard({
                         </div>
 
                         {/* Botón Ver Detalle */}
-                        <Button
-                            asChild
-                            variant="outline"
-                            size="sm"
-                            className="w-full h-7 text-xs"
-                        >
-                            <Link to={`/panel/autores/editar/${author._id}`}>
-                                Ver detalle
-                                <ArrowRight className="ml-1 h-3 w-3" />
-                            </Link>
-                        </Button>
+                        {!isExecutive && (
+                            <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="w-full h-7 text-xs"
+                            >
+                                <Link to={`/panel/autores/editar/${author._id}`}>
+                                    Ver detalle
+                                    <ArrowRight className="ml-1 h-3 w-3" />
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
             </CardContent>

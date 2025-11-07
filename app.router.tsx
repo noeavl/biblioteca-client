@@ -30,6 +30,7 @@ import { AuthorsEditPage } from '@/panel/pages/authors/AuthorsEditPage';
 import { AuthorsBooksPage } from './src/library/pages/authors/AuthorsBooksPage';
 import { ProtectedRoute } from '@/auth/components/ProtectedRoute';
 import { ReaderRoute } from '@/auth/components/ReaderRoute';
+import { NonExecutiveRoute } from '@/auth/components/NonExecutiveRoute';
 import ProfilePage from '@/library/pages/profile/ProfilePage';
 
 export const appRouter = createBrowserRouter([
@@ -129,6 +130,7 @@ export const appRouter = createBrowserRouter([
             },
             {
                 path: 'usuarios',
+                Component: NonExecutiveRoute,
                 children: [
                     {
                         index: true,
@@ -146,6 +148,7 @@ export const appRouter = createBrowserRouter([
             },
             {
                 path: 'libros',
+                Component: NonExecutiveRoute,
                 children: [
                     {
                         index: true,
@@ -167,6 +170,7 @@ export const appRouter = createBrowserRouter([
             },
             {
                 path: 'categorias',
+                Component: NonExecutiveRoute,
                 children: [
                     {
                         index: true,
@@ -184,6 +188,7 @@ export const appRouter = createBrowserRouter([
             },
             {
                 path: 'autores',
+                Component: NonExecutiveRoute,
                 children: [
                     {
                         index: true,
