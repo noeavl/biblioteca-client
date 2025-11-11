@@ -10,10 +10,11 @@ import { getBookById } from '@/library/api/books.api';
 import type { Book } from '@/library/interfaces/book.interface';
 import { useParams, useNavigate } from 'react-router';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { pdfjs, Document, Page } from 'react-pdf';
+import { pdfjs, Document } from 'react-pdf';
 import { Spinner } from '@/components/ui/spinner';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import { BookOpen, ArrowLeft, FileX } from 'lucide-react';
+import { OptimizedPdfPage } from '@/library/components/OptimizedPdfPage';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 
@@ -77,6 +78,41 @@ export const ReaderPage = () => {
     const [visiblePages, setVisiblePages] = useState<Set<number>>(
         new Set([1, 2, 3])
     );
+
+    // Suprimir warnings de AbortException en el text layer (es normal cuando se cambia de página rápido)
+    useEffect(() => {
+        const originalWarn = console.warn;
+        const originalError = console.error;
+
+        console.warn = (...args) => {
+            const message = args[0]?.toString?.() || '';
+            // Suprimir warnings de TextLayer task cancelled
+            if (
+                message.includes('AbortException') ||
+                message.includes('TextLayer task cancelled')
+            ) {
+                return;
+            }
+            originalWarn(...args);
+        };
+
+        console.error = (...args) => {
+            const message = args[0]?.toString?.() || '';
+            // Suprimir errors de TextLayer task cancelled
+            if (
+                message.includes('AbortException') ||
+                message.includes('TextLayer task cancelled')
+            ) {
+                return;
+            }
+            originalError(...args);
+        };
+
+        return () => {
+            console.warn = originalWarn;
+            console.error = originalError;
+        };
+    }, []);
 
     // Calcular tamaño óptimo de páginas según viewport
     useEffect(() => {
@@ -171,19 +207,25 @@ export const ReaderPage = () => {
     );
 
     // Actualizar páginas visibles cuando cambia la página actual
+    // Pre-carga agresiva: 3 páginas antes y 5 después para navegación fluida
     useEffect(() => {
         const newVisiblePages = new Set<number>();
 
-        // Página actual
+        // Página actual y siguiente (siempre visibles)
         newVisiblePages.add(currentPage);
-
-        // 2 páginas antes
-        if (currentPage - 1 >= 1) newVisiblePages.add(currentPage - 1);
-        if (currentPage - 2 >= 1) newVisiblePages.add(currentPage - 2);
-
-        // 2 páginas después
         if (currentPage + 1 <= numPages) newVisiblePages.add(currentPage + 1);
-        if (currentPage + 2 <= numPages) newVisiblePages.add(currentPage + 2);
+
+        // 3 páginas antes
+        for (let i = 1; i <= 3; i++) {
+            const pageNum = currentPage - i;
+            if (pageNum >= 1) newVisiblePages.add(pageNum);
+        }
+
+        // 5 páginas después (usuario suele avanzar más que retroceder)
+        for (let i = 2; i <= 5; i++) {
+            const pageNum = currentPage + i;
+            if (pageNum <= numPages) newVisiblePages.add(pageNum);
+        }
 
         setVisiblePages(newVisiblePages);
     }, [currentPage, numPages]);
@@ -753,8 +795,95 @@ export const ReaderPage = () => {
             >
                 <>
                     <style>{`
-                        .react-pdf__Page__canvas{width:100% !important;height:100% !important;display:block}
-                        .react-pdf__Page__svg{width:100% !important;height:100% !important;display:block}
+                        /* Estilos para el canvas del PDF */
+                        .react-pdf__Page {
+                            position: relative;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                        }
+
+                        /* Canvas VISIBLE - muestra la imagen del PDF (z-index: 1) */
+                        .react-pdf__Page__canvas {
+                            display: block !important;
+                            max-width: 100%;
+                            height: auto;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .react-pdf__Page__svg {
+                            width: 100% !important;
+                            height: auto !important;
+                            display: block;
+                        }
+
+                        /* Text layer INVISIBLE pero seleccionable - encima del canvas (z-index: 2) */
+                        .react-pdf__Page__textContent {
+                            position: absolute !important;
+                            left: 0 !important;
+                            top: 0 !important;
+                            right: 0 !important;
+                            bottom: 0 !important;
+                            overflow: hidden !important;
+                            opacity: 1 !important;
+                            line-height: 1 !important;
+                            z-index: 2 !important;
+                            padding: 0 !important;
+                            background: transparent !important;
+                        }
+
+                        .react-pdf__Page__textContent span {
+                            color: transparent !important;
+                            position: absolute !important;
+                            white-space: pre !important;
+                            cursor: text !important;
+                            transform-origin: 0% 0% !important;
+                            user-select: text !important;
+                            -webkit-user-select: text !important;
+                            pointer-events: auto !important;
+                        }
+
+                        /* NO agregar espacios - mantenemos posicionamiento absoluto */
+
+                        /* Selección de texto VISIBLE con fondo azul sobre texto transparente */
+                        .react-pdf__Page__textContent span::selection {
+                            background: rgba(74, 144, 226, 0.5) !important;
+                            color: transparent !important;
+                        }
+
+                        .react-pdf__Page__textContent span::-moz-selection {
+                            background: rgba(74, 144, 226, 0.5) !important;
+                            color: transparent !important;
+                        }
+
+                        /* Selección del contenedor completo */
+                        .react-pdf__Page__textContent::selection {
+                            background: rgba(74, 144, 226, 0.5) !important;
+                        }
+
+                        .react-pdf__Page__textContent::-moz-selection {
+                            background: rgba(74, 144, 226, 0.5) !important;
+                        }
+
+                        /* También para el contenedor padre */
+                        .react-pdf__Page::selection {
+                            background: rgba(74, 144, 226, 0.5) !important;
+                        }
+
+                        .react-pdf__Page::-moz-selection {
+                            background: rgba(74, 144, 226, 0.5) !important;
+                        }
+
+                        /* Annotation layer */
+                        .react-pdf__Page__annotations {
+                            position: absolute;
+                            left: 0;
+                            top: 0;
+                            right: 0;
+                            bottom: 0;
+                        }
+
                         /* Smooth scrolling en fullscreen */
                         ${
                             isFullscreen
@@ -802,24 +931,9 @@ export const ReaderPage = () => {
                             </div>
                         }
                         options={pdfOptions}
-                        onLoadSuccess={async (pdf) => {
+                        onLoadSuccess={(pdf) => {
                             onDocumentLoadSuccess(pdf);
                             pdfDocumentRef.current = pdf;
-
-                            // DEBUG: Ver información del PDF
-                            console.log('📄 PDF Info:', {
-                                numPages: pdf.numPages,
-                                fingerprints: pdf.fingerprints,
-                                pdfInfo: await pdf.getMetadata(),
-                            });
-
-                            // DEBUG: Ver info de la primera página
-                            const page = await pdf.getPage(1);
-                            console.log('📋 Page 1 Info:', {
-                                width: page.view[2],
-                                height: page.view[3],
-                                rotate: page.rotate,
-                            });
                         }}
                         onLoadError={(error) => {
                             console.error('Error loading PDF:', error);
@@ -828,96 +942,27 @@ export const ReaderPage = () => {
                     >
                         <div
                             ref={pageContainerRef}
-                            className={`flex justify-center items-start gap-4 ${
+                            className={`flex justify-center items-start gap-4 mx-auto p-4 md:p-6 lg:p-8 bg-background min-h-full ${
                                 isFullscreen ? 'pt-4' : ''
-                            } mx-auto p-2 sm:p-4 md:p-6 lg:p-8 bg-background min-h-full transition-opacity duration-200`}
+                            }`}
                         >
                             {/* Página izquierda */}
-                            {visiblePages.has(currentPage) ? (
-                                <div
-                                    className="shadow-2xl bg-white flex justify-center items-center flex-shrink-0 overflow-hidden"
-                                    style={{
-                                        width: `${pageWidth}px`,
-                                        height: `${pageHeight}px`,
-                                        maxWidth: `${pageWidth}px`,
-                                        maxHeight: `${pageHeight}px`,
-                                    }}
-                                >
-                                    <Page
-                                        pageNumber={currentPage}
-                                        renderAnnotationLayer={false}
-                                        renderTextLayer={false}
-                                        renderMode="canvas"
-                                        width={pageWidth}
-                                        height={pageHeight}
-                                        loading={
-                                            <div
-                                                className="flex justify-center items-center bg-gray-100"
-                                                style={{
-                                                    width: `${pageWidth}px`,
-                                                    height: `${pageHeight}px`,
-                                                }}
-                                            >
-                                                <Spinner />
-                                            </div>
-                                        }
-                                    />
-                                </div>
-                            ) : (
-                                <div
-                                    className="flex justify-center items-center bg-gray-100 shadow-2xl flex-shrink-0"
-                                    style={{
-                                        width: `${pageWidth}px`,
-                                        height: `${pageHeight}px`,
-                                    }}
-                                >
-                                    <Spinner />
-                                </div>
-                            )}
+                            <OptimizedPdfPage
+                                pageNumber={currentPage}
+                                width={pageWidth}
+                                height={pageHeight}
+                                isVisible={visiblePages.has(currentPage)}
+                            />
 
-                            {/* Página derecha (siguiente página) */}
-                            {currentPage + 1 <= numPages &&
-                                (visiblePages.has(currentPage + 1) ? (
-                                    <div
-                                        className="shadow-2xl flex items-center justify-center bg-white flex-shrink-0 overflow-hidden"
-                                        style={{
-                                            width: `${pageWidth}px`,
-                                            height: `${pageHeight}px`,
-                                            maxWidth: `${pageWidth}px`,
-                                            maxHeight: `${pageHeight}px`,
-                                        }}
-                                    >
-                                        <Page
-                                            pageNumber={currentPage + 1}
-                                            renderAnnotationLayer={false}
-                                            renderTextLayer={true}
-                                            renderMode="canvas"
-                                            width={pageWidth}
-                                            height={pageHeight}
-                                            loading={
-                                                <div
-                                                    className="flex justify-center items-center bg-gray-100"
-                                                    style={{
-                                                        width: `${pageWidth}px`,
-                                                        height: `${pageHeight}px`,
-                                                    }}
-                                                >
-                                                    <Spinner />
-                                                </div>
-                                            }
-                                        />
-                                    </div>
-                                ) : (
-                                    <div
-                                        className="flex justify-center items-center bg-gray-100 shadow-2xl flex-shrink-0"
-                                        style={{
-                                            width: `${pageWidth}px`,
-                                            height: `${pageHeight}px`,
-                                        }}
-                                    >
-                                        <Spinner />
-                                    </div>
-                                ))}
+                            {/* Página derecha */}
+                            {currentPage + 1 <= numPages && (
+                                <OptimizedPdfPage
+                                    pageNumber={currentPage + 1}
+                                    width={pageWidth}
+                                    height={pageHeight}
+                                    isVisible={visiblePages.has(currentPage + 1)}
+                                />
+                            )}
                         </div>
                     </Document>
                 </>
