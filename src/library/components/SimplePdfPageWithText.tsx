@@ -50,7 +50,7 @@ const SimplePdfPageWithTextComponent = ({
         {pageNumber}
       </div>
 
-      <style jsx>{`
+      <style>{`
         /* Canvas visible */
         :global(.react-pdf__Page__canvas) {
           display: block !important;

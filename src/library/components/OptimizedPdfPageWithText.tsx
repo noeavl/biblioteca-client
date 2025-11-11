@@ -72,12 +72,7 @@ const OptimizedPdfPageWithTextComponent = ({
       }
 
       try {
-        // Importar dinámicamente para evitar carga innecesaria
-        const pdfjsLib = await import('pdfjs-dist');
-        const { renderTextLayer } = await import('pdfjs-dist/legacy/build/pdf.mjs');
-
         const page = await pdfDocument.getPage(pageNumber);
-        const viewport = page.getViewport({ scale });
 
         // Limpiar contenido anterior
         textLayerRef.current.innerHTML = '';
@@ -85,12 +80,16 @@ const OptimizedPdfPageWithTextComponent = ({
         // Obtener contenido de texto
         const textContent = await page.getTextContent();
 
-        // Renderizar text layer
-        await renderTextLayer({
-          textContentSource: textContent,
-          container: textLayerRef.current,
-          viewport: viewport,
-          textDivs: [],
+        // Renderizar text layer manualmente
+        textContent.items.forEach((item: any) => {
+          const textDiv = document.createElement('span');
+          textDiv.textContent = item.str;
+          textDiv.style.position = 'absolute';
+          textDiv.style.left = `${item.transform[4]}px`;
+          textDiv.style.top = `${item.transform[5]}px`;
+          textDiv.style.fontSize = `${Math.sqrt(item.transform[0] * item.transform[0] + item.transform[1] * item.transform[1])}px`;
+          textDiv.style.fontFamily = item.fontName;
+          textLayerRef.current!.appendChild(textDiv);
         });
 
         setTextLayerRendered(true);

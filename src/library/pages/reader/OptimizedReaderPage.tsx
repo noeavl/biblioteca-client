@@ -5,7 +5,6 @@ import {
     PopoverContent,
 } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-import { Input } from '@/components/ui/input';
 import { getBookById } from '@/library/api/books.api';
 import type { Book } from '@/library/interfaces/book.interface';
 import { useParams, useNavigate } from 'react-router';

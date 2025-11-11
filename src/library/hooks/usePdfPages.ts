@@ -84,6 +84,7 @@ export const usePdfPages = ({
         await page.render({
           canvasContext: context,
           viewport,
+          canvas,
         }).promise;
 
         // Guardar en caché

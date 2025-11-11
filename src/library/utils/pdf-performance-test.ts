@@ -64,7 +64,7 @@ export class PdfPerformanceMonitor {
   report(): void {
     console.group('📊 PDF Reader Performance Report');
 
-    for (const [label, values] of this.metrics.entries()) {
+    for (const [label] of this.metrics.entries()) {
       const stats = this.getStats(label);
       if (!stats) continue;
 
