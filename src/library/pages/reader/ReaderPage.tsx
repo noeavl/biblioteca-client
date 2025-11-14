@@ -18,10 +18,8 @@ import { OptimizedPdfPage } from '@/library/components/OptimizedPdfPage';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url
-).toString();
+// Usar CDN para el worker en producción (evita problemas de MIME type)
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 // Configuración de PDF options fuera del componente (best practice)
 const pdfOptions = {

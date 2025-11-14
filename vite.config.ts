@@ -13,5 +13,21 @@ export default defineConfig({
     },
     build: {
         chunkSizeWarningLimit: 2000,
+        rollupOptions: {
+            output: {
+                // Asegurar que .mjs files tengan el MIME type correcto
+                assetFileNames: (assetInfo) => {
+                    const fileName = assetInfo.names?.[0] || '';
+                    if (fileName.endsWith('.mjs')) {
+                        return 'assets/[name]-[hash][extname]';
+                    }
+                    return 'assets/[name]-[hash][extname]';
+                },
+            },
+        },
+    },
+    // Optimizar manejo de workers
+    worker: {
+        format: 'es',
     },
 });

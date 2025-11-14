@@ -16,10 +16,8 @@ import { BookOpen, ArrowLeft, FileX } from 'lucide-react';
 import { SimplePdfPageWithText } from '@/library/components/SimplePdfPageWithText';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url
-).toString();
+// Usar CDN para el worker en producción (evita problemas de MIME type)
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const pdfOptions = {
     cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
