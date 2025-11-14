@@ -5,6 +5,12 @@ import {
     PopoverContent,
 } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { getBookById } from '@/library/api/books.api';
 import type { Book } from '@/library/interfaces/book.interface';
 import { useParams, useNavigate } from 'react-router';
@@ -89,7 +95,7 @@ export const OptimizedReaderPage = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const bookData = await getBookById(bookId);
+                const bookData = await getBookById(bookId, true);
                 setBook(bookData);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (err) {
@@ -301,16 +307,12 @@ export const OptimizedReaderPage = () => {
                 } border-b border-foreground/20 flex`}
             >
                 <div className="hidden sm:flex gap-3">
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button>
-                                <span className="material-symbols-outlined">bookmarks</span>
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="p-8 m-3 z-10 rounded-2xl border-blue-400/30 w-full sm:w-auto">
-                            <p className="text-sm text-muted-foreground">Marcadores próximamente</p>
-                        </PopoverContent>
-                    </Popover>
+                    <Button disabled>
+                        <span className="material-symbols-outlined">notes</span>
+                    </Button>
+                    <Button disabled>
+                        <span className="material-symbols-outlined">bookmarks</span>
+                    </Button>
                 </div>
 
                 <div className="text-center space-y-1 sm:space-y-2">
@@ -334,12 +336,8 @@ export const OptimizedReaderPage = () => {
                 </div>
 
                 <div className="space-x-3">
-                    <Button onClick={() => setIsBookmarked(!isBookmarked)}>
-                        <span
-                            className={`material-symbols-outlined ${
-                                isBookmarked ? 'fill' : ''
-                            }`}
-                        >
+                    <Button disabled>
+                        <span className="material-symbols-outlined">
                             bookmark
                         </span>
                     </Button>

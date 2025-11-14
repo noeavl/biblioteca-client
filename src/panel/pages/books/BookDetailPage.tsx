@@ -50,7 +50,7 @@ export const BookDetailPage = () => {
 
             try {
                 setLoading(true);
-                const bookData = await getBookById(bookId);
+                const bookData = await getBookById(bookId, true);
                 setBook(bookData);
             } catch (error) {
                 toast.error('Error al cargar el libro');

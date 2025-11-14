@@ -43,6 +43,9 @@ export const getBooks = async (
             queryParams.append('search', params.search.trim());
         }
 
+        // No incluir PDF en la respuesta
+        queryParams.append('pdf', 'false');
+
         const url = `/books${
             queryParams.toString() ? `?${queryParams.toString()}` : ''
         }`;
@@ -54,9 +57,10 @@ export const getBooks = async (
     }
 };
 
-export const getBookById = async (bookId: string): Promise<Book> => {
+export const getBookById = async (bookId: string, includePdf: boolean = false): Promise<Book> => {
     try {
-        const { data } = await panelApi.get<Book>(`/books/${bookId}`);
+        const url = `/books/${bookId}?pdf=${includePdf}`;
+        const { data } = await panelApi.get<Book>(url);
         return data;
     } catch (error) {
         console.error('Error al obtener el libro:', error);

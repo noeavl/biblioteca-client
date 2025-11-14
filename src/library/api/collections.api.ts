@@ -41,6 +41,7 @@ export interface Collection {
     _id: string;
     reader: string;
     name: string;
+    description?: string;
     visibility: 'private' | 'public';
     books: string[];
     createdAt: string;
@@ -60,7 +61,13 @@ export interface CollectionWithBooks extends Omit<Collection, 'books'> {
 export interface CreateCollectionDto {
     reader: string;
     name: string;
+    description?: string;
     visibility: 'private' | 'public';
+}
+
+export interface UpdateCollectionDto {
+    name?: string;
+    description?: string;
 }
 
 export interface CreateCollectionResponse {
@@ -168,11 +175,27 @@ export const removeBookFromCollection = async (
 ): Promise<{ message: string }> => {
     try {
         const { data } = await libraryApi.delete<{ message: string }>(
-            `/collections/${collectionId}/books/${bookId}`
+            `/collections/books/${collectionId}/${bookId}`
         );
         return data;
     } catch (error) {
         console.error('Error al remover libro de colección:', error);
+        throw error;
+    }
+};
+
+export const updateCollection = async (
+    collectionId: string,
+    updateData: UpdateCollectionDto
+): Promise<{ message: string }> => {
+    try {
+        const { data } = await libraryApi.patch<{ message: string }>(
+            `/collections/${collectionId}`,
+            updateData
+        );
+        return data;
+    } catch (error) {
+        console.error('Error al actualizar colección:', error);
         throw error;
     }
 };

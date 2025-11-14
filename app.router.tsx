@@ -67,7 +67,11 @@ export const appRouter = createBrowserRouter([
                     },
                     {
                         path: 'lector/:bookId',
-                        Component: ReaderPage,
+                        element: (
+                            <ProtectedRoute>
+                                <ReaderPage />
+                            </ProtectedRoute>
+                        ),
                     },
                 ],
             },

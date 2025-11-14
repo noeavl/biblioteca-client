@@ -4,17 +4,17 @@ import {
 } from '@/library/components/FilterSidebar';
 import { MyLibraryLayout } from '@/library/layouts/MyLibraryLayout';
 import {
-    collectionsItems as initialCollections,
     menuItems,
     orderByItems,
     type SortType,
 } from '@/mocks/filters.mock';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
-import { getCollectionsByReader, createCollection, deleteCollection } from '@/library/api/collections.api';
+import { createCollection, deleteCollection } from '@/library/api/collections.api';
 import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
 import { useAuth } from '@/auth/hooks/useAuth';
 import { toast } from 'sonner';
+import { useCollections } from '@/library/context/CollectionsContext';
 
 const getTitleByPath = (pathname: string): string => {
     if (pathname.includes('/favoritos')) return 'Favoritos';
@@ -28,41 +28,9 @@ export const MyLibraryPage = () => {
     const title = getTitleByPath(location.pathname);
     const { user } = useAuth();
     const [selectedSort, setSelectedSort] = useState<SortType>('recent');
-    const [collectionsItems, setCollectionsItems] = useState(initialCollections);
-    const [isLoadingCollections, setIsLoadingCollections] = useState<boolean>(false);
+    const { collections: collectionsItems, isLoading: isLoadingCollections, refreshCollections, removeCollection: removeCollectionFromContext } = useCollections();
 
     const isReader = user?.role?.name === 'reader';
-
-    // Load collections from API on mount
-    useEffect(() => {
-        const loadCollections = async (): Promise<void> => {
-            if (!isReader) return;
-
-            const readerId = getReaderIdFromToken();
-            if (!readerId) return;
-
-            try {
-                setIsLoadingCollections(true);
-                const collections = await getCollectionsByReader(readerId);
-
-                const mappedCollections = collections.map((collection) => ({
-                    name: collection.name,
-                    url: `/mi-biblioteca/colecciones/${collection._id}`,
-                    icon: 'collections_bookmark',
-                    id: collection._id,
-                }));
-
-                setCollectionsItems(mappedCollections);
-            } catch (error) {
-                console.error('Error al cargar colecciones:', error);
-                toast.error('Error al cargar las colecciones');
-            } finally {
-                setIsLoadingCollections(false);
-            }
-        };
-
-        loadCollections();
-    }, [isReader]);
 
     const handleSortChange = (sortValue: string) => {
         setSelectedSort(sortValue as SortType);
@@ -87,16 +55,8 @@ export const MyLibraryPage = () => {
                 visibility: 'private', // Default to private as requested
             });
 
-            // Reload collections from API since the create endpoint doesn't return the collection
-            const collections = await getCollectionsByReader(readerId);
-            const mappedCollections = collections.map((collection) => ({
-                name: collection.name,
-                url: `/mi-biblioteca/colecciones/${collection._id}`,
-                icon: 'collections_bookmark',
-                id: collection._id,
-            }));
-
-            setCollectionsItems(mappedCollections);
+            // Reload collections from context
+            await refreshCollections();
             toast.success('Colección creada correctamente');
         } catch (error: unknown) {
             console.error('Error al crear colección:', error);
@@ -123,10 +83,8 @@ export const MyLibraryPage = () => {
         try {
             await deleteCollection(collectionId);
 
-            // Remove from local state
-            setCollectionsItems((prev) =>
-                prev.filter((collection) => collection.id !== collectionId)
-            );
+            // Remove from context
+            removeCollectionFromContext(collectionId);
 
             toast.success('Colección eliminada correctamente');
         } catch (error: unknown) {

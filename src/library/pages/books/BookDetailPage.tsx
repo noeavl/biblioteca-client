@@ -14,7 +14,7 @@ import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
 
 export const BookDetailPage = () => {
     const { bookId } = useParams<{ bookId: string }>();
-    const { user } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const [book, setBook] = useState<Book | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -248,12 +248,12 @@ export const BookDetailPage = () => {
                             {book.synopsis || 'Sin sinopsis disponible'}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3">
-                            <Link to={`/libros/lector/${book._id}`}>
+                            <Link to={isAuthenticated ? `/libros/lector/${book._id}` : '/iniciar-sesion'}>
                                 <Button className="bg-blue-400 shadow-xl shadow-blue-200/50 hover:bg-blue-400 text-white font-bold w-full sm:w-auto">
                                     <span className="material-symbols-outlined">
-                                        book_5
+                                        {isAuthenticated ? 'book_5' : 'login'}
                                     </span>
-                                    Leer ahora
+                                    {isAuthenticated ? 'Leer ahora' : 'Inicia sesión para leer ahora'}
                                 </Button>
                             </Link>
 
@@ -296,7 +296,7 @@ export const BookDetailPage = () => {
             </section>
             <section className="pt-12 sm:pt-20 lg:pt-30">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-                    <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-foreground">
                         También te podría gustar
                     </h3>
                     <Link

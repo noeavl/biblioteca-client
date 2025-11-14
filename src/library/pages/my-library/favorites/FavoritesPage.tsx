@@ -75,12 +75,18 @@ export const FavoritesPage = () => {
             return;
         }
 
+        // Optimistic update: remover inmediatamente de la UI
+        const previousFavorites = [...favorites];
+        setFavorites(prevFavorites => prevFavorites.filter(fav => fav.book._id !== bookId));
+        toast.success('Libro removido de favoritos');
+
         try {
             await removeFavorite({ book: bookId, reader: readerId });
-            toast.success('Libro removido de favoritos');
-            // Recargar favoritos
+            // Si la eliminación fue exitosa, recargar para actualizar la paginación
             loadFavorites();
         } catch (error: any) {
+            // Si falla, revertir el cambio optimista
+            setFavorites(previousFavorites);
             console.error('Error al remover de favoritos:', error);
             if (error?.response?.data?.message) {
                 toast.error(error.response.data.message);
@@ -97,23 +103,38 @@ export const FavoritesPage = () => {
             return;
         }
 
-        try {
-            const isRead = readBookIds.has(bookId);
+        const isRead = readBookIds.has(bookId);
 
+        // Optimistic update: actualizar inmediatamente la UI
+        if (isRead) {
+            setReadBookIds((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(bookId);
+                return newSet;
+            });
+            toast.success('Libro marcado como no leído');
+        } else {
+            setReadBookIds((prev) => new Set(prev).add(bookId));
+            toast.success('Libro marcado como leído');
+        }
+
+        try {
             if (isRead) {
                 await removeReadingHistory({ bookId, readerId });
+            } else {
+                await addReadingHistory({ book: bookId, reader: readerId });
+            }
+        } catch (error: any) {
+            // Si falla, revertir el cambio optimista
+            if (isRead) {
+                setReadBookIds((prev) => new Set(prev).add(bookId));
+            } else {
                 setReadBookIds((prev) => {
                     const newSet = new Set(prev);
                     newSet.delete(bookId);
                     return newSet;
                 });
-                toast.success('Libro marcado como no leído');
-            } else {
-                await addReadingHistory({ book: bookId, reader: readerId });
-                setReadBookIds((prev) => new Set(prev).add(bookId));
-                toast.success('Libro marcado como leído');
             }
-        } catch (error: any) {
             console.error('Error al gestionar estado de leído:', error);
             if (error?.response?.data?.message) {
                 toast.error(error.response.data.message);

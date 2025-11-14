@@ -65,7 +65,7 @@ export const BooksEditPage = () => {
                 setLoadingData(true);
                 const [bookData, authorsData, categoriesData] =
                     await Promise.all([
-                        getBookById(bookId),
+                        getBookById(bookId, true),
                         getAuthors(),
                         getCategories(),
                     ]);
@@ -345,12 +345,16 @@ export const BooksEditPage = () => {
                                 id="synopsis"
                                 placeholder="Escribe una sinopsis breve aquí..."
                                 value={formData.synopsis}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        synopsis: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value.length <= 500) {
+                                        setFormData({
+                                            ...formData,
+                                            synopsis: value,
+                                        });
+                                    }
+                                }}
+                                maxLength={500}
                                 required
                             ></Textarea>
                             <p className="text-muted-foreground text-sm">

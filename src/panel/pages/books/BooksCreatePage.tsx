@@ -300,12 +300,16 @@ export const BooksCreatePage = () => {
                                 id="synopsis"
                                 placeholder="Escribe aquí una breve sinopsis del libro…"
                                 value={formData.synopsis}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        synopsis: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value.length <= 500) {
+                                        setFormData({
+                                            ...formData,
+                                            synopsis: value,
+                                        });
+                                    }
+                                }}
+                                maxLength={500}
                                 required
                             />
                             <p className="text-muted-foreground text-sm">

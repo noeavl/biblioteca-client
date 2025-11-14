@@ -39,6 +39,9 @@ export const getBooks = async (
 
         if (params?.status != null) queryParams.append('status', params.status);
 
+        // No incluir PDF en la respuesta
+        queryParams.append('pdf', 'false');
+
         const url = `/books${
             queryParams.toString() ? `?${queryParams.toString()}` : ''
         }`;
@@ -50,9 +53,10 @@ export const getBooks = async (
     }
 };
 
-export const getBookById = async (bookId: string): Promise<Book> => {
+export const getBookById = async (bookId: string, includePdf: boolean = false): Promise<Book> => {
     try {
-        const { data } = await libraryApi.get<Book>(`/books/${bookId}`);
+        const url = `/books/${bookId}?pdf=${includePdf}`;
+        const { data } = await libraryApi.get<Book>(url);
         return data;
     } catch (error) {
         console.error('Error al obtener el libro:', error);

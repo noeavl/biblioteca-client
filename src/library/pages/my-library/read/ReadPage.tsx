@@ -72,11 +72,18 @@ export const ReadPage = () => {
             return;
         }
 
+        // Optimistic update: remover inmediatamente de la UI
+        const previousReadingHistory = [...readingHistory];
+        setReadingHistory(prevHistory => prevHistory.filter(item => item.book._id !== bookId));
+        toast.success('Libro removido del historial de lectura');
+
         try {
             await removeReadingHistory({ bookId, readerId });
-            toast.success('Libro removido del historial de lectura');
+            // Si la eliminación fue exitosa, recargar para actualizar la paginación
             await loadReadingHistory(currentPage);
         } catch (error: any) {
+            // Si falla, revertir el cambio optimista
+            setReadingHistory(previousReadingHistory);
             console.error('Error al remover del historial de lectura:', error);
             if (error?.response?.data?.message) {
                 toast.error(error.response.data.message);
