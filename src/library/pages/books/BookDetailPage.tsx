@@ -7,8 +7,16 @@ import type { Book } from '@/library/interfaces/book.interface';
 import { BooksGrid } from '@/library/components/BooksGrid';
 import { getBooks } from '@/panel/api/books.api';
 import { useAuth } from '@/auth/hooks/useAuth';
-import { addFavorite, removeFavorite, checkIsFavorite } from '@/library/api/favorites.api';
-import { addReadingHistory, removeReadingHistory, getReadingHistory } from '@/library/api/reading-history.api';
+import {
+    addFavorite,
+    removeFavorite,
+    checkIsFavorite,
+} from '@/library/api/favorites.api';
+import {
+    addReadingHistory,
+    removeReadingHistory,
+    getReadingHistory,
+} from '@/library/api/reading-history.api';
 import { toast } from 'sonner';
 import { getReaderIdFromToken } from '@/auth/utils/jwt.utils';
 
@@ -49,8 +57,12 @@ export const BookDetailPage = () => {
                     const isFav = await checkIsFavorite(bookId);
                     setIsFavorite(isFav);
 
-                    const { readingHistory } = await getReadingHistory({ limit: 1000 }); // Fetch a large number of reading history to ensure the book is found if it's read
-                    const isBookRead = readingHistory.some((item) => item.book._id === bookId);
+                    const { readingHistory } = await getReadingHistory({
+                        limit: 1000,
+                    }); // Fetch a large number of reading history to ensure the book is found if it's read
+                    const isBookRead = readingHistory.some(
+                        (item) => item.book._id === bookId
+                    );
                     setIsRead(isBookRead);
                 }
             } catch (err) {
@@ -236,7 +248,7 @@ export const BookDetailPage = () => {
                         <div className="flex flex-wrap justify-start items-center gap-2 sm:gap-3">
                             <Link
                                 to={`/categorias/detalle/${book.category._id}`}
-                                className="text-sm sm:text-base text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-3 py-2 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors cursor-pointer"
+                                className="text-sm sm:text-base text-blue-400 bg-blue-100  px-3 py-2 rounded-full hover:bg-blue-200 transition-colors cursor-pointer"
                             >
                                 {book.category.name}
                             </Link>
@@ -248,12 +260,20 @@ export const BookDetailPage = () => {
                             {book.synopsis || 'Sin sinopsis disponible'}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3">
-                            <Link to={isAuthenticated ? `/libros/lector/${book._id}` : '/iniciar-sesion'}>
+                            <Link
+                                to={
+                                    isAuthenticated
+                                        ? `/libros/lector/${book._id}`
+                                        : '/iniciar-sesion'
+                                }
+                            >
                                 <Button className="bg-blue-400 shadow-xl shadow-blue-200/50 hover:bg-blue-400 text-white font-bold w-full sm:w-auto">
                                     <span className="material-symbols-outlined">
                                         {isAuthenticated ? 'book_5' : 'login'}
                                     </span>
-                                    {isAuthenticated ? 'Leer ahora' : 'Inicia sesión para leer ahora'}
+                                    {isAuthenticated
+                                        ? 'Leer ahora'
+                                        : 'Inicia sesión para leer ahora'}
                                 </Button>
                             </Link>
 
@@ -264,13 +284,15 @@ export const BookDetailPage = () => {
                                     className="bg-blue-50 text-blue-400 hover:bg-blue-50 font-bold w-full sm:w-auto"
                                 >
                                     <span className="material-symbols-outlined">
-                                        {isFavorite ? 'heart_minus' : 'favorite'}
+                                        {isFavorite
+                                            ? 'heart_minus'
+                                            : 'favorite'}
                                     </span>
                                     {isAddingFavorite
                                         ? 'Procesando...'
                                         : isFavorite
-                                          ? 'Remover de favoritos'
-                                          : 'Añadir a favoritos'}
+                                        ? 'Remover de favoritos'
+                                        : 'Añadir a favoritos'}
                                 </Button>
                             )}
 
@@ -286,8 +308,8 @@ export const BookDetailPage = () => {
                                     {isAddingToRead
                                         ? 'Procesando...'
                                         : isRead
-                                          ? 'Marcar como no leído'
-                                          : 'Marcar como leído'}
+                                        ? 'Marcar como no leído'
+                                        : 'Marcar como leído'}
                                 </Button>
                             )}
                         </div>

@@ -6,12 +6,6 @@ import {
 } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { getBookById } from '@/library/api/books.api';
 import type { Book } from '@/library/interfaces/book.interface';
 import { useParams, useNavigate } from 'react-router';
@@ -54,7 +48,6 @@ export const ReaderPage = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [sliderValue, setSliderValue] = useState<number>(1);
     const [numPages, setNumPages] = useState<number>(100);
-    const [isBookmarked, setIsBookmarked] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -620,9 +613,7 @@ export const ReaderPage = () => {
             >
                 <div className="hidden sm:flex gap-3">
                     <Button disabled>
-                        <span className="material-symbols-outlined">
-                            notes
-                        </span>
+                        <span className="material-symbols-outlined">notes</span>
                     </Button>
                     <Button disabled>
                         <span className="material-symbols-outlined">
@@ -950,7 +941,9 @@ export const ReaderPage = () => {
                                     pageNumber={currentPage + 1}
                                     width={pageWidth}
                                     height={pageHeight}
-                                    isVisible={visiblePages.has(currentPage + 1)}
+                                    isVisible={visiblePages.has(
+                                        currentPage + 1
+                                    )}
                                 />
                             )}
                         </div>

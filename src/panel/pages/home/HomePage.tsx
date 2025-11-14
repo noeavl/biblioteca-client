@@ -207,28 +207,52 @@ export const HomePage = () => {
                 <TabsTrigger value="favorite">Más Favoritos</TabsTrigger>
               </TabsList>
               <TabsContent value="read" className="mt-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {stats.bookRankings.mostRead.map((book, index) => (
-                    <BookRankingCard
-                      key={book._id}
-                      book={book}
-                      type="read"
-                      rank={index + 1}
-                    />
-                  ))}
-                </div>
+                {stats.bookRankings.mostRead.length > 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {stats.bookRankings.mostRead.map((book, index) => (
+                      <BookRankingCard
+                        key={book._id}
+                        book={book}
+                        type="read"
+                        rank={index + 1}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No hay libros leídos aún
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Los libros más leídos aparecerán aquí una vez que los lectores comiencen a leer
+                    </p>
+                  </div>
+                )}
               </TabsContent>
               <TabsContent value="favorite" className="mt-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {stats.bookRankings.mostFavorited.map((book, index) => (
-                    <BookRankingCard
-                      key={book._id}
-                      book={book}
-                      type="favorite"
-                      rank={index + 1}
-                    />
-                  ))}
-                </div>
+                {stats.bookRankings.mostFavorited.length > 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {stats.bookRankings.mostFavorited.map((book, index) => (
+                      <BookRankingCard
+                        key={book._id}
+                        book={book}
+                        type="favorite"
+                        rank={index + 1}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Heart className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No hay libros favoritos aún
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Los libros más favoritos aparecerán aquí una vez que los lectores marquen sus favoritos
+                    </p>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -251,30 +275,54 @@ export const HomePage = () => {
                 <TabsTrigger value="favorite">Más Favoritas</TabsTrigger>
               </TabsList>
               <TabsContent value="read" className="mt-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {stats.categoryRankings.mostRead.map((category, index) => (
-                    <CategoryRankingCard
-                      key={category._id}
-                      category={category}
-                      type="read"
-                      rank={index + 1}
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-              <TabsContent value="favorite" className="mt-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {stats.categoryRankings.mostFavorited.map(
-                    (category, index) => (
+                {stats.categoryRankings.mostRead.length > 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {stats.categoryRankings.mostRead.map((category, index) => (
                       <CategoryRankingCard
                         key={category._id}
                         category={category}
-                        type="favorite"
+                        type="read"
                         rank={index + 1}
                       />
-                    )
-                  )}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No hay categorías leídas aún
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Las categorías más leídas aparecerán aquí cuando los lectores lean libros
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="favorite" className="mt-4">
+                {stats.categoryRankings.mostFavorited.length > 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {stats.categoryRankings.mostFavorited.map(
+                      (category, index) => (
+                        <CategoryRankingCard
+                          key={category._id}
+                          category={category}
+                          type="favorite"
+                          rank={index + 1}
+                        />
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Heart className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No hay categorías favoritas aún
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Las categorías favoritas aparecerán aquí cuando los lectores marquen libros como favoritos
+                    </p>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -297,28 +345,52 @@ export const HomePage = () => {
                 <TabsTrigger value="favorite">Más Favoritos</TabsTrigger>
               </TabsList>
               <TabsContent value="read" className="mt-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {stats.authorRankings.mostRead.map((author, index) => (
-                    <AuthorRankingCard
-                      key={author._id}
-                      author={author}
-                      type="read"
-                      rank={index + 1}
-                    />
-                  ))}
-                </div>
+                {stats.authorRankings.mostRead.length > 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {stats.authorRankings.mostRead.map((author, index) => (
+                      <AuthorRankingCard
+                        key={author._id}
+                        author={author}
+                        type="read"
+                        rank={index + 1}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <UserRound className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No hay autores leídos aún
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Los autores más leídos aparecerán aquí cuando los lectores lean sus libros
+                    </p>
+                  </div>
+                )}
               </TabsContent>
               <TabsContent value="favorite" className="mt-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {stats.authorRankings.mostFavorited.map((author, index) => (
-                    <AuthorRankingCard
-                      key={author._id}
-                      author={author}
-                      type="favorite"
-                      rank={index + 1}
-                    />
-                  ))}
-                </div>
+                {stats.authorRankings.mostFavorited.length > 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {stats.authorRankings.mostFavorited.map((author, index) => (
+                      <AuthorRankingCard
+                        key={author._id}
+                        author={author}
+                        type="favorite"
+                        rank={index + 1}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Heart className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No hay autores favoritos aún
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Los autores favoritos aparecerán aquí cuando los lectores marquen sus libros como favoritos
+                    </p>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
