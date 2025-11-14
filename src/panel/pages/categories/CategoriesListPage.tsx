@@ -37,23 +37,11 @@ import {
     MoreHorizontal,
     Plus,
     Pencil,
-    Trash2,
     BookOpen,
 } from 'lucide-react';
-import { getCategories, deleteCategory } from '@/panel/api/categories.api';
+import { getCategories } from '@/panel/api/categories.api';
 import type { BookCategory } from '@/library/interfaces/book.interface';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
 
 const ITEMS_PER_PAGE = 8;
 
@@ -65,9 +53,6 @@ export const CategoriesListPage = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [categoryToDelete, setCategoryToDelete] =
-        useState<BookCategory | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Obtener página actual de los query params
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
@@ -105,37 +90,6 @@ export const CategoriesListPage = () => {
     // Función para cambiar de página
     const handlePageChange = (page: number) => {
         setSearchParams({ page: page.toString() });
-    };
-
-    // Manejar eliminación de categoría
-    const handleDeleteCategory = async () => {
-        if (!categoryToDelete) return;
-
-        try {
-            setIsDeleting(true);
-            await deleteCategory(categoryToDelete._id);
-
-            // Actualizar la lista de categorías
-            setCategories(
-                categories.filter(
-                    (category) => category._id !== categoryToDelete._id
-                )
-            );
-
-            toast.success(
-                `Categoría "${categoryToDelete.name}" eliminada exitosamente`
-            );
-            setCategoryToDelete(null);
-        } catch (error: any) {
-            console.error('Error al eliminar categoría:', error);
-            if (error?.response?.data?.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error('Error al eliminar la categoría');
-            }
-        } finally {
-            setIsDeleting(false);
-        }
     };
 
     return (
@@ -300,17 +254,6 @@ export const CategoriesListPage = () => {
                                                                 <Pencil />
                                                                 Editar
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                variant="destructive"
-                                                                onClick={() =>
-                                                                    setCategoryToDelete(
-                                                                        category
-                                                                    )
-                                                                }
-                                                            >
-                                                                <Trash2 />
-                                                                Eliminar
-                                                            </DropdownMenuItem>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
                                                 </TableCell>
@@ -420,40 +363,6 @@ export const CategoriesListPage = () => {
                     </div>
                 </CardContent>
             </Card>
-
-            {/* AlertDialog para confirmar eliminación */}
-            <AlertDialog
-                open={!!categoryToDelete}
-                onOpenChange={(open) => !open && setCategoryToDelete(null)}
-            >
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            ¿Estás seguro de eliminar esta categoría?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Esta acción no se puede deshacer. Se eliminará
-                            permanentemente la categoría{' '}
-                            <span className="font-semibold capitalize">
-                                "{categoryToDelete?.name}"
-                            </span>{' '}
-                            de la base de datos.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting}>
-                            Cancelar
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDeleteCategory}
-                            disabled={isDeleting}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                            {isDeleting ? 'Eliminando...' : 'Eliminar'}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     );
 };

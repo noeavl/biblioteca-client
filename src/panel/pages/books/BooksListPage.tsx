@@ -37,7 +37,6 @@ import {
     MoreHorizontal,
     Plus,
     Pencil,
-    Trash2,
     BookOpen,
 } from 'lucide-react';
 import { getBooks } from '@/panel/api/books.api';
@@ -275,10 +274,6 @@ export const BooksListPage = () => {
                                                         >
                                                             <Pencil />
                                                             Editar
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem variant="destructive">
-                                                            <Trash2 />
-                                                            Eliminar
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>

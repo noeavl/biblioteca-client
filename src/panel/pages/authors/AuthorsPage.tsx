@@ -33,21 +33,10 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
-import { MoreHorizontal, Plus, Pencil, Trash2 } from "lucide-react";
-import { getAuthors, deleteAuthor } from "@/panel/api/authors.api";
+import { MoreHorizontal, Plus, Pencil } from "lucide-react";
+import { getAuthors } from "@/panel/api/authors.api";
 import type { Author } from "@/library/interfaces/author.interface";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -59,8 +48,6 @@ export const AuthorsPage = () => {
     const [totalAuthors, setTotalAuthors] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [authorToDelete, setAuthorToDelete] = useState<Author | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Cargar autores desde la API con paginación
     useEffect(() => {
@@ -97,43 +84,6 @@ export const AuthorsPage = () => {
     // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + authors.length;
-
-    // Manejar eliminación de autor
-    const handleDeleteAuthor = async () => {
-        if (!authorToDelete) return;
-
-        try {
-            setIsDeleting(true);
-            await deleteAuthor(authorToDelete._id);
-
-            toast.success(`Autor ${authorToDelete.person.firstName} ${authorToDelete.person.lastName} eliminado exitosamente`);
-            setAuthorToDelete(null);
-
-            // Recargar los autores después de eliminar
-            const skip = (currentPage - 1) * ITEMS_PER_PAGE;
-            const data = await getAuthors({
-                limit: ITEMS_PER_PAGE,
-                skip,
-            });
-            setAuthors(data.authors);
-            setTotalPages(data.totalPages);
-            setTotalAuthors(data.total);
-
-            // Si la página actual quedó vacía y no es la primera, volver a la anterior
-            if (data.authors.length === 0 && currentPage > 1) {
-                setCurrentPage(currentPage - 1);
-            }
-        } catch (error: any) {
-            console.error('Error al eliminar autor:', error);
-            if (error?.response?.data?.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error('Error al eliminar el autor');
-            }
-        } finally {
-            setIsDeleting(false);
-        }
-    };
 
     return (
         <div className="flex flex-col gap-6 p-6 w-full max-w-7xl mx-auto">
@@ -297,13 +247,6 @@ export const AuthorsPage = () => {
                                                             <Pencil />
                                                             Editar
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem
-                                                            variant="destructive"
-                                                            onClick={() => setAuthorToDelete(author)}
-                                                        >
-                                                            <Trash2 />
-                                                            Eliminar
-                                                        </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </TableCell>
@@ -410,32 +353,6 @@ export const AuthorsPage = () => {
                     </div>
                 </CardContent>
             </Card>
-
-            {/* AlertDialog para confirmar eliminación */}
-            <AlertDialog open={!!authorToDelete} onOpenChange={(open) => !open && setAuthorToDelete(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>¿Estás seguro de eliminar este autor?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Esta acción no se puede deshacer. Se eliminará permanentemente el autor{' '}
-                            <span className="font-semibold">
-                                {authorToDelete?.person.firstName} {authorToDelete?.person.lastName}
-                            </span>{' '}
-                            de la base de datos.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDeleteAuthor}
-                            disabled={isDeleting}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                            {isDeleting ? 'Eliminando...' : 'Eliminar'}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     );
 };

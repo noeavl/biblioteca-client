@@ -37,7 +37,6 @@ import {
     MoreHorizontal,
     Plus,
     Pencil,
-    Trash2,
     Shield,
     BookOpen,
     UserCog,
@@ -45,22 +44,11 @@ import {
     CheckCircle2,
     XCircle,
 } from 'lucide-react';
-import { getUsers, deleteUser } from '@/panel/api/users.api';
+import { getUsers } from '@/panel/api/users.api';
 import type { User } from '@/library/interfaces/user.interface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
 
 const ITEMS_PER_PAGE = 8;
 
@@ -99,8 +87,6 @@ export const UsersListPage = () => {
     const [totalUsers, setTotalUsers] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [userToDelete, setUserToDelete] = useState<User | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Cargar usuarios desde la API con paginación
     useEffect(() => {
@@ -132,45 +118,6 @@ export const UsersListPage = () => {
     // Calcular índices para mostrar en la UI
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + users.length;
-
-    // Manejar eliminación de usuario
-    const handleDeleteUser = async () => {
-        if (!userToDelete) return;
-
-        try {
-            setIsDeleting(true);
-            await deleteUser(userToDelete._id);
-
-            toast.success(
-                `Usuario ${userToDelete.name} eliminado exitosamente`
-            );
-            setUserToDelete(null);
-
-            // Recargar los usuarios después de eliminar
-            const skip = (currentPage - 1) * ITEMS_PER_PAGE;
-            const data = await getUsers({
-                limit: ITEMS_PER_PAGE,
-                skip,
-            });
-            setUsers(data.users);
-            setTotalPages(data.totalPages);
-            setTotalUsers(data.total);
-
-            // Si la página actual quedó vacía y no es la primera, volver a la anterior
-            if (data.users.length === 0 && currentPage > 1) {
-                setCurrentPage(currentPage - 1);
-            }
-        } catch (error: any) {
-            console.error('Error al eliminar usuario:', error);
-            if (error?.response?.data?.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error('Error al eliminar el usuario');
-            }
-        } finally {
-            setIsDeleting(false);
-        }
-    };
 
     // Obtener iniciales del nombre
     const getInitials = (name: string) => {
@@ -355,17 +302,6 @@ export const UsersListPage = () => {
                                                                 <Pencil />
                                                                 Editar
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                variant="destructive"
-                                                                onClick={() =>
-                                                                    setUserToDelete(
-                                                                        user
-                                                                    )
-                                                                }
-                                                            >
-                                                                <Trash2 />
-                                                                Eliminar
-                                                            </DropdownMenuItem>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
                                                 </TableCell>
@@ -475,40 +411,6 @@ export const UsersListPage = () => {
                     </div>
                 </CardContent>
             </Card>
-
-            {/* AlertDialog para confirmar eliminación */}
-            <AlertDialog
-                open={!!userToDelete}
-                onOpenChange={(open) => !open && setUserToDelete(null)}
-            >
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            ¿Estás seguro de eliminar este usuario?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Esta acción no se puede deshacer. Se eliminará
-                            permanentemente el usuario{' '}
-                            <span className="font-semibold">
-                                {userToDelete?.name}
-                            </span>{' '}
-                            ({userToDelete?.email}) de la base de datos.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting}>
-                            Cancelar
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDeleteUser}
-                            disabled={isDeleting}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                            {isDeleting ? 'Eliminando...' : 'Eliminar'}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     );
 };
