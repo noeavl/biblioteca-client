@@ -267,7 +267,7 @@ export const BookDetailPage = () => {
                                         : '/iniciar-sesion'
                                 }
                             >
-                                <Button className="bg-blue-400 shadow-xl shadow-blue-200/50 hover:bg-blue-400 text-white font-bold w-full sm:w-auto">
+                                <Button className="bg-blue-400 hover:bg-blue-400 text-white font-bold w-full sm:w-auto">
                                     <span className="material-symbols-outlined">
                                         {isAuthenticated ? 'book_5' : 'login'}
                                     </span>

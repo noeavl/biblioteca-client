@@ -49,13 +49,18 @@ const items = [
 ];
 
 export const PanelSidebar = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const userRole = user?.role?.name;
 
     // Filtrar items según el rol del usuario
     const visibleItems = items.filter((item) =>
         item.allowedRoles.includes(userRole || '')
     );
+
+    const handleLogout = () => {
+        logout();
+        window.location.href = '/iniciar-sesion';
+    };
 
     return (
         <Sidebar className="border-none p-6 shadow-lg">
@@ -80,7 +85,16 @@ export const PanelSidebar = () => {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter className="bg-background"></SidebarFooter>
+            <SidebarFooter className="bg-background">
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton onClick={handleLogout}>
+                            <Icon icon="logout" />
+                            Cerrar sesión
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
         </Sidebar>
     );
 };
